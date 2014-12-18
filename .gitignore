@@ -1,0 +1,31 @@
+# Packages
+*.egg
+*.egg-info
+
+*.pyc
+
+# esri
+*.lock
+*.sde
+
+# python code coverage
+.coverage
+
+# test
+.tox
+temp_tests
+
+# install data
+build
+dist
+*.dmp
+
+# data files
+src/dbseeder/data/
+tests/data/DOGM*
+tests/data/UDWR*
+tests/data/UGS*
+
+# secrets
+secrets.cfg
+*.sublime-workspace
