@@ -27,7 +27,7 @@ from shutil import rmtree
 class TestWqpProgram(unittest.TestCase):
 
     def setUp(self):
-        self.parent_folder = os.path.join('.', 'tests', 'data')
+        self.parent_folder = os.getcwd()
         self.location = os.path.join(self.parent_folder, 'temp_tests')
         self.gdb_name = 'wqp.gdb'
 
@@ -58,7 +58,7 @@ class TestWqpProgram(unittest.TestCase):
         httpd_thread.start()
 
         host = 'http://localhost:8001'
-        path = '/dbseeder/tests/data/WQP/Results/'
+        path = '/data/WQP/Results/'
 
         url = '{}{}sample_chemistry.csv'.format(host, path)
 
@@ -72,7 +72,7 @@ class TestWqpProgram(unittest.TestCase):
 
     def test_csv_reader(self):
         test_file = 'sample_chemistry.csv'
-        folder = os.path.join('.', 'tests', 'data', 'WQP', 'Results')
+        folder = os.path.join('.', 'data', 'WQP', 'Results')
 
         f = open(os.path.join(folder, test_file))
         data = f.readlines(2)
@@ -86,7 +86,7 @@ class TestWqpProgram(unittest.TestCase):
         self.assertEqual(values['OrganizationIdentifier'], '1119USBR_WQX')
 
     def test_csv_on_disk(self):
-        data = os.path.join('.', 'tests', 'data', 'WQP')
+        data = os.path.join('.', 'data', 'WQP')
         gen = self.patient._csvs_on_disk(data, 'Stations')
         csv = gen.next()
 
@@ -94,7 +94,7 @@ class TestWqpProgram(unittest.TestCase):
         self.assertRegexpMatches('Stations.csv', 'Stations.csv$')
 
     def test_result_csv_on_disk(self):
-        data = os.path.join('.', 'tests', 'data', 'WQP')
+        data = os.path.join('.', 'data', 'WQP')
         gen = self.patient._csvs_on_disk(data, 'Results')
         count = 0
 
@@ -109,7 +109,7 @@ class TestWqpProgram(unittest.TestCase):
         self.assertEqual(count, row_count + balance_rows)
 
     def test_field_lengths(self):
-        data = os.path.join('.', 'tests', 'data', 'WQP')
+        data = os.path.join('.', 'data', 'WQP')
         maps = self.patient.field_lengths(data, 'Stations')
 
         self.assertEqual(maps['MonitoringLocationTypeName'][1], 21)
@@ -362,14 +362,13 @@ class TestWqpProgram(unittest.TestCase):
         self.assertEqual('1', arcpy.GetCount_management(table).getOutput(0))
 
     def test_seeding_with_balancing(self):
-        folder = os.path.join('.', 'tests', 'data')
+        folder = os.path.join('.', 'data')
 
         self.patient.csv_location = os.path.join(
             'WQP_Charge', 'Results', 'sample_balance.csv')
         self.patient.seed(folder, ['Results'])
 
         arcpy.env.workspace = self.patient.location
-        print self.patient.location
         actual = arcpy.GetCount_management('Results').getOutput(0)
 
         original_row_count = 20
@@ -393,7 +392,7 @@ class TestWqpProgram(unittest.TestCase):
 class TestSdwisProgram(unittest.TestCase):
 
     def setUp(self):
-        self.parent_folder = os.path.join(os.getcwd(), 'dbseeder', 'tests')
+        self.parent_folder = os.getcwd()
         self.location = os.path.join(self.parent_folder, 'temp_tests')
         self.gdb_name = 'sdwis.gdb'
 
@@ -471,7 +470,7 @@ class TestSdwisProgram(unittest.TestCase):
         self.assertEqual('1', arcpy.GetCount_management(table).getOutput(0))
 
     def test_charge_balance(self):
-        table_location = os.path.join('.', 'tests', 'data', 'SDWIS_Charge', 'Result.csv')
+        table_location = os.path.join('.', 'data', 'SDWIS_Charge', 'Result.csv')
         data = []
 
         with open(table_location, 'rb') as csv_file:
@@ -505,7 +504,7 @@ class TestSdwisProgram(unittest.TestCase):
 class TestDogmProgram(unittest.TestCase):
 
     def setUp(self):
-        self.parent_folder = os.path.join(os.getcwd(), 'dbseeder', 'tests')
+        self.parent_folder = os.getcwd()
         self.location = os.path.join(self.parent_folder, 'temp_tests')
         self.gdb_name = 'dogm.gdb'
 
@@ -591,7 +590,7 @@ class TestDogmProgram(unittest.TestCase):
         self.assertEqual('1', arcpy.GetCount_management(table).getOutput(0))
 
     def test_seed(self):
-        folder = os.path.join('.', 'tests', 'data')
+        folder = os.path.join('.', 'data')
 
         self.patient.seed(folder, ['Stations', 'Results'])
 
@@ -605,7 +604,7 @@ class TestDogmProgram(unittest.TestCase):
         self.assertEqual(actual, str(rows + charges))
 
     def test_seeding_with_balancing(self):
-        folder = os.path.join('.', 'tests', 'data')
+        folder = os.path.join('.', 'data')
 
         self.patient.gdb_name = os.path.join('DOGM_Charge', 'DOGM_AGRC.gdb')
         self.patient.seed(folder, ['Results'])

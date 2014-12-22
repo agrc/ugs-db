@@ -232,7 +232,7 @@ class Field(object):
         self.field_type = self._etl_type(arg['type'])
         #: the source of the field mapping
         self.field_source = arg['source']
-         #: the field length default if none is set
+        #: the field length default if none is set
         self.length_default = 50
         #: the length of the field. Only useful for type String
         self.field_length = None

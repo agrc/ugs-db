@@ -17,7 +17,7 @@ class WqpResult(WqpTable, Balanceable):
 
     """ORM mapping to result schema to WqpResult table"""
 
-    def __init__(self, row,  normalizer):
+    def __init__(self, row, normalizer):
         super(WqpResult, self).__init__(normalizer)
 
         schema = Schema().result

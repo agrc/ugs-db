@@ -23,7 +23,7 @@ class TestDbSeeder(unittest.TestCase):
     gdb_name = 'seed.gdb'
 
     def setUp(self):
-        self.parent_folder = os.path.join(os.getcwd(), 'dbseeder', 'tests')
+        self.parent_folder = os.getcwd()
         self.location = os.path.join(self.parent_folder, 'temp_tests')
 
         self.tearDown()

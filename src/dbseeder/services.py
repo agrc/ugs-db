@@ -40,7 +40,7 @@ class WebQuery(object):
                                       self.dev_api_key)
         r = requests.get(url)
 
-        pass
+        return r.json()
 
     def county_code(self, utm_x, utm_y):
         layer = 'SGID10.BOUNDARIES.COUNTIES'
@@ -53,7 +53,7 @@ class WebQuery(object):
                                       self.dev_api_key)
         r = requests.get(url)
 
-        pass
+        return r.json()
 
 
 class ConsolePrompt(object):
@@ -68,8 +68,11 @@ class ConsolePrompt(object):
 
         The "answer" return value is one of "yes" or "no".
         """
-        valid = {"yes": True,   "y": True,  "ye": True,
-                 "no": False,     "n": False}
+        valid = {"yes": True,
+                 "y": True,
+                 "ye": True,
+                 "no": False,
+                 "n": False}
         if default is None:
             prompt = " [y/n] "
         elif default == "yes":
