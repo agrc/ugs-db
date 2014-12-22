@@ -41,9 +41,6 @@ def main(argv=()):
     gdb = 'master.gdb'
     seed_data = '.\\data'
 
-    from nose.tools import set_trace
-    set_trace()
-
     try:
         if args.update:
             pass
