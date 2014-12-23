@@ -17,13 +17,12 @@ class WqpResult(WqpTable, Balanceable):
 
     """ORM mapping to result schema to WqpResult table"""
 
-    def __init__(self, row, normalizer):
+    def __init__(self, row, normalizer, schema_map):
         super(WqpResult, self).__init__(normalizer)
 
         schema = Schema().result
         self.fields = range(0, len(schema))
 
-        schema_map = WqpTable.build_schema_map(schema)
         self.row = self._etl_row(row, schema_map, 'Result')
 
 

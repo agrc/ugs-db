@@ -144,7 +144,7 @@ class Wqp(Program, Balanceable):
 
         with self.InsertCursor(location, fields) as cursor:
             for row in data:
-                etl = Type(row, self.normalizer)
+                etl = Type(row, self.normalizer, schema_map)
                 insert_row = etl.row
 
                 station_id = etl.normalize_fields['stationid'][0]

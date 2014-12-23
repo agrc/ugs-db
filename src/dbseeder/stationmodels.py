@@ -16,13 +16,12 @@ class WqpStation(WqpTable):
 
     """ORM mapping from chemistry schema to WqpStation feature class"""
 
-    def __init__(self, row, normalizer):
+    def __init__(self, row, normalizer, schema_map):
         super(WqpStation, self).__init__(normalizer)
 
         schema = Schema().station
         self.fields = range(0, len(schema))
 
-        schema_map = WqpTable.build_schema_map(schema)
         self.row = self._etl_row(row, schema_map, 'Station')
 
 
