@@ -133,8 +133,9 @@ class TestWqpModels(unittest.TestCase):
                     'USGSPCode'
                     ]
 
+        schema_map = resultmodel.WqpResult.build_schema_map('Results')
         actual = resultmodel.WqpResult(
-            csv_data, Normalizer()).row
+            csv_data, Normalizer(), schema_map).row
         self.assertListEqual(actual, expected)
 
     def test_station_model_hydration(self):
@@ -220,8 +221,10 @@ class TestWqpModels(unittest.TestCase):
             None,
             (227191.93568276422, 4717996.363612308)
         ]
+
+        schema_map = resultmodel.WqpResult.build_schema_map('Stations')
         actual = stationmodel.WqpStation(
-            csv_data, Normalizer()).row
+            csv_data, Normalizer(), schema_map).row
 
         self.assertListEqual(actual, expected)
 
@@ -289,8 +292,9 @@ class TestWqpModels(unittest.TestCase):
                    'SampleCollectionEquipmentName': '',
                    'ActivityDepthHeightMeasure/MeasureUnitCode': ''}
 
+        schema_map = resultmodel.WqpResult.build_schema_map('Results')
         actual = resultmodel.WqpResult(
-            csv_row, Normalizer()).row
+            csv_row, Normalizer(), schema_map).row
 
         expected = [None,  # analysisdate
                     None,  # analytmeth
@@ -549,8 +553,9 @@ class TestDogmModels(unittest.TestCase):
                     4397670.5318
                     ]
 
+        schema_map = stationmodel.OgmStation.build_schema_map('Station')
         model = stationmodel.OgmStation(
-            gdb_data, Normalizer())
+            gdb_data, Normalizer(), schema_map)
 
         expected = ['UDOGM',
                     'Utah Division Of Oil Gas And Mining',

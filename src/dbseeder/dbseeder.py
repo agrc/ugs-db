@@ -171,7 +171,6 @@ class Seeder(object):
 
 if __name__ == '__main__':
     from cProfile import Profile
-    from pyprof2calltree import convert, visualize
 
     print 'profiling Seeder'
 
@@ -180,12 +179,12 @@ if __name__ == '__main__':
     seed_data = 'C:\\Projects\\GitHub\\ugs-db\\tests\\data'
     types = ['Results', 'Stations']
     seed_program = {
-            'WQP': True,
-            'SDWIS': False,
-            'DOGM': False,
-            'DWR': False,
-            'UGS': False
-        }
+        'WQP': True,
+        'SDWIS': False,
+        'DOGM': False,
+        'DWR': False,
+        'UGS': False
+    }
 
     profiler = Profile()
 
@@ -198,5 +197,6 @@ seeder._seed(seed_data, types, seed_program)
 
     profiler.dump_stats('.pstat')
 
+    # from pyprof2calltree import convert, visualize
     # visualize(profiler.getstats())
     # convert(profiler.getstats(), 'profiling_results.kgrind')
