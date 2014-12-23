@@ -48,12 +48,9 @@ class SdwisResult(Table, Balanceable):
               'IdNum',
               'ParamGroup']
 
-    def __init__(self, row, normalizer):
+    def __init__(self, row, normalizer, schema_map):
         super(SdwisResult, self).__init__(normalizer)
 
-        schema = Schema().result
-
-        schema_map = Table.build_schema_map(schema)
         self.row = self._etl_row(row, schema_map, 'Result')
 
 
@@ -101,17 +98,14 @@ class DwrResult(Table, Balanceable):
               'SampleId',
               'IdNum']
 
-    def __init__(self, row, normalizer):
+    def __init__(self, row, normalizer, schema_map):
         super(DwrResult, self).__init__(normalizer)
 
         #: add paramgroup in ctor so `Type.fields` works for reads
         #: since paragroup does not exist in source data
         self.fields = self.fields + ['ParamGroup']
 
-        self.schema = Schema().result
-
-        self.schema_map = Table.build_schema_map(self.schema)
-        self.row = self._etl_row(row, self.schema_map, 'Result')
+        self.row = self._etl_row(row, schema_map, 'Result')
 
 
 class UgsResult(Table, Balanceable):
@@ -136,10 +130,7 @@ class UgsResult(Table, Balanceable):
               'SampComment',
               'CAS_Reg']
 
-    def __init__(self, row, normalizer):
+    def __init__(self, row, normalizer, schema_map):
         super(UgsResult, self).__init__(normalizer)
 
-        self.schema = Schema().result
-
-        self.schema_map = Table.build_schema_map(self.schema)
-        self.row = self._etl_row(row, self.schema_map, 'Result')
+        self.row = self._etl_row(row, schema_map, 'Result')

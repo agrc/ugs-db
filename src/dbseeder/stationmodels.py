@@ -44,12 +44,9 @@ class SdwisStation(Table):
               'Depth',
               'DepthUnit']
 
-    def __init__(self, row, normalizer):
+    def __init__(self, row, normalizer, schema_map):
         super(SdwisStation, self).__init__(normalizer)
 
-        schema = Schema().station
-
-        schema_map = Table.build_schema_map(schema)
         self.row = self._etl_row(row, schema_map, 'Station')
 
 
@@ -94,13 +91,10 @@ class DwrStation(Table):
               'X_UTM',
               'Y_UTM']
 
-    def __init__(self, row, normalizer):
+    def __init__(self, row, normalizer, schema_map):
         super(DwrStation, self).__init__(normalizer)
 
-        self.schema = Schema().station
-
-        self.schema_map = Table.build_schema_map(self.schema)
-        self.row = self._etl_row(row, self.schema_map, 'Station')
+        self.row = self._etl_row(row, schema_map, 'Station')
 
 
 class UgsStation(Table):
@@ -117,10 +111,7 @@ class UgsStation(Table):
               'StationComment',
               'StationId']
 
-    def __init__(self, row, normalizer):
+    def __init__(self, row, normalizer, schema_map):
         super(UgsStation, self).__init__(normalizer)
 
-        self.schema = Schema().station
-
-        self.schema_map = Table.build_schema_map(self.schema)
-        self.row = self._etl_row(row, self.schema_map, 'Station')
+        self.row = self._etl_row(row, schema_map, 'Station')

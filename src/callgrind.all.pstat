@@ -1,0 +1,2470 @@
+events: Ticks
+summary: 41021
+fn=<nt.listdir>
+0 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\_weakrefset.py
+fn=__iter__
+58 0
+cfl=C:\Python27\ArcGISx6410.2\lib\_weakrefset.py
+cfn=__init__
+calls=11 16
+58 0
+cfl=C:\Python27\ArcGISx6410.2\lib\_weakrefset.py
+cfn=__enter__
+calls=11 20
+58 0
+cfl=C:\Python27\ArcGISx6410.2\lib\_weakrefset.py
+cfn=__exit__
+calls=11 26
+58 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\ConfigParser.py
+fn=_read
+464 0
+cfn=<method 'split' of 'str' objects>
+calls=5 0
+464 0
+cfl=C:\Python27\ArcGISx6410.2\lib\collections.py
+cfn=__init__
+calls=1 38
+464 0
+cfn=<method 'extend' of 'list' objects>
+calls=1 0
+464 0
+cfn=<method 'strip' of 'str' objects>
+calls=9 0
+464 0
+cfn=<method 'group' of '_sre.SRE_Match' objects>
+calls=5 0
+464 0
+cfl=C:\Python27\ArcGISx6410.2\lib\ConfigParser.py
+cfn=optionxform
+calls=4 373
+464 0
+cfn=<isinstance>
+calls=5 0
+464 0
+cfl=C:\Python27\ArcGISx6410.2\lib\collections.py
+cfn=__setitem__
+calls=10 54
+464 0
+cfn=<method 'lower' of 'str' objects>
+calls=5 0
+464 0
+cfl=C:\Python27\ArcGISx6410.2\lib\collections.py
+cfn=items
+calls=2 108
+464 0
+cfn=<method 'rstrip' of 'str' objects>
+calls=4 0
+464 0
+cfn=<method 'readline' of 'file' objects>
+calls=6 0
+464 0
+cfl=C:\Python27\ArcGISx6410.2\lib\collections.py
+cfn=values
+calls=1 104
+464 0
+cfn=<method 'isspace' of 'str' objects>
+calls=5 0
+464 0
+cfn=<method 'match' of '_sre.SRE_Pattern' objects>
+calls=9 0
+464 0
+cfn=<method 'join' of 'str' objects>
+calls=4 0
+464 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\services.py
+fn=__init__
+160 0
+cfn=<zip>
+calls=5 0
+160 0
+
+fl=build\bdist.win-amd64\egg\dateutil\parser.py
+fn=split
+138 2
+cfl=build\bdist.win-amd64\egg\dateutil\parser.py
+cfn=__iter__
+calls=296 126
+138 0
+cfl=build\bdist.win-amd64\egg\dateutil\parser.py
+cfn=next
+calls=1776 135
+138 13
+cfl=build\bdist.win-amd64\egg\dateutil\parser.py
+cfn=__init__
+calls=296 34
+138 1
+
+fn=<method 'lstrip' of 'str' objects>
+0 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=__init__
+446 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=__init__
+calls=1 95
+446 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+fn=set_row_index
+175 25
+cfn=<method 'keys' of 'dict' objects>
+calls=22085 0
+175 7
+cfn=<method 'lower' of 'str' objects>
+calls=25866 0
+175 9
+
+fn=<method 'split' of 'str' objects>
+0 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=track_concentration
+36 4
+cfn=<method 'keys' of 'dict' objects>
+calls=960 0
+36 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=append
+calls=769 155
+36 7
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+cfn=balance
+calls=960 188
+36 9
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+cfn=sample_id
+calls=1920 157
+36 2
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=_query
+378 2286
+cfn=<method 'fetchmany' of 'cx_Oracle.Cursor' objects>
+calls=2 0
+378 270
+cfn=<method 'cursor' of 'cx_Oracle.Connection' objects>
+calls=2 0
+378 0
+cfn=<method 'close' of 'cx_Oracle.Cursor' objects>
+calls=2 0
+378 0
+cfn=<method 'execute' of 'cx_Oracle.Cursor' objects>
+calls=2 0
+378 34465
+cfn=<method 'close' of 'cx_Oracle.Connection' objects>
+calls=2 0
+378 455
+
+fl=C:\Python27\ArcGISx6410.2\lib\_weakrefset.py
+fn=__init__
+16 0
+
+fn=<method 'lower' of 'unicode' objects>
+0 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\glob.py
+fn=glob1
+66 0
+cfn=<nt.listdir>
+calls=2 0
+66 0
+cfn=<isinstance>
+calls=2 0
+66 0
+cfn=<filter>
+calls=2 0
+66 0
+cfl=C:\Python27\ArcGISx6410.2\lib\fnmatch.py
+cfn=filter
+calls=2 45
+66 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+fn=__init__
+19 5
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+cfn=__init__
+calls=1480 99
+19 15
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+fn=result
+850 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\site-packages\pyproj\__init__.py
+fn=_copytobuffer
+493 4
+cfn=<hasattr>
+calls=618 0
+493 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=seed
+425 2
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=_query
+calls=2 378
+425 37478
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=_insert_rows
+calls=2 396
+425 233
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+fn=match
+196 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=__next
+calls=1 183
+196 0
+
+fl=build\bdist.win-amd64\egg\dateutil\parser.py
+fn=__next__
+129 1
+cfl=build\bdist.win-amd64\egg\dateutil\parser.py
+cfn=get_token
+calls=1776 48
+129 10
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\services.py
+fn=<lambda>
+139 0
+
+fn=<any>
+0 0
+cfl=C:\Python27\ArcGISx6410.2\lib\_abcoll.py
+cfn=<genexpr>
+calls=3 26
+0 0
+
+fn=<open>
+0 0
+
+fn=<method 'format' of 'str' objects>
+0 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_compile.py
+fn=_compile
+33 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_compile.py
+cfn=_compile
+calls=1 33
+33 0
+cfn=<method 'append' of 'list' objects>
+calls=16 0
+33 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=__getitem__
+calls=2 131
+33 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_compile.py
+cfn=_simple
+calls=1 355
+33 0
+cfn=<method 'get' of 'dict' objects>
+calls=1 0
+33 0
+cfn=<len>
+calls=2 0
+33 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\glob.py
+fn=glob
+18 0
+cfl=C:\Python27\ArcGISx6410.2\lib\glob.py
+cfn=iglob
+calls=8 29
+18 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+fn=normcase
+42 0
+cfn=<method 'lower' of 'str' objects>
+calls=8 0
+42 0
+cfn=<method 'replace' of 'str' objects>
+calls=8 0
+42 0
+
+fn=<method 'append' of 'list' objects>
+0 18
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\services.py
+fn=cast
+118 63
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\services.py
+cfn=<lambda>
+calls=2395 139
+118 0
+cfn=<method 'strip' of 'unicode' objects>
+calls=14212 0
+118 3
+cfn=<method 'strip' of 'str' objects>
+calls=5087 0
+118 0
+cfn=<isinstance>
+calls=2744 0
+118 1
+cfl=build\bdist.win-amd64\egg\dateutil\parser.py
+cfn=parse
+calls=296 734
+118 42
+
+fl=C:\Python27\ArcGISx6410.2\lib\glob.py
+fn=<lambda>
+77 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\stationmodels.py
+fn=__init__
+70 1
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=_etl_row
+calls=250 44
+70 33
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=__init__
+calls=250 24
+70 1
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+fn=__getitem__
+131 0
+cfn=<isinstance>
+calls=6 0
+131 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=__init__
+calls=1 91
+131 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\csv.py
+fn=__iter__
+83 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\collections.py
+fn=__init__
+38 0
+cfl=C:\Python27\ArcGISx6410.2\lib\abc.py
+cfn=__subclasscheck__
+calls=31 148
+38 0
+cfn=<len>
+calls=31 0
+38 0
+cfl=C:\Python27\ArcGISx6410.2\lib\_abcoll.py
+cfn=update
+calls=31 526
+38 2
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=_read_gdb
+98 803
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=seed
+544 199
+cfn=<method 'format' of 'str' objects>
+calls=2 0
+544 0
+cfn=<method 'append' of 'list' objects>
+calls=1 0
+544 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=_read_gdb
+calls=522 98
+544 256
+cfl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+cfn=join
+calls=4 63
+544 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\resultmodels.py
+cfn=__init__
+calls=270 133
+544 71
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=write_balance_rows
+calls=1 46
+544 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=build_schema_map
+calls=2 29
+544 1
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=_get_default_fields
+calls=2 82
+544 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\stationmodels.py
+cfn=__init__
+calls=250 114
+544 51
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=_insert_row
+calls=520 118
+544 25
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+cfn=sample_id
+calls=270 157
+544 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+fn=nitrate
+90 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=_get_summed_value
+calls=12 201
+90 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+fn=parse
+676 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=get
+calls=1 202
+676 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=_parse_sub
+calls=1 302
+676 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=__init__
+calls=1 68
+676 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=__init__
+calls=1 179
+676 0
+
+fn=<method 'extend' of 'list' objects>
+0 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+fn=normpath
+398 0
+cfn=<method 'lstrip' of 'str' objects>
+calls=1 0
+398 0
+cfn=<method 'split' of 'str' objects>
+calls=1 0
+398 0
+cfn=<isinstance>
+calls=1 0
+398 0
+cfn=<method 'replace' of 'str' objects>
+calls=1 0
+398 0
+cfn=<len>
+calls=6 0
+398 0
+cfl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+cfn=splitdrive
+calls=1 122
+398 0
+cfn=<method 'join' of 'str' objects>
+calls=1 0
+398 0
+cfn=<method 'startswith' of 'str' objects>
+calls=2 0
+398 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\services.py
+fn=calculate_charge_balance
+397 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=nitrate
+calls=12 90
+397 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=potassium
+calls=12 109
+397 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=magnesium
+calls=12 70
+397 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=sodium
+calls=12 98
+397 0
+cfn=<round>
+calls=36 0
+397 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=calcium
+calls=12 66
+397 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=bicarbonate
+calls=12 78
+397 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=sodium_plus_potassium
+calls=12 120
+397 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=chloride
+calls=12 74
+397 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=nitrite
+calls=12 94
+397 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=carbonate
+calls=12 86
+397 0
+cfn=<sum>
+calls=24 0
+397 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=sulfate
+calls=12 82
+397 0
+
+fn=<method 'strip' of 'unicode' objects>
+0 3
+
+fl=C:\Python27\ArcGISx6410.2\lib\collections.py
+fn=__iter__
+73 24
+
+fn=<method 'fetchmany' of 'cx_Oracle.Cursor' objects>
+0 270
+
+fn=<method 'insertRow' of 'da.InsertCursor' objects>
+0 120
+
+fn=<setattr>
+0 1
+
+fl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+fn=join
+63 0
+cfl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+cfn=isabs
+calls=38 55
+63 0
+cfn=<len>
+calls=38 0
+63 0
+
+fl=build\bdist.win-amd64\egg\dateutil\parser.py
+fn=_parsems
+926 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\site-packages\pyproj\__init__.py
+fn=transform
+403 1
+cfl=C:\Python27\ArcGISx6410.2\lib\site-packages\pyproj\__init__.py
+cfn=_copytobuffer
+calls=618 493
+403 5
+cfn=<_proj._transform>
+calls=309 0
+403 1
+cfl=C:\Python27\ArcGISx6410.2\lib\site-packages\pyproj\__init__.py
+cfn=_convertback
+calls=618 541
+403 0
+
+fn=<nt._getfullpathname>
+0 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+fn=potassium
+109 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=_get_summed_value
+calls=36 201
+109 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+fn=chemical
+124 0
+
+fn=<zip>
+0 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\resultmodels.py
+fn=__init__
+133 1
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=_etl_row
+calls=270 44
+133 65
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=__init__
+calls=270 24
+133 4
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=write_balance_rows
+46 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\services.py
+cfn=calculate_charge_balance
+calls=12 397
+46 1
+cfn=<method 'keys' of 'dict' objects>
+calls=9 0
+46 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+cfn=create_rows_from_balance
+calls=12 193
+46 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=_insert_row
+calls=36 118
+46 490
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=has_major_params
+calls=221 131
+46 5
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\services.py
+fn=calculate_paramgroup
+372 1
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\services.py
+fn=__init__
+394 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\services.py
+fn=to_utm
+105 0
+cfl=C:\Python27\ArcGISx6410.2\lib\site-packages\pyproj\__init__.py
+cfn=transform
+calls=309 403
+105 9
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+fn=station
+846 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+fn=normalize
+32 12
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\services.py
+cfn=calculate_paramgroup
+calls=2149 372
+32 1
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\services.py
+cfn=normalize_unit
+calls=2149 169
+32 10
+cfn=<method 'search' of '_sre.SRE_Pattern' objects>
+calls=2149 0
+32 2
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+fn=magnesium
+70 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=_get_summed_value
+calls=233 201
+70 0
+
+fn=<method 'strip' of 'str' objects>
+0 2
+
+fn=<method 'keys' of 'dict' objects>
+0 10
+
+fl=<string>
+fn=<module>
+1 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\dbseeder.py
+cfn=_seed
+calls=1 142
+1 41021
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=seed
+450 180
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=track_concentration
+calls=403 36
+450 9
+cfn=<method 'format' of 'str' objects>
+calls=2 0
+450 0
+cfn=<method 'append' of 'list' objects>
+calls=1 0
+450 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\stationmodels.py
+cfn=__init__
+calls=250 70
+450 35
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=_read_gdb
+calls=655 98
+450 278
+cfl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+cfn=join
+calls=4 63
+450 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=write_balance_rows
+calls=1 46
+450 496
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=build_schema_map
+calls=2 29
+450 2
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=_get_default_fields
+calls=2 82
+450 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\resultmodels.py
+cfn=__init__
+calls=403 74
+450 88
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=_insert_row
+calls=653 118
+450 27
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+cfn=sample_id
+calls=403 157
+450 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\stationmodels.py
+fn=__init__
+19 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=station
+calls=49 846
+19 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=__init__
+calls=49 115
+19 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=_etl_row
+calls=49 142
+19 10
+cfn=<len>
+calls=49 0
+19 0
+cfn=<range>
+calls=49 0
+19 0
+
+fn=<ord>
+0 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+fn=sodium
+98 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=_get_summed_value
+calls=72 201
+98 0
+
+fn=<method 'group' of '_sre.SRE_Match' objects>
+0 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\ConfigParser.py
+fn=optionxform
+373 0
+cfn=<method 'lower' of 'str' objects>
+calls=8 0
+373 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+fn=append
+139 0
+cfn=<method 'append' of 'list' objects>
+calls=6 0
+139 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\services.py
+fn=normalize_unit
+169 9
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\services.py
+cfn=calculate_amount
+calls=116 364
+169 0
+cfn=<method 'lower' of 'str' objects>
+calls=1047 0
+169 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=__init__
+75 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\services.py
+cfn=__init__
+calls=5 160
+75 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=__init__
+calls=5 29
+75 0
+
+fn=<method 'cursor' of 'cx_Oracle.Connection' objects>
+0 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=seed
+241 179
+cfn=<open>
+calls=6 0
+241 0
+cfn=<method 'format' of 'str' objects>
+calls=12 0
+241 0
+cfl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+cfn=join
+calls=1 63
+241 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=_insert_rows
+calls=6 130
+241 659
+cfl=C:\Python27\ArcGISx6410.2\lib\csv.py
+cfn=__init__
+calls=6 74
+241 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=_csvs_on_disk
+calls=8 174
+241 0
+
+fn=<round>
+0 0
+
+fn=<isinstance>
+0 2
+cfl=C:\Python27\ArcGISx6410.2\lib\abc.py
+cfn=__instancecheck__
+calls=865 128
+0 3
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+fn=get
+202 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=__next
+calls=13 183
+202 0
+
+fn=<method 'decode' of 'str' objects>
+0 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\_weakrefset.py
+fn=__enter__
+20 0
+cfn=<method 'add' of 'set' objects>
+calls=11 0
+20 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+fn=build_schema_map
+29 1
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=result
+calls=4 850
+29 0
+cfl=C:\Python27\ArcGISx6410.2\lib\collections.py
+cfn=__init__
+calls=16 38
+29 1
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=station
+calls=4 846
+29 0
+cfn=<isinstance>
+calls=8 0
+29 0
+cfl=C:\Python27\ArcGISx6410.2\lib\abc.py
+cfn=__subclasscheck__
+calls=296 148
+29 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=__init__
+calls=296 223
+29 2
+cfl=C:\Python27\ArcGISx6410.2\lib\_abcoll.py
+cfn=update
+calls=296 526
+29 2
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+fn=update_normalize
+69 30
+cfn=<method 'sub' of '_sre.SRE_Pattern' objects>
+calls=1986 0
+69 6
+cfn=<method 'lower' of 'str' objects>
+calls=39307 0
+69 17
+
+fl=build\bdist.win-amd64\egg\dateutil\parser.py
+fn=validate
+274 0
+cfl=build\bdist.win-amd64\egg\dateutil\parser.py
+cfn=convertyear
+calls=196 264
+274 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+fn=detect_cond
+146 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+fn=_get_summed_value
+201 2
+cfn=<sum>
+calls=1345 0
+201 1
+cfn=<len>
+calls=24 0
+201 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_compile.py
+fn=_simple
+355 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=__getitem__
+calls=1 131
+355 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=getwidth
+calls=1 141
+355 0
+
+fn=<_csv.reader>
+0 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\re.py
+fn=_compile
+226 0
+cfn=<isinstance>
+calls=1 0
+226 0
+cfn=<method 'get' of 'dict' objects>
+calls=1 0
+226 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_compile.py
+cfn=compile
+calls=1 496
+226 0
+cfn=<len>
+calls=1 0
+226 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_compile.py
+cfn=isstring
+calls=1 475
+226 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+fn=_parse_sub
+302 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=match
+calls=1 196
+302 0
+cfn=<method 'append' of 'list' objects>
+calls=1 0
+302 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=_parse
+calls=1 380
+302 0
+cfn=<len>
+calls=1 0
+302 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=__init__
+29 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\services.py
+cfn=__init__
+calls=5 394
+29 0
+
+fl=build\bdist.win-amd64\egg\dateutil\parser.py
+fn=jump
+222 0
+cfn=<method 'lower' of 'unicode' objects>
+calls=196 0
+222 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\_abcoll.py
+fn=__subclasshook__
+98 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\abc.py
+fn=__subclasscheck__
+148 0
+cfl=C:\Python27\ArcGISx6410.2\lib\_weakrefset.py
+cfn=__iter__
+calls=17 58
+148 0
+cfl=C:\Python27\ArcGISx6410.2\lib\_abcoll.py
+cfn=__subclasshook__
+calls=10 98
+148 0
+cfl=C:\Python27\ArcGISx6410.2\lib\_weakrefset.py
+cfn=__contains__
+calls=588 68
+148 0
+cfn=<issubclass>
+calls=13 0
+148 0
+cfl=C:\Python27\ArcGISx6410.2\lib\_weakrefset.py
+cfn=__init__
+calls=3 36
+148 0
+cfl=C:\Python27\ArcGISx6410.2\lib\_weakrefset.py
+cfn=add
+calls=11 81
+148 0
+cfl=C:\Python27\ArcGISx6410.2\lib\_abcoll.py
+cfn=__subclasshook__
+calls=1 128
+148 0
+cfn=<getattr>
+calls=11 0
+148 0
+cfn=<method '__subclasses__' of 'type' objects>
+calls=9 0
+148 0
+
+fn=<min>
+0 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+fn=__init__
+91 0
+
+fn=<nt.stat>
+0 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\site-packages\pyproj\__init__.py
+fn=is_latlong
+395 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\resultmodels.py
+fn=__init__
+101 3
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=_etl_row
+calls=534 44
+101 121
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=__init__
+calls=534 24
+101 8
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+fn=__init__
+223 1
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=_etl_type
+calls=538 249
+223 2
+
+fl=build\bdist.win-amd64\egg\dateutil\parser.py
+fn=__iter__
+126 0
+
+fn=<filter>
+0 0
+cfl=C:\Python27\ArcGISx6410.2\lib\glob.py
+cfn=<lambda>
+calls=6 77
+0 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\resultmodels.py
+fn=__init__
+20 1
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=result
+calls=263 850
+20 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=__init__
+calls=263 115
+20 3
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=_etl_row
+calls=263 142
+20 103
+cfn=<len>
+calls=263 0
+20 0
+cfn=<range>
+calls=263 0
+20 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+fn=__init__
+115 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+cfn=__init__
+calls=312 19
+115 3
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+fn=_etl_row
+44 150
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+cfn=set_row_index
+calls=18569 175
+44 35
+cfn=<method 'append' of 'list' objects>
+calls=71574 0
+44 14
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\services.py
+cfn=cast
+calls=25409 118
+44 60
+cfl=C:\Python27\ArcGISx6410.2\lib\collections.py
+cfn=__iter__
+calls=72791 73
+44 21
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\services.py
+cfn=to_utm
+calls=260 105
+44 8
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+cfn=normalize
+calls=1837 32
+44 23
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+cfn=update_normalize
+calls=25409 69
+44 39
+cfn=<method 'index' of 'list' objects>
+calls=27529 0
+44 18
+
+fn=<method 'pop' of 'list' objects>
+0 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\csv.py
+fn=next
+100 6
+cfn=<zip>
+calls=312 0
+100 0
+cfl=C:\Python27\ArcGISx6410.2\lib\csv.py
+cfn=fieldnames
+calls=630 86
+100 1
+cfn=<len>
+calls=624 0
+100 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\csv.py
+fn=fieldnames
+86 1
+
+fl=build\bdist.win-amd64\egg\dateutil\parser.py
+fn=get_token
+48 7
+cfn=<method 'append' of 'list' objects>
+calls=592 0
+48 0
+cfn=<method 'pop' of 'list' objects>
+calls=592 0
+48 0
+cfn=<method 'read' of '_io.StringIO' objects>
+calls=3056 0
+48 1
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=_insert_rows
+130 509
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=track_concentration
+calls=13 36
+130 0
+cfn=<method 'format' of 'str' objects>
+calls=6 0
+130 0
+cfn=<method 'append' of 'list' objects>
+calls=1 0
+130 0
+cfl=C:\Python27\ArcGISx6410.2\lib\csv.py
+cfn=__iter__
+calls=6 83
+130 0
+cfn=<method 'insertRow' of 'da.InsertCursor' objects>
+calls=225 0
+130 13
+cfl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+cfn=join
+calls=6 63
+130 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=write_balance_rows
+calls=5 46
+130 1
+cfn=<method 'keys' of 'dict' objects>
+calls=149 0
+130 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\stationmodels.py
+cfn=__init__
+calls=49 19
+130 11
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\resultmodels.py
+cfn=__init__
+calls=263 20
+130 108
+cfl=C:\Python27\ArcGISx6410.2\lib\csv.py
+cfn=next
+calls=318 100
+130 8
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=_get_fields
+calls=6 89
+130 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=build_schema_map
+calls=6 127
+130 5
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+cfn=sample_id
+calls=176 157
+130 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\collections.py
+fn=__setitem__
+54 1
+
+fn=<method 'close' of 'cx_Oracle.Cursor' objects>
+0 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\ConfigParser.py
+fn=read
+285 0
+cfl=C:\Python27\ArcGISx6410.2\lib\ConfigParser.py
+cfn=_read
+calls=1 464
+285 0
+cfn=<open>
+calls=1 0
+285 0
+cfn=<method 'append' of 'list' objects>
+calls=1 0
+285 0
+cfn=<isinstance>
+calls=1 0
+285 0
+cfn=<method 'close' of 'file' objects>
+calls=1 0
+285 0
+
+fn=<_sre.compile>
+0 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+fn=dirname
+203 0
+cfl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+cfn=split
+calls=1 164
+203 0
+
+fn=<method 'get' of 'dict' objects>
+0 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+fn=calcium
+66 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=_get_summed_value
+calls=233 201
+66 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=_get_fields
+89 0
+cfl=C:\Python27\ArcGISx6410.2\lib\collections.py
+cfn=__iter__
+calls=324 73
+89 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+fn=__init__
+24 3
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+cfn=__init__
+calls=1837 19
+24 18
+
+fl=C:\Python27\ArcGISx6410.2\lib\csv.py
+fn=__init__
+74 0
+cfn=<_csv.reader>
+calls=6 0
+74 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\_weakrefset.py
+fn=__contains__
+68 1
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_compile.py
+fn=compile
+496 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=parse
+calls=1 676
+496 0
+cfn=<_sre.compile>
+calls=1 0
+496 0
+cfn=<method 'items' of 'dict' objects>
+calls=1 0
+496 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_compile.py
+cfn=_code
+calls=1 481
+496 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_compile.py
+cfn=isstring
+calls=1 475
+496 0
+
+fl=build\bdist.win-amd64\egg\dateutil\parser.py
+fn=_parse
+347 5
+cfl=build\bdist.win-amd64\egg\dateutil\parser.py
+cfn=split
+calls=296 138
+347 17
+cfn=<method 'append' of 'list' objects>
+calls=588 0
+347 0
+cfl=build\bdist.win-amd64\egg\dateutil\parser.py
+cfn=_parsems
+calls=100 926
+347 0
+cfl=build\bdist.win-amd64\egg\dateutil\parser.py
+cfn=validate
+calls=296 274
+347 1
+cfl=build\bdist.win-amd64\egg\dateutil\parser.py
+cfn=jump
+calls=196 222
+347 0
+cfl=build\bdist.win-amd64\egg\dateutil\parser.py
+cfn=month
+calls=196 233
+347 0
+cfl=build\bdist.win-amd64\egg\dateutil\parser.py
+cfn=__init__
+calls=296 145
+347 3
+cfn=<len>
+calls=1184 0
+347 0
+cfl=build\bdist.win-amd64\egg\dateutil\parser.py
+cfn=hms
+calls=296 241
+347 1
+
+fl=C:\Python27\ArcGISx6410.2\lib\stat.py
+fn=S_ISREG
+49 0
+cfl=C:\Python27\ArcGISx6410.2\lib\stat.py
+cfn=S_IFMT
+calls=2 24
+49 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+fn=bicarbonate
+78 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=_get_summed_value
+calls=233 201
+78 0
+
+fn=<issubclass>
+0 0
+cfl=C:\Python27\ArcGISx6410.2\lib\abc.py
+cfn=__subclasscheck__
+calls=7 148
+0 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\ConfigParser.py
+fn=__init__
+232 0
+cfl=C:\Python27\ArcGISx6410.2\lib\collections.py
+cfn=__init__
+calls=2 38
+232 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\fnmatch.py
+fn=translate
+81 0
+cfl=C:\Python27\ArcGISx6410.2\lib\re.py
+cfn=escape
+calls=4 204
+81 0
+cfn=<len>
+calls=1 0
+81 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=_get_default_fields
+82 0
+cfn=<method 'append' of 'list' objects>
+calls=222 0
+82 0
+cfl=C:\Python27\ArcGISx6410.2\lib\collections.py
+cfn=__iter__
+calls=228 73
+82 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\_weakrefset.py
+fn=__init__
+36 0
+
+fn=<_proj._transform>
+0 1
+cfl=C:\Python27\ArcGISx6410.2\lib\site-packages\pyproj\__init__.py
+cfn=is_latlong
+calls=618 395
+0 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+fn=sodium_plus_potassium
+120 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=_get_summed_value
+calls=36 201
+120 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\fnmatch.py
+fn=filter
+45 0
+cfl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+cfn=normcase
+calls=8 42
+45 0
+cfn=<method 'append' of 'list' objects>
+calls=6 0
+45 0
+cfl=C:\Python27\ArcGISx6410.2\lib\fnmatch.py
+cfn=translate
+calls=1 81
+45 0
+cfn=<len>
+calls=1 0
+45 0
+cfl=C:\Python27\ArcGISx6410.2\lib\re.py
+cfn=compile
+calls=1 188
+45 0
+cfn=<method 'match' of '_sre.SRE_Pattern' objects>
+calls=6 0
+45 0
+
+fl=build\bdist.win-amd64\egg\dateutil\parser.py
+fn=month
+233 0
+cfn=<len>
+calls=196 0
+233 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+fn=chloride
+74 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=_get_summed_value
+calls=233 201
+74 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\site-packages\pyproj\__init__.py
+fn=_convertback
+541 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+fn=abspath
+466 0
+cfl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+cfn=normpath
+calls=1 398
+466 0
+cfn=<nt._getfullpathname>
+calls=1 0
+466 0
+
+fl=build\bdist.win-amd64\egg\dateutil\parser.py
+fn=convertyear
+264 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\_weakrefset.py
+fn=_commit_removals
+52 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+fn=_etl_row
+142 26
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+cfn=set_row_index
+calls=3516 175
+142 7
+cfn=<method 'append' of 'list' objects>
+calls=12663 0
+142 2
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\services.py
+cfn=cast
+calls=4937 118
+142 50
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\services.py
+cfn=to_utm
+calls=49 105
+142 1
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+cfn=normalize
+calls=312 32
+142 3
+cfn=<method 'strip' of 'str' objects>
+calls=4937 0
+142 1
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+cfn=update_normalize
+calls=12614 69
+142 14
+cfl=C:\Python27\ArcGISx6410.2\lib\collections.py
+cfn=keys
+calls=312 100
+142 5
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+fn=__setitem__
+135 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+fn=build_schema_map
+127 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=result
+calls=5 850
+127 0
+cfl=C:\Python27\ArcGISx6410.2\lib\collections.py
+cfn=__init__
+calls=12 38
+127 1
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=station
+calls=1 846
+127 0
+cfn=<isinstance>
+calls=6 0
+127 0
+cfl=C:\Python27\ArcGISx6410.2\lib\abc.py
+cfn=__subclasscheck__
+calls=242 148
+127 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=__init__
+calls=242 223
+127 1
+cfl=C:\Python27\ArcGISx6410.2\lib\_abcoll.py
+cfn=update
+calls=242 526
+127 2
+
+fl=C:\Python27\ArcGISx6410.2\lib\re.py
+fn=escape
+204 0
+cfn=<method 'join' of 'str' objects>
+calls=4 0
+204 0
+
+fn=<method 'sub' of '_sre.SRE_Pattern' objects>
+0 6
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+fn=__init__
+68 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\collections.py
+fn=keys
+100 2
+cfl=C:\Python27\ArcGISx6410.2\lib\collections.py
+cfn=__iter__
+calls=12926 73
+100 2
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\stationmodels.py
+fn=__init__
+47 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=_etl_row
+calls=10 44
+47 2
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=__init__
+calls=10 24
+47 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_compile.py
+fn=_compile_info
+362 0
+cfn=<method 'append' of 'list' objects>
+calls=5 0
+362 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=getwidth
+calls=1 141
+362 0
+cfn=<len>
+calls=2 0
+362 0
+
+fn=<method 'execute' of 'cx_Oracle.Cursor' objects>
+0 34465
+
+fn=<method 'read' of '_io.StringIO' objects>
+0 1
+
+fn=<hasattr>
+0 1
+
+fn=<method 'search' of '_sre.SRE_Pattern' objects>
+0 2
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\resultmodels.py
+fn=__init__
+51 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=_etl_row
+calls=10 44
+51 3
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=__init__
+calls=10 24
+51 0
+
+fl=build\bdist.win-amd64\egg\dateutil\parser.py
+fn=__init__
+145 1
+cfn=<setattr>
+calls=2960 0
+145 1
+
+fl=C:\Python27\ArcGISx6410.2\lib\_weakrefset.py
+fn=add
+81 0
+cfn=<method 'add' of 'set' objects>
+calls=11 0
+81 0
+
+fl=build\bdist.win-amd64\egg\dateutil\parser.py
+fn=parse
+291 3
+cfn=<isinstance>
+calls=296 0
+291 2
+cfn=<method 'get' of 'dict' objects>
+calls=592 0
+291 0
+cfl=build\bdist.win-amd64\egg\dateutil\parser.py
+cfn=_parse
+calls=296 347
+291 29
+cfn=<method 'replace' of 'datetime.datetime' objects>
+calls=592 0
+291 1
+cfn=<getattr>
+calls=2072 0
+291 0
+cfn=<built-in method now>
+calls=296 0
+291 2
+
+fl=C:\Python27\ArcGISx6410.2\lib\_abcoll.py
+fn=__subclasshook__
+128 0
+cfl=C:\Python27\ArcGISx6410.2\lib\_abcoll.py
+cfn=_hasattr
+calls=1 24
+128 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\stationmodels.py
+fn=__init__
+114 1
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=_etl_row
+calls=250 44
+114 49
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=__init__
+calls=250 24
+114 1
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+fn=append
+155 4
+cfn=<method 'keys' of 'dict' objects>
+calls=769 0
+155 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=_set
+calls=8459 167
+155 2
+
+fn=<method 'items' of 'dict' objects>
+0 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\resultmodels.py
+fn=__init__
+74 2
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=_etl_row
+calls=403 44
+74 79
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=__init__
+calls=403 24
+74 5
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+fn=nitrite
+94 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=_get_summed_value
+calls=12 201
+94 0
+
+fl=build\bdist.win-amd64\egg\dateutil\parser.py
+fn=next
+135 1
+cfl=build\bdist.win-amd64\egg\dateutil\parser.py
+cfn=__next__
+calls=1776 129
+135 11
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\services.py
+fn=calculate_amount
+364 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+fn=__init__
+179 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=__next
+calls=1 183
+179 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\stat.py
+fn=S_IFMT
+24 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+fn=isabs
+55 0
+cfl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+cfn=splitdrive
+calls=38 122
+55 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=__init__
+540 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=__init__
+calls=1 95
+540 0
+
+fn=<method 'replace' of 'datetime.datetime' objects>
+0 1
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+fn=getwidth
+141 0
+cfn=<min>
+calls=4 0
+141 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=getwidth
+calls=1 141
+141 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+fn=_set
+167 5
+cfn=<method 'keys' of 'dict' objects>
+calls=2428 0
+167 1
+cfn=<method 'lower' of 'str' objects>
+calls=1214 0
+167 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\dbseeder.py
+fn=_seed
+142 31
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=__init__
+calls=1 446
+142 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=seed
+calls=1 425
+142 37714
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=seed
+calls=1 544
+142 606
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=seed
+calls=1 450
+142 1120
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=__init__
+calls=1 75
+142 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=seed
+calls=1 241
+142 840
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=__init__
+calls=1 540
+142 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=__init__
+calls=1 495
+142 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=__init__
+calls=1 357
+142 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=seed
+calls=1 499
+142 707
+
+fl=C:\Python27\ArcGISx6410.2\lib\_abcoll.py
+fn=_hasattr
+24 0
+cfn=<any>
+calls=1 0
+24 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+fn=amount
+135 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\genericpath.py
+fn=isfile
+26 0
+cfn=<nt.stat>
+calls=2 0
+26 0
+cfl=C:\Python27\ArcGISx6410.2\lib\stat.py
+cfn=S_ISREG
+calls=2 49
+26 0
+
+fn=<method 'upper' of 'str' objects>
+0 0
+
+fn=<getattr>
+0 1
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+fn=_etl_type
+249 1
+cfn=<method 'strip' of 'str' objects>
+calls=538 0
+249 0
+cfn=<method 'upper' of 'str' objects>
+calls=538 0
+249 0
+cfn=<method 'replace' of 'str' objects>
+calls=538 0
+249 0
+
+fn=<built-in method now>
+0 2
+
+fl=C:\Python27\ArcGISx6410.2\lib\_weakrefset.py
+fn=__exit__
+26 0
+cfl=C:\Python27\ArcGISx6410.2\lib\_weakrefset.py
+cfn=_commit_removals
+calls=11 52
+26 0
+cfn=<method 'remove' of 'set' objects>
+calls=11 0
+26 0
+
+fn=<method 'lower' of 'str' objects>
+0 30
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+fn=carbonate
+86 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=_get_summed_value
+calls=12 201
+86 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\abc.py
+fn=__instancecheck__
+128 1
+cfl=C:\Python27\ArcGISx6410.2\lib\abc.py
+cfn=__subclasscheck__
+calls=4 148
+128 0
+cfl=C:\Python27\ArcGISx6410.2\lib\_weakrefset.py
+cfn=__contains__
+calls=1178 68
+128 1
+cfn=<getattr>
+calls=865 0
+128 0
+
+fn=<method 'replace' of 'str' objects>
+0 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\glob.py
+fn=has_magic
+94 0
+cfn=<method 'search' of '_sre.SRE_Pattern' objects>
+calls=6 0
+94 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+fn=_parse
+380 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=match
+calls=6 196
+380 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=__getitem__
+calls=3 131
+380 0
+cfn=<ord>
+calls=3 0
+380 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=append
+calls=6 139
+380 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=get
+calls=12 202
+380 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=__init__
+calls=1 91
+380 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=__setitem__
+calls=1 135
+380 0
+cfn=<len>
+calls=1 0
+380 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=_escape
+calls=2 258
+380 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=__len__
+calls=3 127
+380 0
+
+fn=<sum>
+0 1
+
+fl=C:\Python27\ArcGISx6410.2\lib\collections.py
+fn=items
+108 0
+cfl=C:\Python27\ArcGISx6410.2\lib\collections.py
+cfn=__iter__
+calls=7 73
+108 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=_csvs_on_disk
+174 0
+cfl=C:\Python27\ArcGISx6410.2\lib\glob.py
+cfn=glob
+calls=2 18
+174 0
+cfl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+cfn=join
+calls=2 63
+174 0
+cfl=C:\Python27\ArcGISx6410.2\lib\genericpath.py
+cfn=isfile
+calls=2 26
+174 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+fn=__init__
+19 9
+
+fn=<method 'close' of 'cx_Oracle.Connection' objects>
+0 455
+
+fn=<method 'rstrip' of 'str' objects>
+0 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+fn=balance
+188 3
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+cfn=chemical
+calls=960 124
+188 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+cfn=detect_cond
+calls=960 146
+188 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=_set
+calls=960 167
+188 4
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+cfn=amount
+calls=960 135
+188 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+fn=create_rows_from_balance
+193 0
+cfn=<method 'append' of 'list' objects>
+calls=36 0
+193 0
+cfn=<method 'keys' of 'dict' objects>
+calls=48 0
+193 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+fn=__init__
+99 6
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=__init__
+calls=1480 19
+99 9
+
+fn=<len>
+0 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+cfn=__len__
+calls=1 127
+0 0
+
+fn=<method 'remove' of 'set' objects>
+0 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_compile.py
+fn=_code
+481 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_compile.py
+cfn=_compile
+calls=1 33
+481 0
+cfn=<method 'append' of 'list' objects>
+calls=1 0
+481 0
+cfl=C:\Python27\ArcGISx6410.2\lib\sre_compile.py
+cfn=_compile_info
+calls=1 362
+481 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\glob.py
+fn=iglob
+29 0
+cfl=C:\Python27\ArcGISx6410.2\lib\glob.py
+cfn=glob1
+calls=2 66
+29 0
+cfl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+cfn=join
+calls=6 63
+29 0
+cfl=C:\Python27\ArcGISx6410.2\lib\glob.py
+cfn=has_magic
+calls=6 94
+29 0
+cfl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+cfn=split
+calls=2 164
+29 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\_abcoll.py
+fn=<genexpr>
+26 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=__init__
+95 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=__init__
+calls=3 75
+95 0
+
+fn=<method 'readline' of 'file' objects>
+0 0
+
+fn=<range>
+0 0
+
+fn=<method '__subclasses__' of 'type' objects>
+0 0
+
+fn=<method 'close' of 'file' objects>
+0 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+fn=splitdrive
+122 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\_abcoll.py
+fn=update
+526 2
+cfl=C:\Python27\ArcGISx6410.2\lib\collections.py
+cfn=__iter__
+calls=552 73
+526 0
+cfn=<isinstance>
+calls=569 0
+526 2
+cfl=C:\Python27\ArcGISx6410.2\lib\collections.py
+cfn=__setitem__
+calls=1076 54
+526 1
+cfn=<hasattr>
+calls=17 0
+526 0
+cfn=<method 'items' of 'dict' objects>
+calls=569 0
+526 0
+cfn=<len>
+calls=1138 0
+526 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+fn=_escape
+258 0
+cfn=<ord>
+calls=1 0
+258 0
+cfn=<method 'get' of 'dict' objects>
+calls=3 0
+258 0
+cfn=<len>
+calls=1 0
+258 0
+
+fl=build\bdist.win-amd64\egg\dateutil\parser.py
+fn=__init__
+34 1
+cfn=<isinstance>
+calls=296 0
+34 0
+
+fl=build\bdist.win-amd64\egg\dateutil\parser.py
+fn=hms
+241 1
+cfn=<method 'lower' of 'unicode' objects>
+calls=296 0
+241 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=__init__
+495 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=__init__
+calls=1 95
+495 0
+
+fl=build\bdist.win-amd64\egg\dateutil\parser.py
+fn=parse
+734 0
+cfn=<isinstance>
+calls=296 0
+734 0
+cfn=<method 'decode' of 'str' objects>
+calls=296 0
+734 0
+cfl=build\bdist.win-amd64\egg\dateutil\parser.py
+cfn=parse
+calls=296 291
+734 40
+
+fl=C:\Python27\ArcGISx6410.2\lib\collections.py
+fn=values
+104 0
+cfl=C:\Python27\ArcGISx6410.2\lib\collections.py
+cfn=__iter__
+calls=2 73
+104 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=_insert_row
+118 472
+cfn=<method 'insertRow' of 'da.InsertCursor' objects>
+calls=1853 0
+118 100
+
+fl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+fn=split
+164 0
+cfn=<len>
+calls=3 0
+164 0
+cfl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+cfn=splitdrive
+calls=3 122
+164 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_compile.py
+fn=isstring
+475 0
+cfn=<isinstance>
+calls=2 0
+475 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\re.py
+fn=compile
+188 0
+cfl=C:\Python27\ArcGISx6410.2\lib\re.py
+cfn=_compile
+calls=1 226
+188 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\stationmodels.py
+fn=__init__
+94 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=_etl_row
+calls=110 44
+94 18
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=__init__
+calls=110 24
+94 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=__init__
+357 0
+cfn=<method 'format' of 'str' objects>
+calls=1 0
+357 0
+cfl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+cfn=join
+calls=1 63
+357 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=__init__
+calls=1 75
+357 0
+cfl=C:\Python27\ArcGISx6410.2\lib\ConfigParser.py
+cfn=read
+calls=1 285
+357 0
+cfl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+cfn=dirname
+calls=1 203
+357 0
+cfl=C:\Python27\ArcGISx6410.2\lib\ConfigParser.py
+cfn=__init__
+calls=1 232
+357 0
+cfl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+cfn=abspath
+calls=1 466
+357 0
+cfl=C:\Python27\ArcGISx6410.2\lib\ConfigParser.py
+cfn=get
+calls=4 326
+357 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=seed
+499 238
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=track_concentration
+calls=534 36
+499 14
+cfn=<method 'format' of 'str' objects>
+calls=2 0
+499 0
+cfn=<method 'append' of 'list' objects>
+calls=1 0
+499 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=_read_gdb
+calls=646 98
+499 268
+cfl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+cfn=join
+calls=4 63
+499 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=write_balance_rows
+calls=1 46
+499 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=build_schema_map
+calls=2 29
+499 1
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\resultmodels.py
+cfn=__init__
+calls=534 101
+499 132
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=_get_default_fields
+calls=2 82
+499 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=_insert_row
+calls=644 118
+499 29
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\stationmodels.py
+cfn=__init__
+calls=110 94
+499 20
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+cfn=sample_id
+calls=534 157
+499 1
+
+fn=<method 'add' of 'set' objects>
+0 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+fn=sample_id
+157 3
+cfn=<method 'lower' of 'str' objects>
+calls=2880 0
+157 1
+
+fn=<method 'isspace' of 'str' objects>
+0 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+fn=__next
+183 0
+cfn=<len>
+calls=27 0
+183 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\sre_parse.py
+fn=__len__
+127 0
+cfn=<len>
+calls=4 0
+127 0
+
+fn=<method 'match' of '_sre.SRE_Pattern' objects>
+0 0
+
+fl=C:\Python27\ArcGISx6410.2\lib\ConfigParser.py
+fn=get
+326 0
+cfl=C:\Python27\ArcGISx6410.2\lib\ConfigParser.py
+cfn=optionxform
+calls=4 373
+326 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+fn=has_major_params
+131 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=magnesium
+calls=221 70
+131 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=sodium
+calls=12 98
+131 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=calcium
+calls=221 66
+131 1
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=bicarbonate
+calls=221 78
+131 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=chloride
+calls=221 74
+131 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=sulfate
+calls=221 82
+131 0
+
+fn=<method 'join' of 'str' objects>
+0 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+fn=sulfate
+82 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\models.py
+cfn=_get_summed_value
+calls=233 201
+82 0
+
+fn=<method 'disable' of '_lsprof.Profiler' objects>
+0 0
+
+fl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+fn=_insert_rows
+396 218
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=track_concentration
+calls=10 36
+396 0
+cfn=<method 'format' of 'str' objects>
+calls=2 0
+396 0
+cfn=<method 'append' of 'list' objects>
+calls=1 0
+396 0
+cfn=<method 'insertRow' of 'da.InsertCursor' objects>
+calls=20 0
+396 6
+cfl=C:\Python27\ArcGISx6410.2\lib\ntpath.py
+cfn=join
+calls=2 63
+396 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=write_balance_rows
+calls=1 46
+396 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelbases.py
+cfn=build_schema_map
+calls=2 29
+396 3
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\programs.py
+cfn=_get_fields
+calls=2 89
+396 0
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\stationmodels.py
+cfn=__init__
+calls=10 47
+396 2
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\resultmodels.py
+cfn=__init__
+calls=10 51
+396 3
+cfl=C:\Projects\GitHub\ugs-db\src\dbseeder\modelextensions.py
+cfn=sample_id
+calls=10 157
+396 0
+
+fn=<method 'startswith' of 'str' objects>
+0 0
+
+fn=<method 'index' of 'list' objects>
+0 18
+

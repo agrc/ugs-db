@@ -179,11 +179,11 @@ if __name__ == '__main__':
     seed_data = 'C:\\Projects\\GitHub\\ugs-db\\tests\\data'
     types = ['Results', 'Stations']
     seed_program = {
-        'WQP': False,
-        'SDWIS': False,
+        'WQP': True,
+        'SDWIS': True,
         'DOGM': True,
-        'DWR': False,
-        'UGS': False
+        'DWR': True,
+        'UGS': True
     }
 
     seeder = Seeder(location, gdb)

@@ -416,8 +416,9 @@ class TestSdwisProgram(unittest.TestCase):
     def test_query(self):
         self.patient.count = 2
         data = self.patient._query(self.patient._result_query)
+        schema_map = resultmodel.SdwisResult.build_schema_map('Results')
         for item in data:
-            etl = resultmodel.SdwisResult(item,  Normalizer())
+            etl = resultmodel.SdwisResult(item,  Normalizer(), schema_map)
 
             self.assertIsNotNone(etl.row)
 

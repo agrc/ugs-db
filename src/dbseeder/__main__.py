@@ -35,7 +35,7 @@ def main(argv=()):
     seeder = Seeder()
     location = 'c:\\temp\\'
     gdb = 'master.gdb'
-    seed_data = '.\\data'
+    seed_data = '.\\dbseeder\\data'
 
     try:
         if args.data:

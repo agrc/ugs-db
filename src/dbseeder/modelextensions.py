@@ -14,10 +14,11 @@ from models import Concentration
 
 class Normalizable(object):
 
+    station_id_re = re.compile(re.escape('_WQX'), re.IGNORECASE)
+
     def __init__(self, normalizer):
         super(Normalizable, self).__init__()
 
-        self.station_id_re = re.compile(re.escape('_WQX'), re.IGNORECASE)
         self.normalize_fields = {
             'chemical': (None, None),
             'unit': (None, None),
