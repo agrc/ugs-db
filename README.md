@@ -12,23 +12,27 @@
 
 This package will take UGS, SDWIS, DOGM, WQP, and UDWR data and import it into a gdb.  
 
+## Installation
+
+`setup.py install`
+
 ### Usage
 
 1. Fill out `secrets.cfg` and use `secrets.sample.cfg` as an example
 1. [Download the data](https://drive.google.com/a/utah.gov/file/d/0BzQ5lAz8kBCAMkZPZ1c3S21mUHc/edit?usp=sharing)
-1. Place it in `dbseeder\data`  
+1. Place it in `dbseeder\data` by default or pass in the `--data` flag 
 
-`dbseeder.py --seed` will create the **gdb**, the **stations** point feature class and the **results** table.
+`python -m dbseeder --seed` will create the **gdb**, the **stations** point feature class and the **results** table.
 
-For **WQP**, the module will look for all `*.csv's` in `data\Result` and `data\Station` folders.  
-For **GDB** based programs, the module will look for `data\**Program Type**` and import from the tables.  
+For **WQP**, the module will look for all `*.csv's` in `data\WQP\Result` and `data\WQP\Station` folders.  
+For **GDB** based programs, the module will look for `data\Program Name\Program.gdb\Station or Result` and import from the tables.  
 For **SDWIS** the module will query the database and import the rows. 
 
 Once that is done you can create the relationship feature class by running
 
-`dbseeder.py --relate`
+`python -m dbseeder --relate`
 
-`dbseeder.py --update` is still a work in progress but all the plumbing is there. We just need to figure out how to get the query to the program and what that query should be.
+`python -m dbseeder --update` is still a work in progress but all the plumbing is there. We just need to figure out how to get the query to the program and what that query should be.
 
 ## Tests
 
@@ -39,6 +43,9 @@ Once that is done you can create the relationship feature class by running
 1. Run tests
     1. `tox`
 
-## Installation
-
-`setup.py install`
+## Profiling
+run `dbseeder.py` this will create a `.pstat` file  
+execute `python -m pstats .pstat` to enter the pstat browser  
+enter `strip` to remove long paths  
+enter `sort time`  to sort the stats by time executing  
+enter `stats #` to print # number of records  

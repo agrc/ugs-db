@@ -100,6 +100,13 @@ class Seeder(object):
         """
         gdb_exists = os.path.exists(self.location)
         prompt = ConsolePrompt()
+        seed_program = {
+            'WQP': True,
+            'SDWIS': True,
+            'DOGM': True,
+            'DWR': True,
+            'UGS': True
+        }
 
         if not gdb_exists:
             print 'creating gdb'
@@ -110,34 +117,86 @@ class Seeder(object):
             self._create_feature_classes(types)
             print 'creating feature classes: done'
         else:
-            if not prompt.query_yes_no('gdb already exists. Seeed missing feature classes?'):
-                if not prompt.query_yes_no('seed data? Could cause duplication'):
-                    raise SystemExit('stopping')
-                else:
-                    self._seed(folder, types)
-                    return
-            else:
+            if prompt.query_yes_no('gdb already exists. Do you want to start fresh?'):
+                print 'deleting {}'.format(self.location)
+                from shutil import rmtree
+                rmtree(self.location)
+
+                print 'creating gdb'
+                self._create_gdb()
+                print 'creating gdb: done'
+
+                print 'creating feature classes'
+                self._create_feature_classes(types)
+                print 'creating feature classes: done'
+            elif prompt.query_yes_no('Is it missing feature classes?'):
                 print 'creating feature classes'
                 self._create_feature_classes(types)
                 print 'creating feature classes: done'
 
-        self._seed(folder, types)
+            elif prompt.query_yes_no('Do you want to import the data anyway? This could cause duplication.'):
+                pass
 
-    def _seed(self, folder, types):
-        wqp = Wqp(self.location, arcpy.da.InsertCursor)
-        wqp.seed(folder, types)
+        self._seed(folder, types, seed_program)
 
-        sdwis = Sdwis(self.location, arcpy.da.InsertCursor)
-        sdwis.count = self.count
-        sdwis.seed(types)
+    def _seed(self, folder, types, seed):
 
-        dogm = Dogm(
-            self.location, arcpy.da.SearchCursor, arcpy.da.InsertCursor)
-        dogm.seed(folder, types)
+        if seed['WQP']:
+            print 'Seeding WQP'
+            wqp = Wqp(self.location, arcpy.da.InsertCursor)
+            wqp.seed(folder, types)
 
-        dwr = Udwr(
-            self.location, arcpy.da.SearchCursor, arcpy.da.InsertCursor)
-        dwr.seed(folder, types)
+        if seed['SDWIS']:
+            print 'Seeding SDWIS'
+            sdwis = Sdwis(self.location, arcpy.da.InsertCursor)
+            sdwis.count = self.count
+            sdwis.seed(types)
 
-        ugs = Ugs(self.location, arcpy.da.SearchCursor, arcpy.da.InsertCursor)
-        ugs.seed(folder, types)
+        if seed['DOGM']:
+            print 'Seeding DOGM'
+            dogm = Dogm(
+                self.location, arcpy.da.SearchCursor, arcpy.da.InsertCursor)
+            dogm.seed(folder, types)
+
+        if seed['DWR']:
+            print 'Seeding DWR'
+            dwr = Udwr(
+                self.location, arcpy.da.SearchCursor, arcpy.da.InsertCursor)
+            dwr.seed(folder, types)
+
+        if seed['UGS']:
+            print 'Seeding UGS'
+            ugs = Ugs(self.location, arcpy.da.SearchCursor, arcpy.da.InsertCursor)
+            ugs.seed(folder, types)
+
+if __name__ == '__main__':
+    from cProfile import Profile
+    from pyprof2calltree import convert, visualize
+
+    print 'profiling Seeder'
+
+    location = 'c:\\temp\\'
+    gdb = 'master.gdb'
+    seed_data = 'C:\\Projects\\GitHub\\ugs-db\\tests\\data'
+    types = ['Results', 'Stations']
+    seed_program = {
+            'WQP': True,
+            'SDWIS': False,
+            'DOGM': False,
+            'DWR': False,
+            'UGS': False
+        }
+
+    profiler = Profile()
+
+    profiler.runctx('''
+seeder = Seeder(location, gdb)
+seeder.count = 10
+
+seeder._seed(seed_data, types, seed_program)
+''', locals(), globals())
+
+    profiler.dump_stats('.pstat')
+
+    # visualize(profiler.getstats())
+    # convert(profiler.getstats(), 'profiling_results.kgrind')

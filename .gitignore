@@ -29,3 +29,4 @@ tests/data/UGS*
 # secrets
 secrets.cfg
 *.sublime-workspace
+src/.pstat
