@@ -222,7 +222,7 @@ class TestWqpModels(unittest.TestCase):
             (227191.93568276422, 4717996.363612308)
         ]
 
-        schema_map = resultmodel.WqpResult.build_schema_map('Stations')
+        schema_map = stationmodel.WqpStation.build_schema_map('Stations')
         actual = stationmodel.WqpStation(
             csv_data, Normalizer(), schema_map).row
 
@@ -553,7 +553,7 @@ class TestDogmModels(unittest.TestCase):
                     4397670.5318
                     ]
 
-        schema_map = stationmodel.OgmStation.build_schema_map('Station')
+        schema_map = stationmodel.OgmStation.build_schema_map('Stations')
         model = stationmodel.OgmStation(
             gdb_data, Normalizer(), schema_map)
 
@@ -656,9 +656,9 @@ class TestDogmModels(unittest.TestCase):
                     'unit',
                     None  # usgspcode
                     ]
-
+        schema_map = resultmodel.OgmResult.build_schema_map('Results')
         model = resultmodel.OgmResult(
-            gdb_data, Normalizer())
+            gdb_data, Normalizer(), schema_map)
         actual = model.row
 
         self.assertListEqual(expected, actual)
@@ -720,7 +720,8 @@ class TestDogmModels(unittest.TestCase):
                     None  # usgspcode
                     ]
 
-        model = resultmodel.OgmResult(gdb_data, Normalizer())
+        schema_map = resultmodel.OgmResult.build_schema_map('Results')
+        model = resultmodel.OgmResult(gdb_data, Normalizer(), schema_map)
         actual = model.row
 
         self.assertListEqual(expected, actual)

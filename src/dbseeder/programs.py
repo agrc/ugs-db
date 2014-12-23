@@ -461,18 +461,15 @@ class Dogm(GdbProgram, Balanceable):
 
             location = os.path.join(self.location, model_type)
 
+            schema_map = Type.build_schema_map(model_type)
+            fields_to_insert = self._get_default_fields(schema_map)
+            if model_type == 'Stations':
+                fields_to_insert.append('SHAPE@XY')
+
             print 'inserting into {} DOGM type {}'.format(location, model_type)
 
-            fields_to_insert = None
-
             for record in self._read_gdb(table, Type.fields):
-                etl = Type(record, self.normalizer)
-                if not fields_to_insert:
-                    fields_to_insert = self._get_default_fields(etl.schema_map)
-
-                    if model_type == 'Stations':
-                        fields_to_insert.append('SHAPE@XY')
-
+                etl = Type(record, self.normalizer, schema_map)
                 self._insert_row(etl.row, fields_to_insert, location)
 
                 if etl.balanceable and etl.sample_id is not None:

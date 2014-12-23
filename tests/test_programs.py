@@ -544,9 +544,9 @@ class TestDogmProgram(unittest.TestCase):
                    mdl,
                    'Unit',
                    'SampComment')
-
+        schema_map = resultmodel.OgmResult.build_schema_map('Results')
         one_row_from_query = resultmodel.OgmResult(
-            gdb_row, Normalizer()).row
+            gdb_row, Normalizer(), schema_map).row
 
         fields = self.patient._get_default_fields(
             resultmodel.OgmResult.build_schema_map('Results'))
@@ -571,8 +571,9 @@ class TestDogmProgram(unittest.TestCase):
                    512329.9142,
                    4397670.5318)
 
+        schema_map = stationmodel.OgmStation.build_schema_map('Stations')
         station_model = stationmodel.OgmStation(
-            gdb_row, Normalizer())
+            gdb_row, Normalizer(), schema_map)
 
         one_row_from_query = station_model.row
 

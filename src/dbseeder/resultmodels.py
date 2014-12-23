@@ -74,17 +74,14 @@ class OgmResult(Table, Balanceable):
               'Unit',
               'SampComment']
 
-    def __init__(self, row, normalizer):
+    def __init__(self, row, normalizer, schema_map):
         super(OgmResult, self).__init__(normalizer)
 
         #: add paramgroup in ctor so `Type.fields` works for reads
         #: since paragroup does not exist in source data
         self.fields = self.fields + ['ParamGroup']
 
-        self.schema = Schema().result
-
-        self.schema_map = Table.build_schema_map(self.schema)
-        self.row = self._etl_row(row, self.schema_map, 'Result')
+        self.row = self._etl_row(row, schema_map, 'Result')
 
 
 class DwrResult(Table, Balanceable):

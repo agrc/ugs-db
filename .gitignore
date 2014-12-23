@@ -30,3 +30,4 @@ tests/data/UGS*
 secrets.cfg
 *.sublime-workspace
 src/.pstat
+*.noseids

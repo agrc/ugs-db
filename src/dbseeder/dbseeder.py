@@ -179,22 +179,26 @@ if __name__ == '__main__':
     seed_data = 'C:\\Projects\\GitHub\\ugs-db\\tests\\data'
     types = ['Results', 'Stations']
     seed_program = {
-        'WQP': True,
+        'WQP': False,
         'SDWIS': False,
-        'DOGM': False,
+        'DOGM': True,
         'DWR': False,
         'UGS': False
     }
 
+    seeder = Seeder(location, gdb)
+
+    if os.path.exists(seeder.location):
+        from shutil import rmtree
+        rmtree(seeder.location)
+
+    seeder._create_gdb()
+    seeder._create_feature_classes(types)
+    seeder.count = 10
+
     profiler = Profile()
 
-    profiler.runctx('''
-seeder = Seeder(location, gdb)
-seeder.count = 10
-
-seeder._seed(seed_data, types, seed_program)
-''', locals(), globals())
-
+    profiler.runctx('seeder._seed(seed_data, types, seed_program)', locals(), globals())
     profiler.dump_stats('.pstat')
 
     # from pyprof2calltree import convert, visualize

@@ -70,13 +70,10 @@ class OgmStation(Table):
               'UTM_X',
               'UTM_Y']
 
-    def __init__(self, row, normalizer):
+    def __init__(self, row, normalizer, schema_map):
         super(OgmStation, self).__init__(normalizer)
 
-        self.schema = Schema().station
-
-        self.schema_map = Table.build_schema_map(self.schema)
-        self.row = self._etl_row(row, self.schema_map, 'Station')
+        self.row = self._etl_row(row, schema_map, 'Station')
 
 
 class DwrStation(Table):
