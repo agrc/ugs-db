@@ -19,9 +19,8 @@ This package will take UGS, SDWIS, DOGM, WQP, and UDWR data and import it into a
 ### Usage
 
 1. Fill out `secrets.cfg` and use `secrets.sample.cfg` as an example
-1. [Download the data](https://drive.google.com/a/utah.gov/file/d/0BzQ5lAz8kBCAMkZPZ1c3S21mUHc/edit?usp=sharing)
-1. Place it in `dbseeder\data` by default or pass in the `--data` flag 
-    1. This assumes you are cd'd into `dbseeder/src`  
+1. Place your data in `dbseeder\data`. This assumes you are cd'd into `dbseeder/src`  
+    1. You can override the default with the `--data` flag 
     
 `python -m dbseeder --seed` will create the **gdb**, the **stations** point feature class and the **results** table.
 
@@ -36,9 +35,6 @@ Once that is done you can create the relationship feature class by running
 `python -m dbseeder --update` is still a work in progress but all the plumbing is there. We just need to figure out how to get the query to the program and what that query should be.
 
 ## Tests
-
-1. [Download the test data](). 
-1. Place it in `dbseeder\tests\data`
 1. Install tox
     1. `pip install tox`
 1. Run tests
@@ -56,5 +52,4 @@ enter `stats #` to print # number of records
 to create a qcachegrind file  
 `pyprof2calltree -i .pstat -o callgrind.pstat`  
 install and run qcachegrind  
-`qcachegrind`  
-open file
+`qcachegrind filename`  

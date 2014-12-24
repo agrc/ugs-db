@@ -110,6 +110,11 @@ class TestWebQuery(unittest.TestCase):
     def setUp(self):
         self.patient = service.WebQuery()
 
+    def test_can_get_elevation(self):
+        raise nose.SkipTest()
+
+        pass
+
     def test_can_get_state_from_xy(self):
         raise nose.SkipTest()
 
