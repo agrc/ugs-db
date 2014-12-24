@@ -15,9 +15,6 @@ def main(argv=()):
 
     Does stuff.
     '''
-    argv = sys.argv
-
-    seeder = Seeder()
 
     parser = argparse.ArgumentParser(description='seed a geodatabse.')
 
@@ -35,9 +32,10 @@ def main(argv=()):
 
     args = parser.parse_args()
 
+    seeder = Seeder()
     location = 'c:\\temp\\'
     gdb = 'master.gdb'
-    seed_data = '.\\data'
+    seed_data = '.\\dbseeder\\data'
 
     try:
         if args.data:

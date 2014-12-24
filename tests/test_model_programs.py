@@ -133,8 +133,9 @@ class TestWqpModels(unittest.TestCase):
                     'USGSPCode'
                     ]
 
+        schema_map = resultmodel.WqpResult.build_schema_map('Results')
         actual = resultmodel.WqpResult(
-            csv_data, Normalizer()).row
+            csv_data, Normalizer(), schema_map).row
         self.assertListEqual(actual, expected)
 
     def test_station_model_hydration(self):
@@ -220,8 +221,10 @@ class TestWqpModels(unittest.TestCase):
             None,
             (227191.93568276422, 4717996.363612308)
         ]
+
+        schema_map = stationmodel.WqpStation.build_schema_map('Stations')
         actual = stationmodel.WqpStation(
-            csv_data, Normalizer()).row
+            csv_data, Normalizer(), schema_map).row
 
         self.assertListEqual(actual, expected)
 
@@ -289,8 +292,9 @@ class TestWqpModels(unittest.TestCase):
                    'SampleCollectionEquipmentName': '',
                    'ActivityDepthHeightMeasure/MeasureUnitCode': ''}
 
+        schema_map = resultmodel.WqpResult.build_schema_map('Results')
         actual = resultmodel.WqpResult(
-            csv_row, Normalizer()).row
+            csv_row, Normalizer(), schema_map).row
 
         expected = [None,  # analysisdate
                     None,  # analytmeth
@@ -358,8 +362,10 @@ class TestSdwisModels(unittest.TestCase):
                   '003',
                   0,
                   None]
+
+        schema_map = stationmodel.SdwisStation.build_schema_map('Stations')
         patient = stationmodel.SdwisStation(
-            db_row, Normalizer())
+            db_row, Normalizer(), schema_map)
         actual = patient.row
         expected = ['750',
                     'HANNA WATER & SEWER IMPROVEMENT DISTRICT',
@@ -416,8 +422,9 @@ class TestSdwisModels(unittest.TestCase):
                   None,
                   3908822]
 
+        schema_map = resultmodel.SdwisResult.build_schema_map('Results')
         actual = resultmodel.SdwisResult(
-            db_row, Normalizer()).row
+            db_row, Normalizer(), schema_map).row
         expected = [None,
                     None,
                     None,
@@ -483,8 +490,9 @@ class TestSdwisModels(unittest.TestCase):
                   None,
                   None]
 
+        schema_map = resultmodel.SdwisResult.build_schema_map('Results')
         actual = resultmodel.SdwisResult(
-            db_row, Normalizer()).row
+            db_row, Normalizer(), schema_map).row
         expected = [None,  # analysisdate
                     None,  # analytmeth
                     None,  # analythmethid
@@ -549,8 +557,9 @@ class TestDogmModels(unittest.TestCase):
                     4397670.5318
                     ]
 
+        schema_map = stationmodel.OgmStation.build_schema_map('Stations')
         model = stationmodel.OgmStation(
-            gdb_data, Normalizer())
+            gdb_data, Normalizer(), schema_map)
 
         expected = ['UDOGM',
                     'Utah Division Of Oil Gas And Mining',
@@ -651,9 +660,9 @@ class TestDogmModels(unittest.TestCase):
                     'unit',
                     None  # usgspcode
                     ]
-
+        schema_map = resultmodel.OgmResult.build_schema_map('Results')
         model = resultmodel.OgmResult(
-            gdb_data, Normalizer())
+            gdb_data, Normalizer(), schema_map)
         actual = model.row
 
         self.assertListEqual(expected, actual)
@@ -715,7 +724,8 @@ class TestDogmModels(unittest.TestCase):
                     None  # usgspcode
                     ]
 
-        model = resultmodel.OgmResult(gdb_data, Normalizer())
+        schema_map = resultmodel.OgmResult.build_schema_map('Results')
+        model = resultmodel.OgmResult(gdb_data, Normalizer(), schema_map)
         actual = model.row
 
         self.assertListEqual(expected, actual)
@@ -787,8 +797,9 @@ class TestDwrModels(unittest.TestCase):
                     'usgspcode'  # usgspcode
                     ]
 
+        schema_map = resultmodel.DwrResult.build_schema_map('Results')
         model = resultmodel.DwrResult(
-            gdb_data, Normalizer())
+            gdb_data, Normalizer(), schema_map)
         actual = model.row
 
         self.assertListEqual(expected, actual)
@@ -819,8 +830,9 @@ class TestDwrModels(unittest.TestCase):
                     x,
                     y]
 
+        schema_map = stationmodel.DwrStation.build_schema_map('Stations')
         model = stationmodel.DwrStation(
-            gdb_data, Normalizer())
+            gdb_data, Normalizer(), schema_map)
 
         expected = ['orgid',  # orgid
                     'orgname',  # orgname
@@ -877,8 +889,9 @@ class TestDwrModels(unittest.TestCase):
             None
         ]
 
+        schema_map = resultmodel.DwrResult.build_schema_map('Results')
         model = resultmodel.DwrResult(
-            gdb_result_data, Normalizer())
+            gdb_result_data, Normalizer(), schema_map)
         expected = [None,  # analysisdate
                     None,  # analytmeth
                     None,  # analythmethid
@@ -1002,8 +1015,9 @@ class TestUgsModels(unittest.TestCase):
                     None  # usgspcode
                     ]
 
+        schema_map = resultmodel.UgsResult.build_schema_map('Results')
         model = resultmodel.UgsResult(
-            gdb_data, Normalizer())
+            gdb_data, Normalizer(), schema_map)
         actual = model.row
 
         self.assertListEqual(actual, expected)
@@ -1025,8 +1039,9 @@ class TestUgsModels(unittest.TestCase):
                     'stationcomment',
                     'stationid']
 
+        schema_map = stationmodel.UgsStation.build_schema_map('Stations')
         model = stationmodel.UgsStation(
-            gdb_data, Normalizer())
+            gdb_data, Normalizer(), schema_map)
 
         expected = ['orgid',  # orgid
                     'orgname',  # orgname

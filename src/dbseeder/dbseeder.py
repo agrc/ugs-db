@@ -171,7 +171,6 @@ class Seeder(object):
 
 if __name__ == '__main__':
     from cProfile import Profile
-    from pyprof2calltree import convert, visualize
 
     print 'profiling Seeder'
 
@@ -180,23 +179,28 @@ if __name__ == '__main__':
     seed_data = 'C:\\Projects\\GitHub\\ugs-db\\tests\\data'
     types = ['Results', 'Stations']
     seed_program = {
-            'WQP': True,
-            'SDWIS': False,
-            'DOGM': False,
-            'DWR': False,
-            'UGS': False
-        }
+        'WQP': True,
+        'SDWIS': True,
+        'DOGM': True,
+        'DWR': True,
+        'UGS': True
+    }
+
+    seeder = Seeder(location, gdb)
+
+    if os.path.exists(seeder.location):
+        from shutil import rmtree
+        rmtree(seeder.location)
+
+    seeder._create_gdb()
+    seeder._create_feature_classes(types)
+    seeder.count = 10
 
     profiler = Profile()
 
-    profiler.runctx('''
-seeder = Seeder(location, gdb)
-seeder.count = 10
-
-seeder._seed(seed_data, types, seed_program)
-''', locals(), globals())
-
+    profiler.runctx('seeder._seed(seed_data, types, seed_program)', locals(), globals())
     profiler.dump_stats('.pstat')
 
+    # from pyprof2calltree import convert, visualize
     # visualize(profiler.getstats())
     # convert(profiler.getstats(), 'profiling_results.kgrind')

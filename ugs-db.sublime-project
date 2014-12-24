@@ -21,7 +21,9 @@
 			[
 				"node_modules",
 				".tox",
-				"*.egg-info"
+				"*.egg-info",
+				"build",
+				"dist"
 			],
 			"path": "/"
 		}

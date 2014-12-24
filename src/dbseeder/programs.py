@@ -43,7 +43,7 @@ class Balanceable(object):
 
         self.samples[etl.sample_id] = etl.concentration
 
-    def write_balance_rows(self, etl, location, curser=None):
+    def write_balance_rows(self, etl, location, cursor=None):
         for sample_id in self.samples.keys():
             concentration = self.samples[sample_id]
 
@@ -60,9 +60,9 @@ class Balanceable(object):
             balance_rows = etl.create_rows_from_balance(sample_id, balance)
 
             for row in balance_rows:
-                if curser:
+                if cursor:
                     try:
-                        curser.insertRow(row)
+                        cursor.insertRow(row)
                         continue
                     except Exception as e:
                         raise e
@@ -115,9 +115,12 @@ class GdbProgram(Program):
 
             raise e
 
-    def _insert_row(self, row, fields, location):
-        with self.InsertCursor(location, fields) as cursor:
+    def _insert_row(self, row, fields, location, cursor=None):
+        if cursor:
             cursor.insertRow(row)
+        else:
+            with self.InsertCursor(location, fields) as cursor:
+                cursor.insertRow(row)
 
 
 class Wqp(Program, Balanceable):
@@ -144,7 +147,7 @@ class Wqp(Program, Balanceable):
 
         with self.InsertCursor(location, fields) as cursor:
             for row in data:
-                etl = Type(row, self.normalizer)
+                etl = Type(row, self.normalizer, schema_map)
                 insert_row = etl.row
 
                 station_id = etl.normalize_fields['stationid'][0]
@@ -399,17 +402,18 @@ class Sdwis(Program, Balanceable):
         elif feature_class == 'Stations':
             Type = stationmodel.SdwisStation
 
-        fields = self._get_fields(Type.build_schema_map(feature_class))
+        schema_map = Type.build_schema_map(feature_class)
+        fields = self._get_fields(schema_map)
 
         if feature_class == 'Stations':
             fields.append('SHAPE@XY')
 
-        with self.InsertCursor(location, fields) as curser:
+        with self.InsertCursor(location, fields) as cursor:
             for row in data:
-                etl = Type(row, self.normalizer)
+                etl = Type(row, self.normalizer, schema_map)
                 insert_row = etl.row
 
-                curser.insertRow(insert_row)
+                cursor.insertRow(insert_row)
 
                 if etl.balanceable and etl.sample_id is not None:
                     self.track_concentration(etl)
@@ -461,22 +465,20 @@ class Dogm(GdbProgram, Balanceable):
 
             location = os.path.join(self.location, model_type)
 
+            schema_map = Type.build_schema_map(model_type)
+            fields_to_insert = self._get_default_fields(schema_map)
+            if model_type == 'Stations':
+                fields_to_insert.append('SHAPE@XY')
+
             print 'inserting into {} DOGM type {}'.format(location, model_type)
 
-            fields_to_insert = None
+            with self.InsertCursor(location, fields_to_insert) as cursor:
+                for record in self._read_gdb(table, Type.fields):
+                    etl = Type(record, self.normalizer, schema_map)
+                    self._insert_row(etl.row, fields_to_insert, location, cursor)
 
-            for record in self._read_gdb(table, Type.fields):
-                etl = Type(record, self.normalizer)
-                if not fields_to_insert:
-                    fields_to_insert = self._get_default_fields(etl.schema_map)
-
-                    if model_type == 'Stations':
-                        fields_to_insert.append('SHAPE@XY')
-
-                self._insert_row(etl.row, fields_to_insert, location)
-
-                if etl.balanceable and etl.sample_id is not None:
-                    self.track_concentration(etl)
+                    if etl.balanceable and etl.sample_id is not None:
+                        self.track_concentration(etl)
 
             if etl.balanceable:
                 self.write_balance_rows(etl, location)
@@ -508,24 +510,23 @@ class Udwr(GdbProgram, Balanceable):
 
             location = os.path.join(self.location, model_type)
 
+            schema_map = Type.build_schema_map(model_type)
+            fields_to_insert = self._get_default_fields(schema_map)
+            if model_type == 'Stations':
+                fields_to_insert.append('SHAPE@XY')
+
             print 'inserting into {} UDWR type {}'.format(location, model_type)
 
-            fields_to_insert = None
+            with self.InsertCursor(location, fields_to_insert) as cursor:
+                for record in self._read_gdb(table, Type.fields):
+                    etl = Type(record, self.normalizer, schema_map)
+                    self._insert_row(etl.row, fields_to_insert, location, cursor)
 
-            for record in self._read_gdb(table, Type.fields):
-                etl = Type(record, self.normalizer)
-                if not fields_to_insert:
-                    fields_to_insert = self._get_default_fields(etl.schema_map)
+                    if etl.balanceable and etl.sample_id is not None:
+                        self.track_concentration(etl)
 
-                    if model_type == 'Stations':
-                        fields_to_insert.append('SHAPE@XY')
-
-                self._insert_row(etl.row, fields_to_insert, location)
-
-                if etl.balanceable and etl.sample_id is not None:
-                    self.track_concentration(etl)
-
-            self.write_balance_rows(etl, location)
+            if etl.balanceable:
+                self.write_balance_rows(etl, location)
 
 
 class Ugs(GdbProgram, Balanceable):
@@ -554,21 +555,20 @@ class Ugs(GdbProgram, Balanceable):
 
             location = os.path.join(self.location, model_type)
 
+            schema_map = Type.build_schema_map(model_type)
+            fields_to_insert = self._get_default_fields(schema_map)
+            if model_type == 'Stations':
+                fields_to_insert.append('SHAPE@XY')
+
             print 'inserting into {} UGS type {}'.format(location, model_type)
 
-            fields_to_insert = None
+            with self.InsertCursor(location, fields_to_insert) as cursor:
+                for record in self._read_gdb(table, Type.fields):
+                    etl = Type(record, self.normalizer, schema_map)
+                    self._insert_row(etl.row, fields_to_insert, location, cursor)
 
-            for record in self._read_gdb(table, Type.fields):
-                etl = Type(record, self.normalizer)
-                if not fields_to_insert:
-                    fields_to_insert = self._get_default_fields(etl.schema_map)
+                    if etl.balanceable and etl.sample_id is not None:
+                        self.track_concentration(etl)
 
-                    if model_type == 'Stations':
-                        fields_to_insert.append('SHAPE@XY')
-
-                self._insert_row(etl.row, fields_to_insert, location)
-
-                if etl.balanceable and etl.sample_id is not None:
-                    self.track_concentration(etl)
-
-            self.write_balance_rows(etl, location)
+            if etl.balanceable:
+                self.write_balance_rows(etl, location, cursor)
