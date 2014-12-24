@@ -43,6 +43,8 @@ Once that is done you can create the relationship feature class by running
     1. `pip install tox`
 1. Run tests
     1. `tox`
+1. To run specific test
+    1. `tox -e py27-nocover -- test_services`
 
 ## Profiling
 run `dbseeder.py` this will create a `.pstat` file  

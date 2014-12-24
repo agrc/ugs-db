@@ -17,9 +17,9 @@ from pyproj import Proj, transform
 class WebQuery(object):
 
     """the http query wrapper over requests for unit testing"""
-    web_api_url = ('http://api.mapserv.utah.gov/api/v1/search/{}'
+    web_api_url = ('http://api.mapserv.utah.gov/api/v1/search/{}/{}/'
                    '?geometry=point:[{},{}]&attributeStyle=upper&apikey={}')
-    dev_api_key = 'AGRC-B5D62BD2151902'
+    dev_api_key = 'AGRC-D202DF40275245'
 
     def results(self, url):
         r = requests.get(url)
@@ -40,7 +40,12 @@ class WebQuery(object):
                                       self.dev_api_key)
         r = requests.get(url)
 
-        return r.json()
+        response = r.json()
+
+        if response['status'] != 200:
+            raise Exception(response['message'])
+
+        return int(response['result'][0]['attributes'][attribute])
 
     def county_code(self, utm_x, utm_y):
         layer = 'SGID10.BOUNDARIES.COUNTIES'
@@ -53,7 +58,12 @@ class WebQuery(object):
                                       self.dev_api_key)
         r = requests.get(url)
 
-        return r.json()
+        response = r.json()
+
+        if response['status'] != 200:
+            raise Exception(response['message'])
+
+        return int(response['result'][0]['attributes'][attribute])
 
 
 class ConsolePrompt(object):

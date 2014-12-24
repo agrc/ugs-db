@@ -9,6 +9,7 @@ Tests for `services` module.
 """
 import dbseeder.services as service
 import unittest
+import nose
 from dbseeder.models import Concentration
 from dbseeder.modelextensions import Normalizable
 
@@ -102,3 +103,33 @@ class TestChargeBalancer(unittest.TestCase):
         self.assertEqual(balance, expected_balance)
         self.assertEqual(cations, expected_cations)
         self.assertEqual(anions, expected_anions)
+
+
+class TestWebQuery(unittest.TestCase):
+
+    def setUp(self):
+        self.patient = service.WebQuery()
+
+    def test_can_get_state_from_xy(self):
+        raise nose.SkipTest()
+
+        x = 425000
+        y = 4510000
+
+        actual = self.patient.state(x, y)
+
+        expected = 49
+
+        self.assertEqual(actual, expected)
+
+    def test_can_get_county_from_xy(self):
+        raise nose.SkipTest()
+
+        x = 425000
+        y = 4510000
+
+        actual = self.patient.county_code(x, y)
+
+        expected = 35
+
+        self.assertEqual(actual, expected)
