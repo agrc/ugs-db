@@ -28,6 +28,8 @@ class WqpResult(WqpTable, Balanceable):
 
 class SdwisResult(Table, Balanceable):
 
+    datasource = 'SDWIS'
+
     fields = ['AnalysisDate',
               'LabName',
               'MDL',
@@ -58,6 +60,8 @@ class OgmResult(Table, Balanceable):
 
     """docstring for OgmResult"""
 
+    datasource = 'DOGM'
+
     fields = ['StationId',
               'Param',
               'SampleId',
@@ -82,6 +86,8 @@ class OgmResult(Table, Balanceable):
 
 
 class DwrResult(Table, Balanceable):
+
+    datasource = 'DWR'
 
     fields = ['SampleDate',
               'USGSPCode',
@@ -109,6 +115,8 @@ class DwrResult(Table, Balanceable):
 
 
 class UgsResult(Table, Balanceable):
+
+    datasource = 'UGS'
 
     fields = ['ResultValue',
               'AnalysisDate',

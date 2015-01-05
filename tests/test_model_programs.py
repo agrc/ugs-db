@@ -95,7 +95,7 @@ class TestWqpModels(unittest.TestCase):
                     None,
                     None,
                     None,
-                    None,
+                    'WQP',
                     'DetectCond',
                     None,  # : idNum
                     'LabComments',
@@ -217,7 +217,7 @@ class TestWqpModels(unittest.TestCase):
             holedepth,
             'HoleDUnit',
             None,
-            None,
+            'WQP',
             None,
             (227191.93568276422, 4717996.363612308)
         ]
@@ -302,7 +302,7 @@ class TestWqpModels(unittest.TestCase):
                     None,  # autoqual
                     None,  # cas reg
                     None,  # chrg
-                    None,  # datasource
+                    'WQP',  # datasource
                     None,  # detectcond
                     None,  # idnum
                     None,  # lab comments
@@ -397,7 +397,7 @@ class TestSdwisModels(unittest.TestCase):
                     None,
                     None,
                     None,
-                    None,
+                    'SDWIS',
                     None,
                     (514725.5552380322, 4478837.450786671)]
         self.assertListEqual(expected, actual)
@@ -431,7 +431,7 @@ class TestSdwisModels(unittest.TestCase):
                     None,
                     None,  # : cas_reg
                     None,
-                    None,
+                    'SDWIS',
                     None,
                     3908822L,  # : idnum
                     None,
@@ -499,7 +499,7 @@ class TestSdwisModels(unittest.TestCase):
                     None,  # autoqual
                     None,  # cas reg
                     None,  # chrg
-                    None,  # datasource
+                    'SDWIS',  # datasource
                     None,  # detectcond
                     None,  # idnum
                     None,  # lab comments
@@ -591,7 +591,7 @@ class TestDogmModels(unittest.TestCase):
                     None,
                     None,
                     None,
-                    None,
+                    'DOGM',
                     None,
                     (512329.9142,
                      4397670.5318)]
@@ -623,7 +623,7 @@ class TestDogmModels(unittest.TestCase):
                     None,  # autoqual
                     None,  # cas reg
                     None,  # chrg
-                    None,  # datasource
+                    'DOGM',  # datasource
                     None,  # detectcond
                     None,  # idnum
                     None,  # lab comments
@@ -686,7 +686,7 @@ class TestDogmModels(unittest.TestCase):
                     None,  # autoqual
                     None,  # cas reg
                     None,  # chrg
-                    None,  # datasource
+                    'DOGM',  # datasource
                     None,  # detectcond
                     None,  # idnum
                     None,  # lab comments
@@ -759,7 +759,7 @@ class TestDwrModels(unittest.TestCase):
                     None,  # autoqual
                     None,  # cas reg
                     None,  # chrg
-                    None,  # datasource
+                    'DWR',  # datasource
                     None,  # detectcond
                     idnum,  # idnum
                     None,  # lab comments
@@ -864,7 +864,7 @@ class TestDwrModels(unittest.TestCase):
                     hole_depth,  # hole depth
                     None,  # hold d unit
                     None,  # dem elev
-                    None,  # datasource
+                    'DWR',  # datasource
                     win,  # win
                     (x, y)  # shape
                     ]
@@ -898,7 +898,7 @@ class TestDwrModels(unittest.TestCase):
                     None,  # autoqual
                     None,  # cas reg
                     None,  # chrg
-                    None,  # datasource
+                    'DWR',  # datasource
                     None,  # detectcond
                     None,  # idnum
                     None,  # lab comments
@@ -977,7 +977,7 @@ class TestUgsModels(unittest.TestCase):
                     None,  # autoqual
                     'casreg',  # cas reg
                     None,  # chrg
-                    None,  # datasource
+                    'UGS',  # datasource
                     'detectcond',  # detectcond
                     idnum,  # idnum
                     None,  # lab comments
@@ -1073,7 +1073,7 @@ class TestUgsModels(unittest.TestCase):
                     None,  # hole depth
                     None,  # hold d unit
                     None,  # dem elev
-                    'datasource',  # datasource
+                    'UGS',  # datasource
                     None,  # win
                     (312382.9355031499, 4166423.73346324)  # shape
                     ]

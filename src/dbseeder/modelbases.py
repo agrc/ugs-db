@@ -46,8 +46,18 @@ class Table(Normalizable):
         self.balanceable = True
 
         for i, field_name in enumerate(schema_map):
+
+            if field_name == 'DataSource':
+                try:
+                    _row.append(self.datasource)
+                except AttributeError:
+                    _row.append(None)  # must be a result
+
+                continue
+
             if field_name not in self.fields:
                 _row.append(None)
+
                 continue
 
             try:
@@ -112,6 +122,8 @@ class WqpTable(Normalizable):
     data translations
     """
 
+    datasource = 'WQP'
+
     def __init__(self, normalizer):
         """
             this base class takes a csv row
@@ -149,6 +161,14 @@ class WqpTable(Normalizable):
             field = schema_map[key]
             source_field_name = field.field_source
             destination_field_type = field.field_type
+
+            if field.field_name == 'DataSource':
+                try:
+                    _row.append(self.datasource)
+                except AttributeError:
+                    _row.append(None)  # must be a result
+
+                continue
 
             # not all of the programs have the same schema
             if source_field_name not in row:

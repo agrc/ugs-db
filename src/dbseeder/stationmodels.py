@@ -27,6 +27,8 @@ class WqpStation(WqpTable):
 
 class SdwisStation(Table):
 
+    datasource = 'SDWIS'
+
     fields = ['OrgId',
               'OrgName',
               'StationId',
@@ -54,6 +56,8 @@ class OgmStation(Table):
 
     """docstring for OgmStation"""
 
+    datasource = 'DOGM'
+
     fields = ['OrgId',
               'OrgName',
               'StationId',
@@ -74,6 +78,8 @@ class OgmStation(Table):
 
 
 class DwrStation(Table):
+
+    datasource = 'DWR'
 
     fields = ['WIN',
               'OrgId',
@@ -98,6 +104,8 @@ class DwrStation(Table):
 
 
 class UgsStation(Table):
+
+    datasource = 'UGS'
 
     fields = ['OrgId',
               'DataSource',
