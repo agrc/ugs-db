@@ -43,7 +43,7 @@ class TestWqpProgram(unittest.TestCase):
         seed._create_gdb()
         seed._create_feature_classes(['Results', 'Stations'])
 
-        self.patient = Wqp(self.folder, InsertCursor)
+        self.patient = Wqp(self.folder, InsertCursor, SearchCursor)
 
     def test_sanity(self):
         self.assertIsNotNone(self.patient)
@@ -408,14 +408,14 @@ class TestSdwisProgram(unittest.TestCase):
         seed._create_gdb()
         seed._create_feature_classes(['Results', 'Stations'])
 
-        self.patient = Sdwis(self.folder, InsertCursor)
+        self.patient = Sdwis(self.folder, InsertCursor, SearchCursor)
 
     def test_sanity(self):
         self.assertIsNotNone(self.patient)
 
     def test_query(self):
         self.patient.count = 2
-        data = self.patient._query(self.patient._result_query)
+        data = self.patient._query(self.patient._result_query.format(''))
         schema_map = resultmodel.SdwisResult.build_schema_map('Results')
         for item in data:
             etl = resultmodel.SdwisResult(item,  Normalizer(), schema_map)
@@ -487,6 +487,55 @@ class TestSdwisProgram(unittest.TestCase):
         balance_rows = 3
 
         self.assertEqual(str(original_row_count + balance_rows), arcpy.GetCount_management(table).getOutput(0))
+
+    def test_update_query_string(self):
+        data = [(None,
+                 'UT00007   ',
+                 0.1,
+                 'MG/L     ',
+                 1748,
+                 'SUMMIT CHATEAU IN BRIAN HEAD',
+                 'NITRATE-NITRITE                         ',
+                 0.0,
+                 datetime.datetime(2014, 2, 2, 0, 0),
+                 datetime.datetime(1, 1, 1, 14, 10),
+                 'K201400801',
+                 'WL',
+                 9032,
+                 '         ',
+                 37.732475,
+                 -112.871236,
+                 None,
+                 3908822),
+                (None,
+                 'UT00007   ',
+                 0.1,
+                 'MG/L     ',
+                 1748,
+                 'SUMMIT CHATEAU IN BRIAN HEAD',
+                 'NITRATE-NITRITE                         ',
+                 0.0,
+                 datetime.datetime(2014, 1, 1, 0, 0),
+                 datetime.datetime(1, 1, 1, 14, 10),
+                 'K201400801',
+                 'WL',
+                 9032,
+                 '         ',
+                 37.732475,
+                 -112.871236,
+                 None,
+                 3908822)]
+
+        model_type = 'Results'
+        self.patient._insert_rows(data, model_type)
+
+        current_date = self.patient._get_most_current_date('SDWIS', 'Results')
+        self.assertEqual(current_date, datetime.datetime(2014, 2, 3, 0, 0))
+
+        expected = 'UTV80.TSASAMPL.COLLLECTION_END_DT > 2014-02-03 00:00:00'
+
+        actual = self.patient._format_update_query_string(current_date, model_type)
+        self.assertTrue(expected in actual)
 
     def tearDown(self):
         self.patient = None
@@ -617,6 +666,21 @@ class TestDogmProgram(unittest.TestCase):
         original_row_count = 17
         balance_rows = 3
         self.assertEqual(actual, str(original_row_count + balance_rows))
+
+    def test_most_current_date(self):
+        folder = os.path.join('.', 'data')
+
+        self.patient.seed(folder, ['Results'])
+
+        # expected_station_date = datetime.date(12, 13, 2013)
+        # actual_station_date = self._get_most_current_date('DOGM', 'Stations')
+
+        # self.assertEqual(actual_station_date, expected_station_date)
+
+        expected_result_date = datetime.datetime(2013, 12, 14, 0, 0)
+        actual_result_date = self.patient._get_most_current_date('DOGM', 'Results')
+
+        self.assertEqual(actual_result_date, expected_result_date)
 
     def tearDown(self):
         self.patient = None

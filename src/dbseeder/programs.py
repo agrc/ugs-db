@@ -17,6 +17,7 @@ import models
 import resultmodels as resultmodel
 import stationmodels as stationmodel
 import os
+from datetime import timedelta
 from services import WebQuery, Normalizer, ChargeBalancer
 
 
@@ -72,12 +73,13 @@ class Balanceable(object):
 
 class Program(object):
 
-    def __init__(self, location, InsertCursor):
+    def __init__(self, location, InsertCursor, SearchCursor):
         super(Program, self).__init__()
 
         self.location = location
-        self.InsertCursor = InsertCursor
         self.normalizer = Normalizer()
+        self.InsertCursor = InsertCursor
+        self.SearchCursor = SearchCursor
 
     def _get_default_fields(self, schema_map):
         fields = []
@@ -89,11 +91,21 @@ class Program(object):
     def _get_fields(self, schema_map):
         return [schema_map[item].field_name for item in schema_map]
 
+    def _get_most_current_date(self, datasource, model_type):
+        location = os.path.join(self.location, model_type)
+        query = "DataSource = '{}'".format(datasource)
+        # ms_sql = ('TOP 1', 'ORDER BY SampleDate')
+        sql = (None, 'ORDER BY SampleDate DESC')
+
+        with self.SearchCursor(location, ['SampleDate'], where_clause=query, sql_clause=sql) as cursor:
+            for row in cursor:
+                return row[0] + timedelta(days=1)
+
 
 class GdbProgram(Program):
 
-    def __init__(self, location, InsertCursor):
-        super(GdbProgram, self).__init__(location, InsertCursor)
+    def __init__(self, location, InsertCursor, SearchCursor):
+        super(GdbProgram, self).__init__(location, InsertCursor, SearchCursor)
 
     def _read_gdb(self, location, fields):
         #: location - the path to the table data
@@ -354,8 +366,8 @@ class Sdwis(Program, Balanceable):
                 UTV80.TINWLCAS.BOTTOM_DEPTH_MSR,
                 UTV80.TINWLCAS.BOTTOM_DP_MSR_UOM"""
 
-    def __init__(self, location, InsertCursor):
-        super(Sdwis, self).__init__(location, InsertCursor)
+    def __init__(self, location, InsertCursor, SearchCursor):
+        super(Sdwis, self).__init__(location, InsertCursor, SearchCursor)
 
         #: testing variable to reduce query times
         self.count = None
@@ -444,8 +456,7 @@ class Dogm(GdbProgram, Balanceable):
     stations = 'DOGM_STATION'
 
     def __init__(self, location, SearchCursor, InsertCursor):
-        super(Dogm, self).__init__(location, InsertCursor)
-        self.SearchCursor = SearchCursor
+        super(Dogm, self).__init__(location, InsertCursor, SearchCursor)
 
     def seed(self, folder, model_types):
         """
@@ -493,8 +504,7 @@ class Udwr(GdbProgram, Balanceable):
     stations = 'UDWR_STATION'
 
     def __init__(self, location, SearchCursor, InsertCursor):
-        super(Udwr, self).__init__(location, InsertCursor)
-        self.SearchCursor = SearchCursor
+        super(Udwr, self).__init__(location, InsertCursor, SearchCursor)
 
     def seed(self, folder, model_types):
         #: folder - the parent folder to the data directory
@@ -538,8 +548,7 @@ class Ugs(GdbProgram, Balanceable):
     stations = 'STATIONS'
 
     def __init__(self, location, SearchCursor, InsertCursor):
-        super(Ugs, self).__init__(location, InsertCursor)
-        self.SearchCursor = SearchCursor
+        super(Ugs, self).__init__(location, InsertCursor, SearchCursor)
 
     def seed(self, folder, model_types):
         #: folder - the parent folder to the data directory
