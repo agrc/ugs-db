@@ -12,6 +12,7 @@ import services
 from collections import OrderedDict
 from models import Field, Schema
 from modelextensions import Normalizable
+from services import WebQuery
 
 
 class Table(Normalizable):
@@ -81,7 +82,7 @@ class Table(Normalizable):
 
         _row = self.normalize(_row)
 
-        if model_type == 'Station':
+        if model_type == 'Stations':
             has_utm = False
             try:
                 utmx_index = self.fields.index('UTM_X')
@@ -151,10 +152,16 @@ class WqpTable(Normalizable):
 
         return OrderedDict(schema_index_items)
 
-    def _etl_row(self, row, schema_map, model_type):
+    def _etl_row(self, row, schema_map, model_type, updating=False):
         _row = []
         self.balanceable = True
-        lat = lon = None
+        calculated_fields = {
+            'demELEVm': (None, -1),
+            'StateCode': (None, -1),
+            'CountyCode': (None, -1),
+            'Lat_Y': (None, -1),
+            'Lon_X': (None, -1)
+        }
 
         for key in schema_map.keys():
             #: the key index maps to the column index in the feature class
@@ -162,6 +169,7 @@ class WqpTable(Normalizable):
             source_field_name = field.field_source
             destination_field_type = field.field_type
 
+            #: set the datasource for the program and move on
             if field.field_name == 'DataSource':
                 try:
                     _row.append(self.datasource)
@@ -170,13 +178,14 @@ class WqpTable(Normalizable):
 
                 continue
 
-            # not all of the programs have the same schema
+            #: not all of the programs have the same schema so append None and move on
             if source_field_name not in row:
                 _row.append(None)
                 self.update_normalize(field.field_name, None, key)
 
                 continue
 
+            #: this should be covered by the last check
             try:
                 value = row[source_field_name].strip()
             except IndexError:
@@ -184,10 +193,10 @@ class WqpTable(Normalizable):
 
             value = services.Caster.cast(value, destination_field_type)
 
-            if field.field_name == 'Lon_X':
-                lon = value
-            elif field.field_name == 'Lat_Y':
-                lat = value
+            # store these values to do later processing
+            if field.field_name in calculated_fields.keys():
+                #: store the value and the index to we can swap them out later
+                calculated_fields[field.field_name] = (value, key)
 
             self.update_normalize(field.field_name, value, key)
 
@@ -201,14 +210,45 @@ class WqpTable(Normalizable):
             _row.append(value)
 
         _row = self.normalize(_row)
+        _row = self.calculate_fields(_row, model_type, calculated_fields, updating)
+
+        return _row
+
+    def calculate_fields(self, row, model_type, field_info, updating=False):
+        x = y = None
+        query_service = WebQuery()
 
         if model_type == 'Station':
             try:
-                x, y = services.Project().to_utm(lon, lat)
+                x, y = services.Project().to_utm(field_info['Lon_X'][0], field_info['Lat_Y'][0])
 
                 if x and y:
-                    _row.append((x, y))
+                    row.append((x, y))
             except Exception as detail:
                 print 'Handling projection error:', detail
 
-        return _row
+        if not(x and y) or not updating:
+            return row
+
+        try:
+            elevation = query_service.elevation(x, y)
+            row[field_info['demELEVm'][1]] = elevation
+        except LookupError:
+            #: point is likely not in Utah
+            pass
+
+        try:
+            state_code = query_service.state_code(x, y)
+            row[field_info['StateCode'][1]] = state_code
+        except LookupError:
+            #: point is likely not in Utah
+            pass
+
+        try:
+            county_code = query_service.county_code(x, y)
+            row[field_info['CountyCode'][1]] = county_code
+        except LookupError:
+            #: point is likely not in Utah
+            pass
+
+        return row

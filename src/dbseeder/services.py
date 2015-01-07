@@ -7,6 +7,7 @@ services
 
 Classes that handle specific repeatable tasks.
 """
+import arcpy
 import datetime
 import requests
 import sys
@@ -14,54 +15,80 @@ from dateutil.parser import parse
 from pyproj import Proj, transform
 
 
+class GdbQuery(object):
+    def county_code(self, utm_x, utm_y):
+
+        point = arcpy.Point(utm_x, utm_y)
+        arcpy.MakeFeatureLayer_management(arcpy.PointGeometry(point), 'selection')
+        arcpy.SelectLayerByAttribute_management('counties_lyr', 'CLEAR_SELECTION')
+        arcpy.SelectLayerByLocation_management('counties_lyr', 'selection')
+
+        with arcpy.da.SearchCursor('counties_lyr', ['COUNTYFP']) as cursor:
+            for row in cursor:
+                return row[0]
+
+
 class WebQuery(object):
 
     """the http query wrapper over requests for unit testing"""
     web_api_url = ('http://api.mapserv.utah.gov/api/v1/search/{}/{}/'
                    '?geometry=point:[{},{}]&attributeStyle=upper&apikey={}')
-    dev_api_key = 'AGRC-D202DF40275245'
+    dev_api_key = 'AGRC-F91218F2743907'
 
-    def results(self, url):
+    wqp_results_url = ('http://www.waterqualitydata.us/Result/search?'
+                       'sampleMedia=Water&startDateLo={}&startDateHi={}&'
+                       'bBox=-115%2C35.5%2C-108%2C42.5&mimeType=csv')
+
+    def results(self, date, url=None):
+        if not url:
+            url = self._format_wqp_result_url(date)
+
         r = requests.get(url)
 
         return r.text.splitlines()
 
-    def elevation(self, utm_x, utm_y):
-        pass
+    def _format_wqp_result_url(self, date, today=None):
+        date_format = '%m-%d-%Y'
+        most_recent_sample = date.strftime(date_format)
 
-    def state(self, utm_x, utm_y):
+        if today:
+            today = today.strftime(date_format)
+        else:
+            today = datetime.datetime.now().strftime(date_format)
+
+        return self.wqp_results_url.format(most_recent_sample, today)
+
+    def elevation(self, utm_x, utm_y):
+        layer = 'SGID10.RASTER.DEM_10METER'
+        attribute = 'VALUE'
+
+        return self._query_web_api(layer, attribute, utm_x, utm_y)
+
+    def state_code(self, utm_x, utm_y):
         layer = 'SGID10.BOUNDARIES.USSTATES'
         attribute = 'STATE_FIPS'
 
-        url = self.web_api_url.format(layer,
-                                      attribute,
-                                      utm_x,
-                                      utm_y,
-                                      self.dev_api_key)
-        r = requests.get(url)
-
-        response = r.json()
-
-        if response['status'] != 200:
-            raise Exception(response['message'])
-
-        return int(response['result'][0]['attributes'][attribute])
+        return self._query_web_api(layer, attribute, utm_x, utm_y)
 
     def county_code(self, utm_x, utm_y):
         layer = 'SGID10.BOUNDARIES.COUNTIES'
         attribute = 'FIPS'
 
+        return self._query_web_api(layer, attribute, utm_x, utm_y)
+
+    def _query_web_api(self, layer, attribute, x, y):
         url = self.web_api_url.format(layer,
                                       attribute,
-                                      utm_x,
-                                      utm_y,
+                                      x,
+                                      y,
                                       self.dev_api_key)
+
         r = requests.get(url)
 
         response = r.json()
 
         if response['status'] != 200:
-            raise Exception(response['message'])
+            raise LookupError(response['message'])
 
         return int(response['result'][0]['attributes'][attribute])
 

@@ -94,7 +94,7 @@ class Program(object):
     def _get_most_current_date(self, datasource, model_type):
         location = os.path.join(self.location, model_type)
         query = "DataSource = '{}'".format(datasource)
-        # ms_sql = ('TOP 1', 'ORDER BY SampleDate')
+        # ms_sql = ('TOP 1', 'ORDER BY SampleDate DESC')
         sql = (None, 'ORDER BY SampleDate DESC')
 
         with self.SearchCursor(location, ['SampleDate'], where_clause=query, sql_clause=sql) as cursor:
@@ -202,8 +202,11 @@ class Wqp(Program, Balanceable):
         for csv_file in glob.glob(folder):
             yield csv_file
 
-    def _query(self, url):
-        data = WebQuery().results(url)
+    def _query_results(self, date, url=None):
+        if url:
+            return WebQuery().results(None, url=url)
+
+        data = WebQuery().results(date)
 
         return data
 
@@ -269,7 +272,11 @@ class Wqp(Program, Balanceable):
 
     def update(self, model_types):
         for model_type in model_types:
-            response = self._query(model_type)
+            most_recent_date = self._get_most_current_date('WQP', model_type)
+
+            print most_recent_date
+
+            response = self._query_results(most_recent_date)
             csv = self._read_response(response)
 
             self._insert_rows(csv, model_type)
@@ -316,6 +323,7 @@ class Sdwis(Program, Balanceable):
         WHERE (UTV80.TINWSF.TYPE_CODE = 'SP' Or
                 UTV80.TINWSF.TYPE_CODE = 'WL') AND
                 UTV80.TSASAR.CONCENTRATION_MSR IS NOT NULL
+                {}
 
         ORDER BY UTV80.TINWSF.ST_ASGN_IDENT_CD"""
 
@@ -434,6 +442,10 @@ class Sdwis(Program, Balanceable):
             with self.InsertCursor(location, etl.balance_fields) as cursor:
                 self.write_balance_rows(etl, location, cursor)
 
+    def _format_update_query_string(self, date, model_type):
+        if model_type == 'Results':
+            return self._result_query.format('UTV80.TSASAMPL.COLLLECTION_END_DT > {}'.format(date))
+
     def seed(self, model_types):
         query_string = None
 
@@ -441,10 +453,19 @@ class Sdwis(Program, Balanceable):
             if model_type == 'Stations':
                 query_string = self._station_query
             elif model_type == 'Results':
-                query_string = self._result_query
+                query_string = self._result_query.format('')
 
             records = self._query(query_string)
             self._insert_rows(records, model_type)
+
+    def update(self, model_types):
+        for model_type in model_types:
+            if model_type == 'Results':
+                current_date = self._get_most_current_date(self.datasource, 'Results')
+                query_string = self._format_update_query_string(current_date, 'Results')
+
+                records = self.query(query_string)
+                self._insert_rows(records, model_type)
 
 
 class Dogm(GdbProgram, Balanceable):

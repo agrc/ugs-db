@@ -13,6 +13,7 @@ import dbseeder.resultmodels as resultmodel
 import dbseeder.stationmodels as stationmodel
 import unittest
 from dbseeder.services import Normalizer
+from nose import SkipTest
 
 
 class TestWqpModels(unittest.TestCase):
@@ -138,14 +139,191 @@ class TestWqpModels(unittest.TestCase):
             csv_data, Normalizer(), schema_map).row
         self.assertListEqual(actual, expected)
 
+    def test_station_model_etl_on_update_with_point_outside_of_utah(self):
+        raise SkipTest()
+
+        lon_x = -114.323546838
+        lat_y = 42.5661737512
+        depth = 1
+        holedepth = 2
+        horacc = 4
+        statecode = 16  # idaho
+        countycode = 83
+        constdate = datetime.datetime(2014, 06, 19, 0, 0)
+
+        csv_data = {'DrainageAreaMeasure/MeasureUnitCode': 'ha',
+                    'MonitoringLocationTypeName': 'StationType',
+                    'HorizontalCoordinateReferenceSystemDatumName': 'HorRef',
+                    'DrainageAreaMeasure/MeasureValue': '2774',
+                    'StateCode': '',
+                    'MonitoringLocationIdentifier': 'StationId',
+                    'MonitoringLocationName': 'StationName',
+                    'VerticalMeasure/MeasureValue': '',
+                    'FormationTypeText': 'FmType',
+                    'VerticalAccuracyMeasure/MeasureUnitCode': 'ElevAccUnit',
+                    'VerticalCoordinateReferenceSystemDatumName': 'ElevRef',
+                    'AquiferTypeName': 'AquiferType',
+                    'HorizontalAccuracyMeasure/MeasureUnitCode': 'HorAccUnit',
+                    'ContributingDrainageAreaMeasure/MeasureUnitCode': '',
+                    'WellHoleDepthMeasure/MeasureValue': str(holedepth),
+                    'WellDepthMeasure/MeasureValue': str(depth),
+                    'LongitudeMeasure': str(lon_x),
+                    'AquiferName': 'Aquifer',
+                    'HorizontalAccuracyMeasure/MeasureValue': str(horacc),
+                    'HUCEightDigitCode': 'HUC8',
+                    'LatitudeMeasure': str(lat_y),
+                    'ContributingDrainageAreaMeasure/MeasureValue': '',
+                    'OrganizationFormalName': 'OrgName',
+                    'WellDepthMeasure/MeasureUnitCode': 'DepthUnit',
+                    'OrganizationIdentifier': 'OrgId',
+                    'HorizontalCollectionMethodName': 'HorCollMeth',
+                    'VerticalAccuracyMeasure/MeasureValue': '',
+                    'VerticalCollectionMethodName': 'ElevMeth',
+                    'MonitoringLocationDescriptionText': 'StationComment',
+                    'CountryCode': 'US',
+                    'VerticalMeasure/MeasureUnitCode': 'ElevUnit',
+                    'CountyCode': '',
+                    'ConstructionDateText': '2014-06-19',
+                    'WellHoleDepthMeasure/MeasureUnitCode': 'HoleDUnit',
+                    'SourceMapScaleNumeric': ''}
+
+        expected = [
+            'OrgId',  # orgid
+            'OrgName',  # orgname
+            'StationId',  # station id
+            'StationName',  # stationname
+            'StationType',  # stationtype
+            'StationComment',  # station comment
+            'HUC8',  # huc8
+            lon_x,  # lon x
+            lat_y,  # lay y
+            horacc,  # horacc
+            'HorAccUnit',  # horaccunit
+            'HorCollMeth',  # horcallmeth
+            'HorRef',  # hor ref
+            None,  # elev
+            'ElevUnit',  # elev unit
+            None,  # elev acc
+            'ElevAccUnit',  # elev acc unit
+            'ElevMeth',  # elev meth
+            'ElevRef',  # elev ref
+            statecode,  # state code
+            countycode,  # county code
+            'Aquifer',  # aquifer
+            'FmType',  # fm type
+            'AquiferType',  # aquifer type
+            constdate,  # constdate
+            depth,  # depth
+            'DepthUnit',  # depth unit
+            holedepth,  # hole depth
+            'HoleDUnit',  # hold d unit
+            None,  # dem elev
+            'WQP',  # datasource
+            None,  # win
+            (227191.93568276422, 4717996.363612308)  # shape
+        ]
+
+        schema_map = stationmodel.WqpStation.build_schema_map('Stations')
+        model = stationmodel.WqpResult(csv_data, Normalizer(), schema_map, updating=True)
+
+        self.assertListEqual(expected, model.row)
+
+    def test_station_calculate_fields_with_no_location(self):
+        row = ['original_data']
+        field_info = {
+            'demELEVm': (None, -1),
+            'StateCode': (None, -1),
+            'CountyCode': (None, -1),
+            'Lat_Y': (None, -1),
+            'Lon_X': (None, -1)
+        }
+
+        schema_map = stationmodel.WqpStation.build_schema_map('Stations')
+        model = stationmodel.WqpStation([], Normalizer(), schema_map)
+
+        actual = model.calculate_fields(row, 'Station', field_info, updating=True)
+        self.assertEqual(actual, row)
+
+    def test_station_calculate_fields_with_partial_location(self):
+        row = ['original_data']
+        field_info = {
+            'demELEVm': (None, -1),
+            'StateCode': (None, -1),
+            'CountyCode': (None, -1),
+            'Lat_Y': (40, -1),
+            'Lon_X': (None, -1)
+        }
+
+        schema_map = stationmodel.WqpStation.build_schema_map('Stations')
+        model = stationmodel.WqpStation([], Normalizer(), schema_map)
+
+        actual = model.calculate_fields(row, 'Station', field_info, updating=True)
+        self.assertEqual(actual, row)
+
+    def test_station_calculate_fields_with_point_outside_of_utah(self):
+        row = [
+            None,  # elevation
+            None,  # state code
+            None,  # county code
+        ]
+
+        expected = [
+            None,  # elevation
+            16,    # state code
+            83,    # county code
+            (227191.93568276422, 4717996.363612308)  # utm cords
+        ]
+
+        field_info = {
+            'demELEVm': (None, 0),
+            'StateCode': (None, 1),
+            'CountyCode': (None, 2),
+            'Lat_Y': (42.5661737512, None),
+            'Lon_X': (-114.323546838, None)
+        }
+
+        schema_map = stationmodel.WqpStation.build_schema_map('Stations')
+        model = stationmodel.WqpStation([], Normalizer(), schema_map)
+
+        actual = model.calculate_fields(row, 'Station', field_info, updating=True)
+        self.assertEqual(actual, expected)
+
+    def test_station_calculate_fields_with_point_in_utah(self):
+        row = [
+            None,  # elevation
+            None,  # state code
+            None   # county code
+        ]
+
+        expected = [
+            908,  # elevation
+            49,   # state code
+            35,   # county code
+            (425053.2238962272, 4514428.45529942)  # utm cords
+        ]
+
+        field_info = {
+            'demELEVm': (None, 0),
+            'StateCode': (None, 1),
+            'CountyCode': (None, 2),
+            'Lat_Y': (40.77742, None),
+            'Lon_X': (-111.88816, None)
+        }
+
+        schema_map = stationmodel.WqpStation.build_schema_map('Stations')
+        model = stationmodel.WqpStation([], Normalizer(), schema_map)
+
+        actual = model.calculate_fields(row, 'Station', field_info, updating=True)
+        self.assertEqual(actual, expected)
+
     def test_station_model_hydration(self):
         lon_x = -114.323546838
         lat_y = 42.5661737512
-        elev = 0
-        depth = 1
-        holedepth = 2
-        elevac = 3
-        horacc = 4
+        elev = float(0)
+        depth = float(1)
+        holedepth = float(2)
+        elevac = float(3)
+        horacc = float(4)
         statecode = 16
         countycode = 83
         constdate = datetime.datetime(2014, 06, 19, 0, 0)
@@ -166,11 +344,11 @@ class TestWqpModels(unittest.TestCase):
                     'ContributingDrainageAreaMeasure/MeasureUnitCode': '',
                     'WellHoleDepthMeasure/MeasureValue': str(holedepth),
                     'WellDepthMeasure/MeasureValue': str(depth),
-                    'LongitudeMeasure': '-114.323546838',
+                    'LongitudeMeasure': str(lon_x),
                     'AquiferName': 'Aquifer',
                     'HorizontalAccuracyMeasure/MeasureValue': str(horacc),
                     'HUCEightDigitCode': 'HUC8',
-                    'LatitudeMeasure': '42.5661737512',
+                    'LatitudeMeasure': str(lat_y),
                     'ContributingDrainageAreaMeasure/MeasureValue': '',
                     'OrganizationFormalName': 'OrgName',
                     'WellDepthMeasure/MeasureUnitCode': 'DepthUnit',
@@ -840,9 +1018,9 @@ class TestDwrModels(unittest.TestCase):
                     'stationname',  # stationname
                     'stationtype',  # stationtype
                     None,  # station comment
-                    'huc8',  # huc8,
+                    'huc8',  # huc8
                     lon,  # lon x
-                    lat,  # lay y,
+                    lat,  # lay y
                     None,  # horacc
                     None,  # horaccunit
                     None,  # horcallmeth

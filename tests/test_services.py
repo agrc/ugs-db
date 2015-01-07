@@ -7,6 +7,8 @@ test_services
 
 Tests for `services` module.
 """
+import arcpy
+import datetime
 import dbseeder.services as service
 import unittest
 import nose
@@ -113,7 +115,14 @@ class TestWebQuery(unittest.TestCase):
     def test_can_get_elevation(self):
         raise nose.SkipTest()
 
-        pass
+        x = 450000
+        y = 4500000
+
+        actual = self.patient.elevation(x, y)
+
+        expected = 2179
+
+        self.assertEqual(actual, expected)
 
     def test_can_get_state_from_xy(self):
         raise nose.SkipTest()
@@ -121,7 +130,7 @@ class TestWebQuery(unittest.TestCase):
         x = 425000
         y = 4510000
 
-        actual = self.patient.state(x, y)
+        actual = self.patient.state_code(x, y)
 
         expected = 49
 
@@ -138,3 +147,24 @@ class TestWebQuery(unittest.TestCase):
         expected = 35
 
         self.assertEqual(actual, expected)
+
+    def test_formats_wqp_url(self):
+        date = datetime.datetime(2014, 1, 2, 0, 0)
+        today = datetime.datetime(2014, 1, 3, 0, 0)
+        actual = self.patient._format_wqp_result_url(date, today)
+
+        expected = ('http://www.waterqualitydata.us/Result/search?'
+                    'sampleMedia=Water&startDateLo=01-02-2014&startDateHi=01-03-2014&'
+                    'bBox=-115%2C35.5%2C-108%2C42.5&mimeType=csv')
+
+        self.assertEqual(actual, expected)
+
+
+class TestGdbQuery(unittest.TestCase):
+    def test_county(self):
+        arcpy.MakeFeatureLayer_management('../src/dbseeder/data/Counties/Census.gdb/Counties',
+                                          'counties_lyr')
+        patient = service.GdbQuery()
+        actual = patient.county_code(425053.2238962272, 4514428.45529942)
+
+        self.assertEqual(actual, 35)

@@ -83,8 +83,51 @@ class Seeder(object):
                                                  key,
                                                  key)
 
-    def update(self):
-        pass
+    def update(self, types):
+        gdb_exists = os.path.exists(self.location)
+
+        arcpy.MakeFeatureLayer_management('./data/Counties/Census.gdb/Counties',
+                                          'counties_lyr',
+                                          field_info=['COUNTYFP'])
+
+        seed = {
+            'WQP': True,
+            'SDWIS': True,
+            'DOGM': False,
+            'DWR': False,
+            'UGS': False
+        }
+
+        if not gdb_exists:
+            raise Exception('Update location does not exist. Exiting.')
+
+        # if seed['WQP']:
+        #     print 'Updating WQP'
+        #     wqp = Wqp(self.location, arcpy.da.InsertCursor)
+        #     wqp.update(types)
+
+        if seed['SDWIS']:
+            print 'Updating SDWIS'
+            sdwis = Sdwis(self.location, arcpy.da.InsertCursor)
+            sdwis.count = self.count
+            sdwis.update(types)
+
+        # if seed['DOGM']:
+        #     print 'Updating DOGM'
+        #     dogm = Dogm(
+        #         self.location, arcpy.da.SearchCursor, arcpy.da.InsertCursor)
+        #     dogm.update(folder, types)
+
+        # if seed['DWR']:
+        #     print 'Updating DWR'
+        #     dwr = Udwr(
+        #         self.location, arcpy.da.SearchCursor, arcpy.da.InsertCursor)
+        #     dwr.update(folder, types)
+
+        # if seed['UGS']:
+        #     print 'Updating UGS'
+        #     ugs = Ugs(self.location, arcpy.da.SearchCursor, arcpy.da.InsertCursor)
+        #     ugs.update(folder, types)
 
     def field_lengths(self, types):
         if types[0].lower() == 'wqp':
@@ -179,11 +222,11 @@ if __name__ == '__main__':
     seed_data = 'C:\\Projects\\GitHub\\ugs-db\\tests\\data'
     types = ['Results', 'Stations']
     seed_program = {
-        'WQP': True,
+        'WQP': False,
         'SDWIS': True,
-        'DOGM': True,
-        'DWR': True,
-        'UGS': True
+        'DOGM': False,
+        'DWR': False,
+        'UGS': False
     }
 
     seeder = Seeder(location, gdb)
