@@ -13,7 +13,7 @@
     * :memo: `:memo:` when writing docs
     * :bug: `:bug:` when fixing a bug
     * :fire: `:fire:` when removing code or files
-    * :green_heart: `:green_heart:` when fixing the CI build
+    * :green_heart: `:green_heart:` when fixing the CI build or tests
     * :white_check_mark: `:white_check_mark:` when adding tests
     * :lock: `:lock:` when dealing with security
     * :arrow_up: `:arrow_up:` when upgrading dependencies

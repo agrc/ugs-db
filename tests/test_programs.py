@@ -747,11 +747,6 @@ class TestDogmProgram(unittest.TestCase):
 
         self.patient.seed(folder, ['Results'])
 
-        # expected_station_date = datetime.date(12, 13, 2013)
-        # actual_station_date = self._get_most_current_date('DOGM', 'Stations')
-
-        # self.assertEqual(actual_station_date, expected_station_date)
-
         expected_result_date = datetime.datetime(2013, 12, 14, 0, 0)
         actual_result_date = self.patient._get_most_current_date('DOGM', 'Results')
 

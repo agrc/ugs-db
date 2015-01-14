@@ -241,7 +241,7 @@ class TestWqpModels(unittest.TestCase):
         schema_map = stationmodel.WqpStation.build_schema_map('Stations')
         model = stationmodel.WqpStation([], Normalizer(), schema_map)
 
-        actual = model.calculate_fields(row, 'Station', field_info, updating=True)
+        actual = model.calculate_fields(row, 'Stations', field_info, updating=True)
         self.assertEqual(actual, row)
 
     def test_station_calculate_fields_with_partial_location(self):
@@ -257,7 +257,7 @@ class TestWqpModels(unittest.TestCase):
         schema_map = stationmodel.WqpStation.build_schema_map('Stations')
         model = stationmodel.WqpStation([], Normalizer(), schema_map)
 
-        actual = model.calculate_fields(row, 'Station', field_info, updating=True)
+        actual = model.calculate_fields(row, 'Stations', field_info, updating=True)
         self.assertEqual(actual, row)
 
     def test_station_calculate_fields_with_point_outside_of_utah(self):
@@ -285,7 +285,7 @@ class TestWqpModels(unittest.TestCase):
         schema_map = stationmodel.WqpStation.build_schema_map('Stations')
         model = stationmodel.WqpStation([], Normalizer(), schema_map)
 
-        actual = model.calculate_fields(row, 'Station', field_info, updating=True)
+        actual = model.calculate_fields(row, 'Stations', field_info, updating=True)
         self.assertEqual(actual, expected)
 
     def test_station_calculate_fields_with_point_in_utah(self):
@@ -313,7 +313,7 @@ class TestWqpModels(unittest.TestCase):
         schema_map = stationmodel.WqpStation.build_schema_map('Stations')
         model = stationmodel.WqpStation([], Normalizer(), schema_map)
 
-        actual = model.calculate_fields(row, 'Station', field_info, updating=True)
+        actual = model.calculate_fields(row, 'Stations', field_info, updating=True)
         self.assertEqual(actual, expected)
 
     def test_station_model_hydration(self):
@@ -771,8 +771,7 @@ class TestDogmModels(unittest.TestCase):
                     None,
                     'DOGM',
                     None,
-                    (512329.9142,
-                     4397670.5318)]
+                    (512329.9142254167, 4397670.531848973)]
 
         self.assertListEqual(expected, model.row)
 
@@ -908,6 +907,94 @@ class TestDogmModels(unittest.TestCase):
 
         self.assertListEqual(expected, actual)
 
+    def test_station_calculate_fields_with_no_location(self):
+        row = ['original_data']
+        field_info = {
+            'demELEVm': (None, -1),
+            'StateCode': (None, -1),
+            'CountyCode': (None, -1),
+            'Lat_Y': (None, -1),
+            'Lon_X': (None, -1)
+        }
+
+        schema_map = stationmodel.OgmStation.build_schema_map('Stations')
+        model = stationmodel.OgmStation([], Normalizer(), schema_map)
+
+        actual = model.calculate_fields(row, 'Stations', field_info, updating=True)
+        self.assertEqual(actual, row)
+
+    def test_station_calculate_fields_with_partial_location(self):
+        row = ['original_data']
+        field_info = {
+            'demELEVm': (None, -1),
+            'StateCode': (None, -1),
+            'CountyCode': (None, -1),
+            'Lat_Y': (40, -1),
+            'Lon_X': (None, -1)
+        }
+
+        schema_map = stationmodel.OgmStation.build_schema_map('Stations')
+        model = stationmodel.OgmStation([], Normalizer(), schema_map)
+
+        actual = model.calculate_fields(row, 'Stations', field_info, updating=True)
+        self.assertEqual(actual, row)
+
+    def test_station_calculate_fields_with_point_outside_of_utah(self):
+        row = [
+            None,  # elevation
+            None,  # state code
+            None,  # county code
+        ]
+
+        expected = [
+            None,  # elevation
+            16,    # state code
+            83,    # county code
+            (227191.93568276422, 4717996.363612308)  # utm cords
+        ]
+
+        field_info = {
+            'demELEVm': (None, 0),
+            'StateCode': (None, 1),
+            'CountyCode': (None, 2),
+            'Lat_Y': (42.5661737512, None),
+            'Lon_X': (-114.323546838, None)
+        }
+
+        schema_map = stationmodel.OgmStation.build_schema_map('Stations')
+        model = stationmodel.OgmStation([], Normalizer(), schema_map)
+
+        actual = model.calculate_fields(row, 'Stations', field_info, updating=True)
+        self.assertEqual(actual, expected)
+
+    def test_station_calculate_fields_with_point_in_utah(self):
+        row = [
+            None,  # elevation
+            None,  # state code
+            None   # county code
+        ]
+
+        expected = [
+            908,  # elevation
+            49,   # state code
+            35,   # county code
+            (425053.2238962272, 4514428.45529942)  # utm cords
+        ]
+
+        field_info = {
+            'demELEVm': (None, 0),
+            'StateCode': (None, 1),
+            'CountyCode': (None, 2),
+            'Lat_Y': (40.77742, None),
+            'Lon_X': (-111.88816, None)
+        }
+
+        schema_map = stationmodel.OgmStation.build_schema_map('Stations')
+        model = stationmodel.OgmStation([], Normalizer(), schema_map)
+
+        actual = model.calculate_fields(row, 'Stations', field_info, updating=True)
+        self.assertEqual(actual, expected)
+
 
 class TestDwrModels(unittest.TestCase):
 
@@ -984,14 +1071,14 @@ class TestDwrModels(unittest.TestCase):
 
     def test_station_model_hydration(self):
         county_code = 0
-        x = 1
-        y = 2
-        hole_depth = 3
-        depth = 4
-        lat = 5
-        lon = 6
+        x = 312382.9355031499
+        y = 4166423.73346324
+        hole_depth = float(3)
+        depth = float(4)
+        lat = 37.6258
+        lon = -113.12605
         state_code = 7
-        win = 8
+        win = long(8)
         gdb_data = [win,
                     'orgid',
                     'orgname',

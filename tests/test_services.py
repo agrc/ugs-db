@@ -7,7 +7,6 @@ test_services
 
 Tests for `services` module.
 """
-import arcpy
 import datetime
 import dbseeder.services as service
 import unittest
@@ -158,13 +157,3 @@ class TestWebQuery(unittest.TestCase):
                     'bBox=-115%2C35.5%2C-108%2C42.5&mimeType=csv')
 
         self.assertEqual(actual, expected)
-
-
-class TestGdbQuery(unittest.TestCase):
-    def test_county(self):
-        arcpy.MakeFeatureLayer_management('../src/dbseeder/data/Counties/Census.gdb/Counties',
-                                          'counties_lyr')
-        patient = service.GdbQuery()
-        actual = patient.county_code(425053.2238962272, 4514428.45529942)
-
-        self.assertEqual(actual, 35)

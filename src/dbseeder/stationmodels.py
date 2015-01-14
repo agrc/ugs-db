@@ -22,7 +22,7 @@ class WqpStation(WqpTable):
         schema = Schema().station
         self.fields = range(0, len(schema))
 
-        self.row = self._etl_row(row, schema_map, 'Station')
+        self.row = self._etl_row(row, schema_map, 'Stations')
 
 
 class SdwisStation(Table):
@@ -49,7 +49,7 @@ class SdwisStation(Table):
     def __init__(self, row, normalizer, schema_map):
         super(SdwisStation, self).__init__(normalizer)
 
-        self.row = self._etl_row(row, schema_map, 'Station')
+        self.row = self._etl_row(row, schema_map, 'Stations')
 
 
 class OgmStation(Table):
@@ -74,7 +74,7 @@ class OgmStation(Table):
     def __init__(self, row, normalizer, schema_map):
         super(OgmStation, self).__init__(normalizer)
 
-        self.row = self._etl_row(row, schema_map, 'Station')
+        self.row = self._etl_row(row, schema_map, 'Stations')
 
 
 class DwrStation(Table):
@@ -100,7 +100,7 @@ class DwrStation(Table):
     def __init__(self, row, normalizer, schema_map):
         super(DwrStation, self).__init__(normalizer)
 
-        self.row = self._etl_row(row, schema_map, 'Station')
+        self.row = self._etl_row(row, schema_map, 'Stations')
 
 
 class UgsStation(Table):
@@ -122,4 +122,4 @@ class UgsStation(Table):
     def __init__(self, row, normalizer, schema_map):
         super(UgsStation, self).__init__(normalizer)
 
-        self.row = self._etl_row(row, schema_map, 'Station')
+        self.row = self._etl_row(row, schema_map, 'Stations')

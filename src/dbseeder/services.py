@@ -7,7 +7,6 @@ services
 
 Classes that handle specific repeatable tasks.
 """
-import arcpy
 import datetime
 import requests
 import sys
@@ -15,25 +14,17 @@ from dateutil.parser import parse
 from pyproj import Proj, transform
 
 
-class GdbQuery(object):
-    def county_code(self, utm_x, utm_y):
-
-        point = arcpy.Point(utm_x, utm_y)
-        arcpy.MakeFeatureLayer_management(arcpy.PointGeometry(point), 'selection')
-        arcpy.SelectLayerByAttribute_management('counties_lyr', 'CLEAR_SELECTION')
-        arcpy.SelectLayerByLocation_management('counties_lyr', 'selection')
-
-        with arcpy.da.SearchCursor('counties_lyr', ['COUNTYFP']) as cursor:
-            for row in cursor:
-                return row[0]
-
-
 class WebQuery(object):
 
     """the http query wrapper over requests for unit testing"""
     web_api_url = ('http://api.mapserv.utah.gov/api/v1/search/{}/{}/'
                    '?geometry=point:[{},{}]&attributeStyle=upper&apikey={}')
-    dev_api_key = 'AGRC-F91218F2743907'
+    dev_api_key = 'AGRC-2D6BDFF7487510'
+
+    tiger_county_url = ('http://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/'
+                        'State_County/MapServer/94/query?geometry={},{}&geometryType=esriGeometryPoint&'
+                        'inSR=26912&spatialRel=esriSpatialRelIntersects&outFields=county&'
+                        'returnGeometry=false&f=json')
 
     wqp_results_url = ('http://www.waterqualitydata.us/Result/search?'
                        'sampleMedia=Water&startDateLo={}&startDateHi={}&'
@@ -71,10 +62,16 @@ class WebQuery(object):
         return self._query_web_api(layer, attribute, utm_x, utm_y)
 
     def county_code(self, utm_x, utm_y):
-        layer = 'SGID10.BOUNDARIES.COUNTIES'
-        attribute = 'FIPS'
+        url = self.tiger_county_url.format(utm_x, utm_y)
 
-        return self._query_web_api(layer, attribute, utm_x, utm_y)
+        r = requests.get(url)
+
+        response = r.json()
+
+        if not response['features'] and response['features'].length < 1:
+            raise LookupError('problem with the TIGER web service')
+
+        return int(response['features'][0]['attributes']['COUNTY'])
 
     def _query_web_api(self, layer, attribute, x, y):
         url = self.web_api_url.format(layer,

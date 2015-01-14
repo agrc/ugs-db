@@ -42,9 +42,16 @@ class Table(Normalizable):
 
         return OrderedDict(schema_index_items)
 
-    def _etl_row(self, row, schema_map, model_type):
+    def _etl_row(self, row, schema_map, model_type, updating=False):
         _row = []
         self.balanceable = True
+        calculated_fields = {
+            'demELEVm': (None, -1),
+            'StateCode': (None, -1),
+            'CountyCode': (None, -1),
+            'Lat_Y': (None, -1),
+            'Lon_X': (None, -1)
+        }
 
         for i, field_name in enumerate(schema_map):
 
@@ -69,6 +76,11 @@ class Table(Normalizable):
             field = schema_map[field_name]
             value = services.Caster.cast(value, field.field_type)
 
+            # store these values to do later processing
+            if field.field_name in calculated_fields.keys():
+                #: store the value and the index to we can swap them out later
+                calculated_fields[field.field_name] = (value, i)
+
             self.update_normalize(field_name, value, i)
 
             if self.balanceable:
@@ -81,39 +93,51 @@ class Table(Normalizable):
             _row.append(value)
 
         _row = self.normalize(_row)
-
-        if model_type == 'Stations':
-            has_utm = False
-            try:
-                utmx_index = self.fields.index('UTM_X')
-                utmy_index = self.fields.index('UTM_Y')
-                has_utm = True
-            except ValueError:
-                pass
-
-            try:
-                utmx_index = self.fields.index('X_UTM')
-                utmy_index = self.fields.index('Y_UTM')
-                has_utm = True
-            except ValueError:
-                pass
-
-            if has_utm:
-                x = row[utmx_index]
-                y = row[utmy_index]
-            else:
-                try:
-                    x_index = self.fields.index('Lon_X')
-                    y_index = self.fields.index('Lat_Y')
-
-                    x, y = services.Project().to_utm(
-                        row[x_index], row[y_index])
-                except Exception as detail:
-                    print 'Handling projection error:', detail
-
-            _row.append((x, y))
+        _row = self.calculate_fields(_row, model_type, calculated_fields, updating)
 
         return _row
+
+    def calculate_fields(self, row, model_type, field_info, updating=False):
+        x = y = None
+        query_service = WebQuery()
+
+        if model_type == 'Stations':
+            try:
+                x, y = services.Project().to_utm(field_info['Lon_X'][0], field_info['Lat_Y'][0])
+
+                if x and y:
+                    row.append((x, y))
+            except Exception as detail:
+                print 'Handling projection error:', detail
+                print field_info
+
+                row.append((None, None))
+
+        if not(x and y) or not updating:
+            return row
+
+        try:
+            elevation = query_service.elevation(x, y)
+            row[field_info['demELEVm'][1]] = elevation
+        except LookupError as detail:
+            #: point is likely not in Utah
+            print 'Handling api query error:', detail
+
+        try:
+            state_code = query_service.state_code(x, y)
+            row[field_info['StateCode'][1]] = state_code
+        except LookupError as detail:
+            #: point is likely not in Utah
+            print 'Handling api query error:', detail
+
+        try:
+            county_code = query_service.county_code(x, y)
+            row[field_info['CountyCode'][1]] = county_code
+        except LookupError as detail:
+            #: point is likely not in Utah
+            print 'Handling api query error:', detail
+
+        return row
 
 
 class WqpTable(Normalizable):
@@ -181,6 +205,8 @@ class WqpTable(Normalizable):
             #: not all of the programs have the same schema so append None and move on
             if source_field_name not in row:
                 _row.append(None)
+
+                # necessesary for param group calculation
                 self.update_normalize(field.field_name, None, key)
 
                 continue
@@ -218,7 +244,7 @@ class WqpTable(Normalizable):
         x = y = None
         query_service = WebQuery()
 
-        if model_type == 'Station':
+        if model_type == 'Stations':
             try:
                 x, y = services.Project().to_utm(field_info['Lon_X'][0], field_info['Lat_Y'][0])
 
@@ -226,6 +252,9 @@ class WqpTable(Normalizable):
                     row.append((x, y))
             except Exception as detail:
                 print 'Handling projection error:', detail
+                print field_info
+
+                row.append((None, None))
 
         if not(x and y) or not updating:
             return row
@@ -233,22 +262,22 @@ class WqpTable(Normalizable):
         try:
             elevation = query_service.elevation(x, y)
             row[field_info['demELEVm'][1]] = elevation
-        except LookupError:
+        except LookupError as detail:
             #: point is likely not in Utah
-            pass
+            print 'Handling api query error:', detail
 
         try:
             state_code = query_service.state_code(x, y)
             row[field_info['StateCode'][1]] = state_code
-        except LookupError:
+        except LookupError as detail:
             #: point is likely not in Utah
-            pass
+            print 'Handling api query error:', detail
 
         try:
             county_code = query_service.county_code(x, y)
             row[field_info['CountyCode'][1]] = county_code
-        except LookupError:
+        except LookupError as detail:
             #: point is likely not in Utah
-            pass
+            print 'Handling api query error:', detail
 
         return row
