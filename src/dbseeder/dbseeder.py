@@ -88,7 +88,7 @@ class Seeder(object):
 
     def field_lengths(self, types):
         if types[0].lower() == 'wqp':
-            seed_data = 'C:\\Projects\\GitHub\\ugs-chemistry\\scripts\\dbseeder\\data'
+            seed_data = 'C:\\Projects\\GitHub\\ugs-db\\tests\\data'
             program = Wqp(self.location, arcpy.da.InsertCursor)
 
             return program.field_lengths(seed_data, types[1])
