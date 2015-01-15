@@ -16,13 +16,13 @@ class WqpStation(WqpTable):
 
     """ORM mapping from chemistry schema to WqpStation feature class"""
 
-    def __init__(self, row, normalizer, schema_map):
-        super(WqpStation, self).__init__(normalizer)
+    def __init__(self, row, normalizer, schema_map, calculated_fields=None):
+        super(WqpStation, self).__init__(normalizer, calculated_fields)
 
         schema = Schema().station
         self.fields = range(0, len(schema))
 
-        self.row = self._etl_row(row, schema_map, 'Stations')
+        self.row = self._etl_row(row, schema_map, 'Stations', calculated_fields)
 
 
 class SdwisStation(Table):
@@ -46,8 +46,8 @@ class SdwisStation(Table):
               'Depth',
               'DepthUnit']
 
-    def __init__(self, row, normalizer, schema_map):
-        super(SdwisStation, self).__init__(normalizer)
+    def __init__(self, row, normalizer, schema_map, calculated_fields=None):
+        super(SdwisStation, self).__init__(normalizer, calculated_fields)
 
         self.row = self._etl_row(row, schema_map, 'Stations')
 
@@ -71,8 +71,8 @@ class OgmStation(Table):
               'UTM_X',
               'UTM_Y']
 
-    def __init__(self, row, normalizer, schema_map):
-        super(OgmStation, self).__init__(normalizer)
+    def __init__(self, row, normalizer, schema_map, calculated_fields=None):
+        super(OgmStation, self).__init__(normalizer, calculated_fields)
 
         self.row = self._etl_row(row, schema_map, 'Stations')
 
@@ -97,8 +97,8 @@ class DwrStation(Table):
               'X_UTM',
               'Y_UTM']
 
-    def __init__(self, row, normalizer, schema_map):
-        super(DwrStation, self).__init__(normalizer)
+    def __init__(self, row, normalizer, schema_map, calculated_fields=None):
+        super(DwrStation, self).__init__(normalizer, calculated_fields)
 
         self.row = self._etl_row(row, schema_map, 'Stations')
 
@@ -119,7 +119,7 @@ class UgsStation(Table):
               'StationComment',
               'StationId']
 
-    def __init__(self, row, normalizer, schema_map):
-        super(UgsStation, self).__init__(normalizer)
+    def __init__(self, row, normalizer, schema_map, calculated_fields=None):
+        super(UgsStation, self).__init__(normalizer, calculated_fields)
 
         self.row = self._etl_row(row, schema_map, 'Stations')

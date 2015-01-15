@@ -19,26 +19,34 @@ class WebQuery(object):
     """the http query wrapper over requests for unit testing"""
     web_api_url = ('http://api.mapserv.utah.gov/api/v1/search/{}/{}/'
                    '?geometry=point:[{},{}]&attributeStyle=upper&apikey={}')
-    dev_api_key = 'AGRC-2D6BDFF7487510'
+    dev_api_key = 'AGRC-D202DF40275245'
 
     tiger_county_url = ('http://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/'
                         'State_County/MapServer/94/query?geometry={},{}&geometryType=esriGeometryPoint&'
                         'inSR=26912&spatialRel=esriSpatialRelIntersects&outFields=county&'
                         'returnGeometry=false&f=json')
 
-    wqp_results_url = ('http://www.waterqualitydata.us/Result/search?'
-                       'sampleMedia=Water&startDateLo={}&startDateHi={}&'
-                       'bBox=-115%2C35.5%2C-108%2C42.5&mimeType=csv')
+    wqp_url = ('http://www.waterqualitydata.us/{}/search?'
+               'sampleMedia=Water&startDateLo={}&startDateHi={}&'
+               'bBox=-115%2C35.5%2C-108%2C42.5&mimeType=csv')
 
-    def results(self, date, url=None):
+    def results(self, date, url=None, today=None):
         if not url:
-            url = self._format_wqp_result_url(date)
+            url = self._format_wqp_url('Result', date, today)
 
         r = requests.get(url)
 
         return r.text.splitlines()
 
-    def _format_wqp_result_url(self, date, today=None):
+    def stations(self, date, url=None, today=None):
+        if not url:
+            url = self._format_wqp_url('Station', date, today)
+
+        r = requests.get(url)
+
+        return r.text.splitlines()
+
+    def _format_wqp_url(self, query_type, date, today=None):
         date_format = '%m-%d-%Y'
         most_recent_sample = date.strftime(date_format)
 
@@ -47,7 +55,7 @@ class WebQuery(object):
         else:
             today = datetime.datetime.now().strftime(date_format)
 
-        return self.wqp_results_url.format(most_recent_sample, today)
+        return self.wqp_url.format(query_type, most_recent_sample, today)
 
     def elevation(self, utm_x, utm_y):
         layer = 'SGID10.RASTER.DEM_10METER'
@@ -86,6 +94,9 @@ class WebQuery(object):
 
         if response['status'] != 200:
             raise LookupError(response['message'])
+
+        if len(response['result']) < 1:
+            return None
 
         return int(response['result'][0]['attributes'][attribute])
 

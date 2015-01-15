@@ -20,7 +20,7 @@ This package will take UGS, SDWIS, DOGM, WQP, and UDWR data and import it into a
 
 1. Fill out `secrets.cfg` and use `secrets.sample.cfg` as an example
 1. Place your data in `dbseeder\data`. This assumes you are cd'd into `dbseeder/src`  
-    1. You can override the default with the `--data` flag 
+    1. You can override the default with the `--data` flag. For example `python -m dbseeder --seed --data c:\mydata` 
     
 `python -m dbseeder --seed` will create the **gdb**, the **stations** point feature class and the **results** table.
 

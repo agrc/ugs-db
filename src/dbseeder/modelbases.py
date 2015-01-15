@@ -11,21 +11,23 @@ operations for ETL'ing the programs data
 import services
 from collections import OrderedDict
 from models import Field, Schema
-from modelextensions import Normalizable
-from services import WebQuery
+from modelextensions import Normalizable, FieldCalcable
 
 
-class Table(Normalizable):
+class Table(Normalizable, FieldCalcable):
 
     """
     The base class for all of the program models whose
     schema does not need to be translated.
     """
 
-    def __init__(self, normalizer):
+    def __init__(self, normalizer, calculated_fields=None):
         super(Table, self).__init__(normalizer)
 
         self.balanceable = False
+
+        if calculated_fields:
+            self.calculated_fields = calculated_fields
 
     @staticmethod
     def build_schema_map(schema):
@@ -42,19 +44,13 @@ class Table(Normalizable):
 
         return OrderedDict(schema_index_items)
 
-    def _etl_row(self, row, schema_map, model_type, updating=False):
+    def _etl_row(self, row, schema_map, model_type, calculated_fields=None):
         _row = []
         self.balanceable = True
-        calculated_fields = {
-            'demELEVm': (None, -1),
-            'StateCode': (None, -1),
-            'CountyCode': (None, -1),
-            'Lat_Y': (None, -1),
-            'Lon_X': (None, -1)
-        }
 
         for i, field_name in enumerate(schema_map):
 
+            #: set the datasource for the program and move on
             if field_name == 'DataSource':
                 try:
                     _row.append(self.datasource)
@@ -63,8 +59,16 @@ class Table(Normalizable):
 
                 continue
 
+            #: not all of the programs have the same schema so append None and move on
             if field_name not in self.fields:
                 _row.append(None)
+
+                # dem elevation v not in row but needs key set
+                if field_name in self.calculated_fields.keys():
+                    #: store the value and the index to we can swap them out later
+                    if not calculated_fields or not calculated_fields[field_name][0]:
+                        #: if the value already is set for testing, ignore it
+                        self.calculated_fields[field_name] = (None, i)
 
                 continue
 
@@ -77,9 +81,11 @@ class Table(Normalizable):
             value = services.Caster.cast(value, field.field_type)
 
             # store these values to do later processing
-            if field.field_name in calculated_fields.keys():
+            if field.field_name in self.calculated_fields.keys():
                 #: store the value and the index to we can swap them out later
-                calculated_fields[field.field_name] = (value, i)
+                if not calculated_fields or not calculated_fields[field.field_name][0]:
+                    #: if the value already is set for testing, ignore it
+                    self.calculated_fields[field.field_name] = (value, i)
 
             self.update_normalize(field_name, value, i)
 
@@ -93,54 +99,11 @@ class Table(Normalizable):
             _row.append(value)
 
         _row = self.normalize(_row)
-        _row = self.calculate_fields(_row, model_type, calculated_fields, updating)
 
         return _row
 
-    def calculate_fields(self, row, model_type, field_info, updating=False):
-        x = y = None
-        query_service = WebQuery()
 
-        if model_type == 'Stations':
-            try:
-                x, y = services.Project().to_utm(field_info['Lon_X'][0], field_info['Lat_Y'][0])
-
-                if x and y:
-                    row.append((x, y))
-            except Exception as detail:
-                print 'Handling projection error:', detail
-                print field_info
-
-                row.append((None, None))
-
-        if not(x and y) or not updating:
-            return row
-
-        try:
-            elevation = query_service.elevation(x, y)
-            row[field_info['demELEVm'][1]] = elevation
-        except LookupError as detail:
-            #: point is likely not in Utah
-            print 'Handling api query error:', detail
-
-        try:
-            state_code = query_service.state_code(x, y)
-            row[field_info['StateCode'][1]] = state_code
-        except LookupError as detail:
-            #: point is likely not in Utah
-            print 'Handling api query error:', detail
-
-        try:
-            county_code = query_service.county_code(x, y)
-            row[field_info['CountyCode'][1]] = county_code
-        except LookupError as detail:
-            #: point is likely not in Utah
-            print 'Handling api query error:', detail
-
-        return row
-
-
-class WqpTable(Normalizable):
+class WqpTable(Normalizable, FieldCalcable):
 
     """
     The base class for all of the wqp schema to handle the
@@ -149,7 +112,7 @@ class WqpTable(Normalizable):
 
     datasource = 'WQP'
 
-    def __init__(self, normalizer):
+    def __init__(self, normalizer, calculated_fields=None):
         """
             this base class takes a csv row
             it then pulls all of the values out via the schema map
@@ -159,7 +122,11 @@ class WqpTable(Normalizable):
         """
 
         super(WqpTable, self).__init__(normalizer)
+
         self.balanceable = None
+
+        if calculated_fields:
+            self.calculated_fields = calculated_fields
 
     @staticmethod
     def build_schema_map(schema):
@@ -176,16 +143,9 @@ class WqpTable(Normalizable):
 
         return OrderedDict(schema_index_items)
 
-    def _etl_row(self, row, schema_map, model_type, updating=False):
+    def _etl_row(self, row, schema_map, model_type, calculated_fields=None):
         _row = []
         self.balanceable = True
-        calculated_fields = {
-            'demELEVm': (None, -1),
-            'StateCode': (None, -1),
-            'CountyCode': (None, -1),
-            'Lat_Y': (None, -1),
-            'Lon_X': (None, -1)
-        }
 
         for key in schema_map.keys():
             #: the key index maps to the column index in the feature class
@@ -209,6 +169,13 @@ class WqpTable(Normalizable):
                 # necessesary for param group calculation
                 self.update_normalize(field.field_name, None, key)
 
+                # dem elevation v not in row but needs key set
+                if field.field_name in self.calculated_fields.keys():
+                    #: store the value and the index to we can swap them out later
+                    if not calculated_fields or not calculated_fields[field.field_name]:
+                        #: if the value already is set for testing, ignore it
+                        self.calculated_fields[field.field_name] = (None, key)
+
                 continue
 
             #: this should be covered by the last check
@@ -220,9 +187,11 @@ class WqpTable(Normalizable):
             value = services.Caster.cast(value, destination_field_type)
 
             # store these values to do later processing
-            if field.field_name in calculated_fields.keys():
+            if field.field_name in self.calculated_fields.keys():
                 #: store the value and the index to we can swap them out later
-                calculated_fields[field.field_name] = (value, key)
+                if not calculated_fields or not calculated_fields[field.field_name]:
+                    #: if the value already is set for testing, ignore it
+                    self.calculated_fields[field.field_name] = (value, key)
 
             self.update_normalize(field.field_name, value, key)
 
@@ -236,48 +205,5 @@ class WqpTable(Normalizable):
             _row.append(value)
 
         _row = self.normalize(_row)
-        _row = self.calculate_fields(_row, model_type, calculated_fields, updating)
 
         return _row
-
-    def calculate_fields(self, row, model_type, field_info, updating=False):
-        x = y = None
-        query_service = WebQuery()
-
-        if model_type == 'Stations':
-            try:
-                x, y = services.Project().to_utm(field_info['Lon_X'][0], field_info['Lat_Y'][0])
-
-                if x and y:
-                    row.append((x, y))
-            except Exception as detail:
-                print 'Handling projection error:', detail
-                print field_info
-
-                row.append((None, None))
-
-        if not(x and y) or not updating:
-            return row
-
-        try:
-            elevation = query_service.elevation(x, y)
-            row[field_info['demELEVm'][1]] = elevation
-        except LookupError as detail:
-            #: point is likely not in Utah
-            print 'Handling api query error:', detail
-
-        try:
-            state_code = query_service.state_code(x, y)
-            row[field_info['StateCode'][1]] = state_code
-        except LookupError as detail:
-            #: point is likely not in Utah
-            print 'Handling api query error:', detail
-
-        try:
-            county_code = query_service.county_code(x, y)
-            row[field_info['CountyCode'][1]] = county_code
-        except LookupError as detail:
-            #: point is likely not in Utah
-            print 'Handling api query error:', detail
-
-        return row

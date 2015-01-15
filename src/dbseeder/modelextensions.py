@@ -10,6 +10,7 @@ functionality
 """
 import re
 from models import Concentration
+from services import WebQuery, Project
 
 
 class Normalizable(object):
@@ -200,3 +201,72 @@ class Balanceable(object):
             rows.append([sample_id, self.param_alias[key], balance[key]])
 
         return rows
+
+
+class FieldCalcable(object):
+    '''
+    #: allows for certain fields to be derived from other fields and services
+    '''
+    def __init__(self):
+        super(FieldCalcable, self).__init__()
+
+        #: structure for calculated fields
+        #: sourceFieldName: (value, index in row)
+        self.calculated_fields = {
+            'demELEVm': (None, -1),
+            'StateCode': (None, -1),
+            'CountyCode': (None, -1),
+            'Lat_Y': (None, -1),
+            'Lon_X': (None, -1)
+        }
+
+    def calculate_fields(self, row, model_type, updating=False):
+        x = y = None
+        query_service = WebQuery()
+
+        if model_type == 'Stations':
+            try:
+                if x and y:
+                    row.append((x, y))
+                else:
+                    lat = self.calculated_fields['Lat_Y'][0]
+                    lon = self.calculated_fields['Lon_X'][0]
+
+                    if not(lat and lon):
+                        row.append((None, None))
+                    else:
+                        x, y = Project().to_utm(lon, lat)
+                        row.append((x, y))
+
+            except Exception as detail:
+                print 'Handling projection error:', detail
+                print self.calculated_fields
+
+                row.append((None, None))
+
+        if not(x and y) or not updating:
+            return row
+
+        try:
+            elevation = query_service.elevation(x, y)
+            row[self.calculated_fields['demELEVm'][1]] = elevation
+        except LookupError as detail:
+            #: point is likely not in Utah
+            print 'elevation inputs: {},{}'.format(x, y)
+            print 'Handling elevation api query error:', detail
+
+        try:
+            state_code = query_service.state_code(x, y)
+            row[self.calculated_fields['StateCode'][1]] = state_code
+        except LookupError as detail:
+            #: point is likely not in Utah
+            print 'Handling state api query error:', detail
+
+        try:
+            county_code = query_service.county_code(x, y)
+            row[self.calculated_fields['CountyCode'][1]] = county_code
+        except LookupError as detail:
+            #: point is likely not in Utah
+            print 'Handling county api query error:', detail
+
+        return row

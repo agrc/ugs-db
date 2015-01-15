@@ -150,7 +150,7 @@ class TestWebQuery(unittest.TestCase):
     def test_formats_wqp_url(self):
         date = datetime.datetime(2014, 1, 2, 0, 0)
         today = datetime.datetime(2014, 1, 3, 0, 0)
-        actual = self.patient._format_wqp_result_url(date, today)
+        actual = self.patient._format_wqp_url('Result', date, today)
 
         expected = ('http://www.waterqualitydata.us/Result/search?'
                     'sampleMedia=Water&startDateLo=01-02-2014&startDateHi=01-03-2014&'

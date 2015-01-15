@@ -91,8 +91,8 @@ class Program(object):
     def _get_fields(self, schema_map):
         return [schema_map[item].field_name for item in schema_map]
 
-    def _get_most_current_date(self, datasource, model_type):
-        location = os.path.join(self.location, model_type)
+    def _get_most_current_date(self, datasource):
+        location = os.path.join(self.location, 'Results')
         query = "DataSource = '{}'".format(datasource)
         # ms_sql = ('TOP 1', 'ORDER BY SampleDate DESC')
         sql = (None, 'ORDER BY SampleDate DESC')
@@ -139,7 +139,10 @@ class Wqp(Program, Balanceable):
 
     csv_location = 'WQP'
 
-    def _insert_rows(self, data, feature_class):
+    def _insert_rows(self, data, feature_class, updating=False):
+        progress = 0
+        display_block = 5000
+
         location = os.path.join(self.location, feature_class)
 
         print 'inserting into {} WQP type {}'.format(location, feature_class)
@@ -159,19 +162,26 @@ class Wqp(Program, Balanceable):
 
         with self.InsertCursor(location, fields) as cursor:
             for row in data:
+                progress += 1
+
+                if progress % display_block == 0:
+                    print progress
+
                 etl = Type(row, self.normalizer, schema_map)
                 insert_row = etl.row
 
-                station_id = etl.normalize_fields['stationid'][0]
+                if feature_class == 'Stations':
+                    station_id = etl.normalize_fields['stationid'][0]
 
-                if station_id:
-                    if station_id in station_ids.keys():
-                        #: station is already inserted skip it
-                        continue
+                    if station_id:
+                        if station_id in station_ids.keys():
+                            #: station is already inserted skip it
+                            continue
 
-                    station_ids[station_id] = True
+                        station_ids[station_id] = True
 
                 try:
+                    insert_row = etl.calculate_fields(insert_row, feature_class, updating)
                     cursor.insertRow(insert_row)
                 except Exception as e:
                     raise e
@@ -202,11 +212,16 @@ class Wqp(Program, Balanceable):
         for csv_file in glob.glob(folder):
             yield csv_file
 
-    def _query_results(self, date, url=None):
-        if url:
-            return WebQuery().results(None, url=url)
+    def _query_results(self, date, model_type, url=None, today=None):
+        query = WebQuery().stations
 
-        data = WebQuery().results(date)
+        if url:
+            return query(None, url=url)
+
+        if model_type == 'Results':
+            query = WebQuery().results
+
+        data = query(date, today=today)
 
         return data
 
@@ -270,16 +285,14 @@ class Wqp(Program, Balanceable):
                     self._insert_rows(csv.DictReader(f), model_type)
                     print 'processing {}: done'.format(csv_file)
 
-    def update(self, model_types):
+    def update(self, model_types, today=None):
         for model_type in model_types:
-            most_recent_date = self._get_most_current_date('WQP', model_type)
+            most_recent_date = self._get_most_current_date('WQP')
 
-            print most_recent_date
-
-            response = self._query_results(most_recent_date)
+            response = self._query_results(most_recent_date, model_type, today=today)
             csv = self._read_response(response)
 
-            self._insert_rows(csv, model_type)
+            self._insert_rows(csv, model_type, updating=True)
 
 
 class Sdwis(Program, Balanceable):
@@ -413,7 +426,7 @@ class Sdwis(Program, Balanceable):
 
         return results
 
-    def _insert_rows(self, data, feature_class):
+    def _insert_rows(self, data, feature_class, updating=False):
         location = os.path.join(self.location, feature_class)
         print 'inserting into {} SDWIS type {}'.format(location, feature_class)
 
@@ -432,6 +445,8 @@ class Sdwis(Program, Balanceable):
             for row in data:
                 etl = Type(row, self.normalizer, schema_map)
                 insert_row = etl.row
+
+                insert_row = etl.calculate_fields(insert_row, feature_class, updating)
 
                 cursor.insertRow(insert_row)
 
@@ -461,7 +476,7 @@ class Sdwis(Program, Balanceable):
     def update(self, model_types):
         for model_type in model_types:
             if model_type == 'Results':
-                current_date = self._get_most_current_date(self.datasource, 'Results')
+                current_date = self._get_most_current_date(self.datasource)
                 query_string = self._format_update_query_string(current_date, 'Results')
 
                 records = self.query(query_string)
@@ -507,7 +522,8 @@ class Dogm(GdbProgram, Balanceable):
             with self.InsertCursor(location, fields_to_insert) as cursor:
                 for record in self._read_gdb(table, Type.fields):
                     etl = Type(record, self.normalizer, schema_map)
-                    self._insert_row(etl.row, fields_to_insert, location, cursor)
+                    row = etl.calculate_fields(etl.row, model_type, updating=False)
+                    self._insert_row(row, fields_to_insert, location, cursor)
 
                     if etl.balanceable and etl.sample_id is not None:
                         self.track_concentration(etl)
@@ -551,7 +567,8 @@ class Udwr(GdbProgram, Balanceable):
             with self.InsertCursor(location, fields_to_insert) as cursor:
                 for record in self._read_gdb(table, Type.fields):
                     etl = Type(record, self.normalizer, schema_map)
-                    self._insert_row(etl.row, fields_to_insert, location, cursor)
+                    row = etl.calculate_fields(etl.row, model_type, updating=False)
+                    self._insert_row(row, fields_to_insert, location, cursor)
 
                     if etl.balanceable and etl.sample_id is not None:
                         self.track_concentration(etl)
@@ -595,7 +612,8 @@ class Ugs(GdbProgram, Balanceable):
             with self.InsertCursor(location, fields_to_insert) as cursor:
                 for record in self._read_gdb(table, Type.fields):
                     etl = Type(record, self.normalizer, schema_map)
-                    self._insert_row(etl.row, fields_to_insert, location, cursor)
+                    row = etl.calculate_fields(etl.row, model_type, updating=False)
+                    self._insert_row(row, fields_to_insert, location, cursor)
 
                     if etl.balanceable and etl.sample_id is not None:
                         self.track_concentration(etl)

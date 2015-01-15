@@ -13,7 +13,6 @@ import dbseeder.resultmodels as resultmodel
 import dbseeder.stationmodels as stationmodel
 import unittest
 from dbseeder.services import Normalizer
-from nose import SkipTest
 
 
 class TestWqpModels(unittest.TestCase):
@@ -139,17 +138,13 @@ class TestWqpModels(unittest.TestCase):
             csv_data, Normalizer(), schema_map).row
         self.assertListEqual(actual, expected)
 
-    def test_station_model_etl_on_update_with_point_outside_of_utah(self):
-        raise SkipTest()
-
-        lon_x = -114.323546838
-        lat_y = 42.5661737512
-        depth = 1
-        holedepth = 2
-        horacc = 4
-        statecode = 16  # idaho
-        countycode = 83
-        constdate = datetime.datetime(2014, 06, 19, 0, 0)
+    def test_station_model_etl_on_update_with_point_in_utah(self):
+        lon_x = -111.88816
+        lat_y = 40.77742
+        statecode = 49  # utah
+        countycode = 35  # salt lake
+        dem_elevation = 908
+        utm = (425053.2238962272, 4514428.45529942)  # utm cords
 
         csv_data = {'DrainageAreaMeasure/MeasureUnitCode': 'ha',
                     'MonitoringLocationTypeName': 'StationType',
@@ -165,11 +160,11 @@ class TestWqpModels(unittest.TestCase):
                     'AquiferTypeName': 'AquiferType',
                     'HorizontalAccuracyMeasure/MeasureUnitCode': 'HorAccUnit',
                     'ContributingDrainageAreaMeasure/MeasureUnitCode': '',
-                    'WellHoleDepthMeasure/MeasureValue': str(holedepth),
-                    'WellDepthMeasure/MeasureValue': str(depth),
+                    'WellHoleDepthMeasure/MeasureValue': '',
+                    'WellDepthMeasure/MeasureValue': '',
                     'LongitudeMeasure': str(lon_x),
                     'AquiferName': 'Aquifer',
-                    'HorizontalAccuracyMeasure/MeasureValue': str(horacc),
+                    'HorizontalAccuracyMeasure/MeasureValue': '',
                     'HUCEightDigitCode': 'HUC8',
                     'LatitudeMeasure': str(lat_y),
                     'ContributingDrainageAreaMeasure/MeasureValue': '',
@@ -183,7 +178,7 @@ class TestWqpModels(unittest.TestCase):
                     'CountryCode': 'US',
                     'VerticalMeasure/MeasureUnitCode': 'ElevUnit',
                     'CountyCode': '',
-                    'ConstructionDateText': '2014-06-19',
+                    'ConstructionDateText': '',
                     'WellHoleDepthMeasure/MeasureUnitCode': 'HoleDUnit',
                     'SourceMapScaleNumeric': ''}
 
@@ -197,7 +192,7 @@ class TestWqpModels(unittest.TestCase):
             'HUC8',  # huc8
             lon_x,  # lon x
             lat_y,  # lay y
-            horacc,  # horacc
+            None,  # horacc
             'HorAccUnit',  # horaccunit
             'HorCollMeth',  # horcallmeth
             'HorRef',  # hor ref
@@ -212,10 +207,95 @@ class TestWqpModels(unittest.TestCase):
             'Aquifer',  # aquifer
             'FmType',  # fm type
             'AquiferType',  # aquifer type
-            constdate,  # constdate
-            depth,  # depth
+            None,  # constdate
+            None,  # depth
             'DepthUnit',  # depth unit
-            holedepth,  # hole depth
+            None,  # hole depth
+            'HoleDUnit',  # hold d unit
+            dem_elevation,  # dem elev
+            'WQP',  # datasource
+            None,  # win
+            utm  # shape
+        ]
+
+        schema_map = stationmodel.WqpStation.build_schema_map('Stations')
+
+        model = stationmodel.WqpStation(csv_data, Normalizer(), schema_map)
+        row = model.calculate_fields(model.row, 'Stations', updating=True)
+
+        self.assertListEqual(expected, row)
+
+    def test_station_model_etl_on_update_with_point_outside_of_utah(self):
+        lon_x = -114.323546838
+        lat_y = 42.5661737512
+        statecode = 16  # idaho
+        countycode = 83
+
+        csv_data = {'DrainageAreaMeasure/MeasureUnitCode': 'ha',
+                    'MonitoringLocationTypeName': 'StationType',
+                    'HorizontalCoordinateReferenceSystemDatumName': 'HorRef',
+                    'DrainageAreaMeasure/MeasureValue': '2774',
+                    'StateCode': '',
+                    'MonitoringLocationIdentifier': 'StationId',
+                    'MonitoringLocationName': 'StationName',
+                    'VerticalMeasure/MeasureValue': '',
+                    'FormationTypeText': 'FmType',
+                    'VerticalAccuracyMeasure/MeasureUnitCode': 'ElevAccUnit',
+                    'VerticalCoordinateReferenceSystemDatumName': 'ElevRef',
+                    'AquiferTypeName': 'AquiferType',
+                    'HorizontalAccuracyMeasure/MeasureUnitCode': 'HorAccUnit',
+                    'ContributingDrainageAreaMeasure/MeasureUnitCode': '',
+                    'WellHoleDepthMeasure/MeasureValue': '',
+                    'WellDepthMeasure/MeasureValue': '',
+                    'LongitudeMeasure': str(lon_x),
+                    'AquiferName': 'Aquifer',
+                    'HorizontalAccuracyMeasure/MeasureValue': '',
+                    'HUCEightDigitCode': 'HUC8',
+                    'LatitudeMeasure': str(lat_y),
+                    'ContributingDrainageAreaMeasure/MeasureValue': '',
+                    'OrganizationFormalName': 'OrgName',
+                    'WellDepthMeasure/MeasureUnitCode': 'DepthUnit',
+                    'OrganizationIdentifier': 'OrgId',
+                    'HorizontalCollectionMethodName': 'HorCollMeth',
+                    'VerticalAccuracyMeasure/MeasureValue': '',
+                    'VerticalCollectionMethodName': 'ElevMeth',
+                    'MonitoringLocationDescriptionText': 'StationComment',
+                    'CountryCode': 'US',
+                    'VerticalMeasure/MeasureUnitCode': 'ElevUnit',
+                    'CountyCode': '',
+                    'ConstructionDateText': '',
+                    'WellHoleDepthMeasure/MeasureUnitCode': 'HoleDUnit',
+                    'SourceMapScaleNumeric': ''}
+
+        expected = [
+            'OrgId',  # orgid
+            'OrgName',  # orgname
+            'StationId',  # station id
+            'StationName',  # stationname
+            'StationType',  # stationtype
+            'StationComment',  # station comment
+            'HUC8',  # huc8
+            lon_x,  # lon x
+            lat_y,  # lay y
+            None,  # horacc
+            'HorAccUnit',  # horaccunit
+            'HorCollMeth',  # horcallmeth
+            'HorRef',  # hor ref
+            None,  # elev
+            'ElevUnit',  # elev unit
+            None,  # elev acc
+            'ElevAccUnit',  # elev acc unit
+            'ElevMeth',  # elev meth
+            'ElevRef',  # elev ref
+            statecode,  # state code
+            countycode,  # county code
+            'Aquifer',  # aquifer
+            'FmType',  # fm type
+            'AquiferType',  # aquifer type
+            None,  # constdate
+            None,  # depth
+            'DepthUnit',  # depth unit
+            None,  # hole depth
             'HoleDUnit',  # hold d unit
             None,  # dem elev
             'WQP',  # datasource
@@ -224,9 +304,10 @@ class TestWqpModels(unittest.TestCase):
         ]
 
         schema_map = stationmodel.WqpStation.build_schema_map('Stations')
-        model = stationmodel.WqpResult(csv_data, Normalizer(), schema_map, updating=True)
+        model = stationmodel.WqpStation(csv_data, Normalizer(), schema_map)
+        row = model.calculate_fields(model.row, 'Stations', updating=True)
 
-        self.assertListEqual(expected, model.row)
+        self.assertListEqual(expected, row)
 
     def test_station_calculate_fields_with_no_location(self):
         row = ['original_data']
@@ -239,9 +320,9 @@ class TestWqpModels(unittest.TestCase):
         }
 
         schema_map = stationmodel.WqpStation.build_schema_map('Stations')
-        model = stationmodel.WqpStation([], Normalizer(), schema_map)
+        model = stationmodel.WqpStation([], Normalizer(), schema_map, calculated_fields=field_info)
 
-        actual = model.calculate_fields(row, 'Stations', field_info, updating=True)
+        actual = model.calculate_fields(row, 'Stations', updating=True)
         self.assertEqual(actual, row)
 
     def test_station_calculate_fields_with_partial_location(self):
@@ -255,9 +336,9 @@ class TestWqpModels(unittest.TestCase):
         }
 
         schema_map = stationmodel.WqpStation.build_schema_map('Stations')
-        model = stationmodel.WqpStation([], Normalizer(), schema_map)
+        model = stationmodel.WqpStation([], Normalizer(), schema_map, calculated_fields=field_info)
 
-        actual = model.calculate_fields(row, 'Stations', field_info, updating=True)
+        actual = model.calculate_fields(row, 'Stations', updating=True)
         self.assertEqual(actual, row)
 
     def test_station_calculate_fields_with_point_outside_of_utah(self):
@@ -278,21 +359,21 @@ class TestWqpModels(unittest.TestCase):
             'demELEVm': (None, 0),
             'StateCode': (None, 1),
             'CountyCode': (None, 2),
-            'Lat_Y': (42.5661737512, None),
-            'Lon_X': (-114.323546838, None)
+            'Lat_Y':  (42.5661737512, 3),
+            'Lon_X': (-114.323546838, 4)
         }
 
         schema_map = stationmodel.WqpStation.build_schema_map('Stations')
-        model = stationmodel.WqpStation([], Normalizer(), schema_map)
+        model = stationmodel.WqpStation([], Normalizer(), schema_map, calculated_fields=field_info)
 
-        actual = model.calculate_fields(row, 'Stations', field_info, updating=True)
+        actual = model.calculate_fields(row, 'Stations', updating=True)
         self.assertEqual(actual, expected)
 
     def test_station_calculate_fields_with_point_in_utah(self):
         row = [
             None,  # elevation
             None,  # state code
-            None   # county code
+            None,  # county code
         ]
 
         expected = [
@@ -306,14 +387,15 @@ class TestWqpModels(unittest.TestCase):
             'demELEVm': (None, 0),
             'StateCode': (None, 1),
             'CountyCode': (None, 2),
-            'Lat_Y': (40.77742, None),
-            'Lon_X': (-111.88816, None)
+            'Lat_Y': (40.77742, 3),
+            'Lon_X': (-111.88816, 4)
         }
 
         schema_map = stationmodel.WqpStation.build_schema_map('Stations')
-        model = stationmodel.WqpStation([], Normalizer(), schema_map)
+        model = stationmodel.WqpStation([], Normalizer(), schema_map, calculated_fields=field_info)
 
-        actual = model.calculate_fields(row, 'Stations', field_info, updating=True)
+        actual = model.calculate_fields(row, 'Stations', updating=True)
+
         self.assertEqual(actual, expected)
 
     def test_station_model_hydration(self):
@@ -401,8 +483,8 @@ class TestWqpModels(unittest.TestCase):
         ]
 
         schema_map = stationmodel.WqpStation.build_schema_map('Stations')
-        actual = stationmodel.WqpStation(
-            csv_data, Normalizer(), schema_map).row
+        model = stationmodel.WqpStation(csv_data, Normalizer(), schema_map)
+        actual = model.calculate_fields(model.row, 'Stations')
 
         self.assertListEqual(actual, expected)
 
@@ -542,9 +624,9 @@ class TestSdwisModels(unittest.TestCase):
                   None]
 
         schema_map = stationmodel.SdwisStation.build_schema_map('Stations')
-        patient = stationmodel.SdwisStation(
-            db_row, Normalizer(), schema_map)
-        actual = patient.row
+        patient = stationmodel.SdwisStation(db_row, Normalizer(), schema_map)
+        actual = patient.calculate_fields(patient.row, 'Stations')
+
         expected = ['750',
                     'HANNA WATER & SEWER IMPROVEMENT DISTRICT',
                     '3382',
@@ -578,6 +660,7 @@ class TestSdwisModels(unittest.TestCase):
                     'SDWIS',
                     None,
                     (514725.5552380322, 4478837.450786671)]
+
         self.assertListEqual(expected, actual)
 
     def test_result_model_hydration(self):
@@ -736,8 +819,8 @@ class TestDogmModels(unittest.TestCase):
                     ]
 
         schema_map = stationmodel.OgmStation.build_schema_map('Stations')
-        model = stationmodel.OgmStation(
-            gdb_data, Normalizer(), schema_map)
+        model = stationmodel.OgmStation(gdb_data, Normalizer(), schema_map)
+        row = model.calculate_fields(model.row, 'Stations')
 
         expected = ['UDOGM',
                     'Utah Division Of Oil Gas And Mining',
@@ -773,7 +856,7 @@ class TestDogmModels(unittest.TestCase):
                     None,
                     (512329.9142254167, 4397670.531848973)]
 
-        self.assertListEqual(expected, model.row)
+        self.assertListEqual(expected, row)
 
     def test_ogm_result_model_hydration(self):
         analysisdate = datetime.datetime(2014, 11, 17, 0, 0)
@@ -918,82 +1001,335 @@ class TestDogmModels(unittest.TestCase):
         }
 
         schema_map = stationmodel.OgmStation.build_schema_map('Stations')
-        model = stationmodel.OgmStation([], Normalizer(), schema_map)
+        model = stationmodel.OgmStation([], Normalizer(), schema_map, calculated_fields=field_info)
 
-        actual = model.calculate_fields(row, 'Stations', field_info, updating=True)
+        actual = model.calculate_fields(row, 'Stations', updating=True)
         self.assertEqual(actual, row)
 
     def test_station_calculate_fields_with_partial_location(self):
-        row = ['original_data']
-        field_info = {
-            'demELEVm': (None, -1),
-            'StateCode': (None, -1),
-            'CountyCode': (None, -1),
-            'Lat_Y': (40, -1),
-            'Lon_X': (None, -1)
-        }
+        lon = None
+        lat = 40.323546838
+        elevation = None
+        state_code = None
+        county_code = None
+        utm = (None, None)
 
-        schema_map = stationmodel.OgmStation.build_schema_map('Stations')
-        model = stationmodel.OgmStation([], Normalizer(), schema_map)
-
-        actual = model.calculate_fields(row, 'Stations', field_info, updating=True)
-        self.assertEqual(actual, row)
-
-    def test_station_calculate_fields_with_point_outside_of_utah(self):
         row = [
-            None,  # elevation
-            None,  # state code
-            None,  # county code
+            None,  # orgid
+            None,  # orgname
+            None,  # station id
+            None,  # stationname
+            None,  # elev
+            None,  # elev unit
+            None,  # stationtype
+            None,  # station comment
+            lat,  # lay y
+            lon,  # lon x
+            None,  # utmx
+            None  # utmy
         ]
 
         expected = [
-            None,  # elevation
-            16,    # state code
-            83,    # county code
-            (227191.93568276422, 4717996.363612308)  # utm cords
+            None,  # orgid
+            None,  # orgname
+            None,  # station id
+            None,  # stationname
+            None,  # stationtype
+            None,  # station comment
+            None,  # huc8
+            None,  # lon x
+            lat,  # lat y
+            None,  # horacc
+            None,  # horaccunit
+            None,  # horcallmeth
+            None,  # hor ref
+            None,  # elev
+            None,  # elev unit
+            None,  # elev acc
+            None,  # elev acc unit
+            None,  # elev meth
+            None,  # elev ref
+            state_code,  # state code
+            county_code,  # county code
+            None,  # aquifer
+            None,  # fm type
+            None,  # aquifer type
+            None,  # constdate
+            None,  # depth
+            None,  # depth unit
+            None,  # hole depth
+            None,  # hold d unit
+            elevation,  # dem elev
+            'DOGM',  # datasource
+            None,  # win
+            utm   # shape
         ]
 
-        field_info = {
-            'demELEVm': (None, 0),
-            'StateCode': (None, 1),
-            'CountyCode': (None, 2),
-            'Lat_Y': (42.5661737512, None),
-            'Lon_X': (-114.323546838, None)
-        }
+        schema_map = stationmodel.OgmStation.build_schema_map('Stations')
+        model = stationmodel.OgmStation(row, Normalizer(), schema_map)
+
+        actual = model.calculate_fields(model.row, 'Stations', updating=True)
+
+        self.assertEqual(actual, expected)
+
+    def test_station_calculate_fields_with_point_outside_of_utah(self):
+        lon = -114.323546838
+        lat = 42.5661737512
+        elevation = None
+        state_code = 16
+        county_code = 83
+        utm = (227191.93568276422, 4717996.363612308)
+
+        row = [
+            None,  # orgid
+            None,  # orgname
+            None,  # station id
+            None,  # stationname
+            None,  # elev
+            None,  # elev unit
+            None,  # stationtype
+            None,  # station comment
+            lat,  # lay y
+            lon,  # lon x
+            None,  # utmx
+            None  # utmy
+        ]
+
+        expected = [
+            None,  # orgid
+            None,  # orgname
+            None,  # station id
+            None,  # stationname
+            None,  # stationtype
+            None,  # station comment
+            None,  # huc8
+            lon,  # lon x
+            lat,  # lay y
+            None,  # horacc
+            None,  # horaccunit
+            None,  # horcallmeth
+            None,  # hor ref
+            None,  # elev
+            None,  # elev unit
+            None,  # elev acc
+            None,  # elev acc unit
+            None,  # elev meth
+            None,  # elev ref
+            state_code,  # state code
+            county_code,  # county code
+            None,  # aquifer
+            None,  # fm type
+            None,  # aquifer type
+            None,  # constdate
+            None,  # depth
+            None,  # depth unit
+            None,  # hole depth
+            None,  # hold d unit
+            elevation,  # dem elev
+            'DOGM',  # datasource
+            None,  # win
+            utm   # shape
+        ]
 
         schema_map = stationmodel.OgmStation.build_schema_map('Stations')
-        model = stationmodel.OgmStation([], Normalizer(), schema_map)
+        model = stationmodel.OgmStation(row, Normalizer(), schema_map)
+        actual = model.calculate_fields(model.row, 'Stations', updating=True)
 
-        actual = model.calculate_fields(row, 'Stations', field_info, updating=True)
         self.assertEqual(actual, expected)
 
     def test_station_calculate_fields_with_point_in_utah(self):
+        lon = -111.88816
+        lat = 40.77742
+        elevation = 908
+        state_code = 49
+        county_code = 35
+        utm = (425053.2238962272, 4514428.45529942)
+
         row = [
-            None,  # elevation
-            None,  # state code
-            None   # county code
+            None,  # orgid
+            None,  # orgname
+            None,  # station id
+            None,  # stationname
+            None,  # elev
+            None,  # elev unit
+            None,  # stationtype
+            None,  # station comment
+            lat,  # lay y
+            lon,  # lon x
+            None,  # utmx
+            None  # utmy
         ]
 
         expected = [
-            908,  # elevation
-            49,   # state code
-            35,   # county code
-            (425053.2238962272, 4514428.45529942)  # utm cords
+            None,  # orgid
+            None,  # orgname
+            None,  # station id
+            None,  # stationname
+            None,  # stationtype
+            None,  # station comment
+            None,  # huc8
+            lon,  # lon x
+            lat,  # lay y
+            None,  # horacc
+            None,  # horaccunit
+            None,  # horcallmeth
+            None,  # hor ref
+            None,  # elev
+            None,  # elev unit
+            None,  # elev acc
+            None,  # elev acc unit
+            None,  # elev meth
+            None,  # elev ref
+            state_code,  # state code
+            county_code,  # county code
+            None,  # aquifer
+            None,  # fm type
+            None,  # aquifer type
+            None,  # constdate
+            None,  # depth
+            None,  # depth unit
+            None,  # hole depth
+            None,  # hold d unit
+            elevation,  # dem elev
+            'DOGM',  # datasource
+            None,  # win
+            utm   # shape
         ]
 
-        field_info = {
-            'demELEVm': (None, 0),
-            'StateCode': (None, 1),
-            'CountyCode': (None, 2),
-            'Lat_Y': (40.77742, None),
-            'Lon_X': (-111.88816, None)
-        }
+        schema_map = stationmodel.OgmStation.build_schema_map('Stations')
+        model = stationmodel.OgmStation(row, Normalizer(), schema_map)
+        actual = model.calculate_fields(model.row, 'Stations', updating=True)
+
+        self.assertEqual(actual, expected)
+
+    def test_station_model_etl_on_update_with_point_in_utah(self):
+        lon_x = -111.88816
+        lat_y = 40.77742
+        statecode = 49  # utah
+        countycode = 35  # salt lake
+        dem_elevation = 908
+        utm = (425053.2238962272, 4514428.45529942)  # utm cords
+
+        data = ['OrgId',
+                'OrgName',
+                'StationId',
+                'StationName',
+                None,
+                'ElevUnit',
+                'StationType',
+                'StationComment',
+                lat_y,
+                lon_x,
+                utm[0],
+                utm[1]
+                ]
+
+        expected = [
+            'OrgId',  # orgid
+            'OrgName',  # orgname
+            'StationId',  # station id
+            'StationName',  # stationname
+            'StationType',  # stationtype
+            'StationComment',  # station comment
+            None,  # huc8
+            lon_x,  # lon x
+            lat_y,  # lay y
+            None,  # horacc
+            None,  # horaccunit
+            None,  # horcallmeth
+            None,  # hor ref
+            None,  # elev
+            'ElevUnit',  # elev unit
+            None,  # elev acc
+            None,  # elev acc unit
+            None,  # elev meth
+            None,  # elev ref
+            statecode,  # state code
+            countycode,  # county code
+            None,  # aquifer
+            None,  # fm type
+            None,  # aquifer type
+            None,  # constdate
+            None,  # depth
+            None,  # depth unit
+            None,  # hole depth
+            None,  # hold d unit
+            dem_elevation,  # dem elev
+            'DOGM',  # datasource
+            None,  # win
+            utm  # shape
+        ]
 
         schema_map = stationmodel.OgmStation.build_schema_map('Stations')
-        model = stationmodel.OgmStation([], Normalizer(), schema_map)
+        model = stationmodel.OgmStation(data, Normalizer(), schema_map)
+        row = model.calculate_fields(model.row, 'Stations', updating=True)
 
-        actual = model.calculate_fields(row, 'Stations', field_info, updating=True)
-        self.assertEqual(actual, expected)
+        self.assertListEqual(expected, row)
+
+    def test_station_model_etl_on_update_with_point_outside_of_utah(self):
+        lon_x = -114.323546838
+        lat_y = 42.5661737512
+        statecode = 16  # idaho
+        countycode = 83
+        dem_elevation = None
+        utm = (227191.93568276422, 4717996.363612308)  # utm cords
+
+        data = ['OrgId',
+                'OrgName',
+                'StationId',
+                'StationName',
+                None,
+                'ElevUnit',
+                'StationType',
+                'StationComment',
+                lat_y,
+                lon_x,
+                utm[0],
+                utm[1]
+                ]
+
+        expected = [
+            'OrgId',  # orgid
+            'OrgName',  # orgname
+            'StationId',  # station id
+            'StationName',  # stationname
+            'StationType',  # stationtype
+            'StationComment',  # station comment
+            None,  # huc8
+            lon_x,  # lon x
+            lat_y,  # lay y
+            None,  # horacc
+            None,  # horaccunit
+            None,  # horcallmeth
+            None,  # hor ref
+            None,  # elev
+            'ElevUnit',  # elev unit
+            None,  # elev acc
+            None,  # elev acc unit
+            None,  # elev meth
+            None,  # elev ref
+            statecode,  # state code
+            countycode,  # county code
+            None,  # aquifer
+            None,  # fm type
+            None,  # aquifer type
+            None,  # constdate
+            None,  # depth
+            None,  # depth unit
+            None,  # hole depth
+            None,  # hold d unit
+            dem_elevation,  # dem elev
+            'DOGM',  # datasource
+            None,  # win
+            utm  # shape
+        ]
+
+        schema_map = stationmodel.OgmStation.build_schema_map('Stations')
+
+        model = stationmodel.OgmStation(data, Normalizer(), schema_map)
+        row = model.calculate_fields(model.row, 'Stations', updating=True)
+
+        self.assertListEqual(expected, row)
 
 
 class TestDwrModels(unittest.TestCase):
@@ -1096,8 +1432,8 @@ class TestDwrModels(unittest.TestCase):
                     y]
 
         schema_map = stationmodel.DwrStation.build_schema_map('Stations')
-        model = stationmodel.DwrStation(
-            gdb_data, Normalizer(), schema_map)
+        model = stationmodel.DwrStation(gdb_data, Normalizer(), schema_map)
+        row = model.calculate_fields(model.row, 'Stations')
 
         expected = ['orgid',  # orgid
                     'orgname',  # orgname
@@ -1134,7 +1470,7 @@ class TestDwrModels(unittest.TestCase):
                     (x, y)  # shape
                     ]
 
-        self.assertListEqual(expected, model.row)
+        self.assertListEqual(expected, row)
 
     def test_gdb_datasoure_normalization(self):
         gdb_result_data = [
@@ -1305,8 +1641,8 @@ class TestUgsModels(unittest.TestCase):
                     'stationid']
 
         schema_map = stationmodel.UgsStation.build_schema_map('Stations')
-        model = stationmodel.UgsStation(
-            gdb_data, Normalizer(), schema_map)
+        model = stationmodel.UgsStation(gdb_data, Normalizer(), schema_map)
+        row = model.calculate_fields(model.row, 'Stations')
 
         expected = ['orgid',  # orgid
                     'orgname',  # orgname
@@ -1343,4 +1679,4 @@ class TestUgsModels(unittest.TestCase):
                     (312382.9355031499, 4166423.73346324)  # shape
                     ]
 
-        self.assertListEqual(expected, model.row)
+        self.assertListEqual(expected, row)
