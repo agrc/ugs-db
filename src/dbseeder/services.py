@@ -294,7 +294,7 @@ class Normalizer(object):
                chemical == 'no2+no3 as n') and
               (unit == 'mg/l as n' or unit == milli_per_liter)):
             return self.calculate_amount(current_amount, 4.426802887), \
-                milli_per_liter, 'Nitrate and nitrite as no3'
+                milli_per_liter, 'Nitrate and nitrite as NO3'
         elif chemical == 'phosphate-phosphorus as p' and unit == 'mg/l as p':
             return self.calculate_amount(current_amount, 3.131265779), \
                 milli_per_liter, 'Phosphate'
