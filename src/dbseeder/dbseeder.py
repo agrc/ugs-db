@@ -186,30 +186,30 @@ class Seeder(object):
 
         if seed['WQP']:
             print 'Seeding WQP'
-            wqp = Wqp(self.location, arcpy.da.InsertCursor)
+            wqp = Wqp(self.location, arcpy.da.InsertCursor, arcpy.da.SearchCursor)
             wqp.seed(folder, types)
 
         if seed['SDWIS']:
             print 'Seeding SDWIS'
-            sdwis = Sdwis(self.location, arcpy.da.InsertCursor)
+            sdwis = Sdwis(self.location, arcpy.da.InsertCursor, arcpy.da.SearchCursor)
             sdwis.count = self.count
             sdwis.seed(types)
 
         if seed['DOGM']:
             print 'Seeding DOGM'
             dogm = Dogm(
-                self.location, arcpy.da.SearchCursor, arcpy.da.InsertCursor)
+                self.location, arcpy.da.SearchCursor, arcpy.da.InsertCursor, arcpy.da.SearchCursor)
             dogm.seed(folder, types)
 
         if seed['DWR']:
             print 'Seeding DWR'
             dwr = Udwr(
-                self.location, arcpy.da.SearchCursor, arcpy.da.InsertCursor)
+                self.location, arcpy.da.SearchCursor, arcpy.da.InsertCursor, arcpy.da.SearchCursor)
             dwr.seed(folder, types)
 
         if seed['UGS']:
             print 'Seeding UGS'
-            ugs = Ugs(self.location, arcpy.da.SearchCursor, arcpy.da.InsertCursor)
+            ugs = Ugs(self.location, arcpy.da.SearchCursor, arcpy.da.InsertCursor, arcpy.da.SearchCursor)
             ugs.seed(folder, types)
 
 if __name__ == '__main__':
