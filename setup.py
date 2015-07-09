@@ -71,7 +71,8 @@ setup(
         # eg: "keyword1", "keyword2", "keyword3",
     ],
     install_requires=[
-        'docopt==0.6.2'
+        'docopt==0.6.2',
+        'pyodbc'
     ],
     dependency_links=[
 

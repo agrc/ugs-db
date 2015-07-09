@@ -49,7 +49,13 @@ class Seeder(object):
         print('{}, {}'.format(source, who))
 
     def _parse_source_args(self, source):
+        all_sources = ['WQP', 'SDWIS', 'DOGM', 'DWR', 'UGS']
         if not source:
-            return ['WQP', 'SDWIS', 'DOGM', 'DWR', 'UGS']
+            return all_sources
         else:
-            return source.split(',').map(strip)
+            sources = [s.strip() for s in source.split(',')]
+            sources = filter(lambda s: s in all_sources, sources)
+            if len(sources) > 0:
+                return sources
+            else:
+                return None
