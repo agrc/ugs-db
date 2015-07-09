@@ -68,17 +68,15 @@ setup(
         "Topic :: Utilities",
     ],
     keywords=[
-        # eg: "keyword1", "keyword2", "keyword3",
     ],
     install_requires=[
         'docopt==0.6.2',
-        'pyodbc'
+        'pyodbc==3.0.10',
+        'querycsv==0.3.0'
     ],
     dependency_links=[
-
     ],
     extras_require={
-        # eg: 'rst': ["docutils>=0.11"],
     },
     entry_points={
         "console_scripts": [
@@ -89,9 +87,6 @@ setup(
         'test': Tox
     },
     tests_require=[
-        'tox',
-        'nose==1.3.7',
-        'coverage==3.7.1',
-        'mock==1.0.1'
+        'tox'
     ],
 )

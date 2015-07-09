@@ -4,13 +4,14 @@
 '''UGS Chemistry database seeder
 Usage:
   dbseeder createdb <configuration>
-  dbseeder seed <source> <configuration>
+  dbseeder seed <source> <file_location> <configuration>
   dbseeder length <source>
   dbseeder (-h | --help)
 Options:
   -h --help     Show this screen.
   <configuration> dev, stage, prod
   <source> WQP, SDWIS, DOGM, DWR, UGS
+  <file_location> the parent location of the programs data
 '''
 
 import sys

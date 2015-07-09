@@ -1,18 +1,33 @@
 # Config file for automatic testing at travis-ci.org
 
-sudo: false
 language: python
 python: 2.7
-env:
-    - TOX_ENV=py27
-    - TOX_ENV=pep8
 
-script: tox -e $TOX_ENV
+before_install:
+  - sudo apt-get update -qq
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget http://repo.continuum.io/miniconda/Miniconda-3.4.2-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION pip pyodbc
+  # Useful for debugging any issues with conda
+  - conda info -a
 
 install:
-    - pip install tox
+  - pip install docopt querycsv coverage nose nose-cov mock flake8 codecov
+  - python setup.py install
 
+script:
+  - nosetests --with-coverage --cov dbseeder --cov-config .coveragerc --logging-level=INFO
+  - flake8
 after_success:
     # Report coverage results to codecov.io
-    - pip install codecov
     - codecov
+notifications:
+    email:
+        on_success: change
+        on_failure: change
