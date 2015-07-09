@@ -9,9 +9,6 @@ test the dbseeder module
 
 import unittest
 from dbseeder.dbseeder import Seeder
-import dbseeder.models as model
-from mock import Mock
-from os.path import isfile
 
 
 class TestDbSeeder(unittest.TestCase):

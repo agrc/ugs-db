@@ -7,11 +7,9 @@ dbseeder
 the dbseeder module
 '''
 
-import models
-import timeit
 import pyodbc
 import secrets
-from os.path import join, dirname, isfile
+from os.path import join, dirname
 
 
 class Seeder(object):

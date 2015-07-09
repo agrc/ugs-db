@@ -32,7 +32,7 @@ def main():
         if not args['source']:
             args['source'] = ['WQP', 'SDWIS', 'DOGM', 'DWR', 'UGS']
         else:
-            args['source'] = args['source'].split(',').map(strip)
+            args['source'] = map(str.strip, args['source'].split(','))
 
         return seeder.seed(**args)
     elif arguments['createdb']:
