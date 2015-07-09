@@ -33,7 +33,7 @@ class TestParseSourceArgs(unittest.TestCase):
         self.assertEqual(self.patient._parse_source_args(''), self.all_sources)
 
     def test_returns_none_when_given_bad_source(self):
-        self.assertNone(self.patient._parse_source_args('not a source'))
+        self.assertIsNone(self.patient._parse_source_args('not a source'))
 
     def test_gets_array_of_sources_when_given_csv(self):
         self.assertEqual(self.patient._parse_source_args('WQP, SDWIS'), ['WQP', 'SDWIS'])

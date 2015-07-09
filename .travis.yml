@@ -1,0 +1,14 @@
+language: python
+version: 2.7
+env:
+    - TOX_ENV=py27
+    - TOX_ENV=py27-develop
+    - TOX_ENV=pep8
+script: tox -e $TOX_ENV
+
+install:
+    - pip install tox
+
+after_success:
+    - pip install codecov
+    - codecov
