@@ -8,7 +8,8 @@ test the dbseeder module
 '''
 
 import unittest
-from dbseeder.dbseeder import Seeder
+from dbseeder.dbseeder import Seeder, WqpProgram
+from os.path import join, basename
 
 
 class TestDbSeeder(unittest.TestCase):
@@ -43,3 +44,29 @@ class TestParseSourceArgs(unittest.TestCase):
         self.assertEqual(self.patient._parse_source_args('WQP '), ['WQP'])
         self.assertEqual(self.patient._parse_source_args(' WQP'), ['WQP'])
         self.assertEqual(self.patient._parse_source_args(' WQP '), ['WQP'])
+
+
+class TestWqpProgram(unittest.TestCase):
+    def setUp(self):
+        self.test_folder = join('tests', 'data')
+
+    def test_class_creation_finds_files(self):
+        patient = WqpProgram(self.test_folder)
+
+        expected_results = [
+            'sample_balance.csv',
+            'sample_chemistry.csv',
+            'sample_chemistry2.csv',
+            'sample_multiple_balance.csv',
+            'test.csv'
+        ]
+
+        expected_stations = [
+            'sample_stations.csv'
+        ]
+
+        results_folder = map(basename, patient._get_files(patient.results_folder))
+        stations_folder = map(basename, patient._get_files(patient.stations_folder))
+
+        self.assertItemsEqual(results_folder, expected_results)
+        self.assertItemsEqual(stations_folder, expected_stations)
