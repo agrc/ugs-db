@@ -10,7 +10,11 @@ the dbseeder module
 import models
 import timeit
 import pyodbc
-import secrets
+try:
+    import secrets
+except Exception as e:
+    import secrets_sample as secrets
+
 from os.path import join, dirname, isfile
 
 
