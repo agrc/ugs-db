@@ -7,15 +7,13 @@ dbseeder
 the dbseeder module
 '''
 
-import models
-import timeit
 import pyodbc
 try:
     import secrets
 except Exception as e:
     import secrets_sample as secrets
 
-from os.path import join, dirname, isfile
+from os.path import join, dirname
 
 
 class Seeder(object):
