@@ -1,7 +1,7 @@
 UGS Water Chemistry Database Seeder
 ===================================
 
-[![Build Status](https://travis-ci.org/agrc/ugs-db.svg?branch=master)](https://travis-ci.org/agrc/ugs-db)
+[![Build Status](https://travis-ci.org/agrc/ugs-db.svg?branch=master)](https://travis-ci.org/agrc/ugs-db) [![codecov.io](http://codecov.io/github/agrc/ugs-db/coverage.svg?branch=master)](http://codecov.io/github/agrc/ugs-db?branch=master)
 
 A db tool for seeding and updating the ugs water chemistry database.
 
