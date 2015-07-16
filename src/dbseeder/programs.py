@@ -89,6 +89,7 @@ class WqpProgram(object):
         for csv_file in self._get_files(self.stations_folder):
             print(csv_file)
 
+        #: this could be more functional
         for csv_file in self._get_files(self.results_folder):
             unique_sample_ids = self._get_distinct_sample_ids_from(csv_file)
 
@@ -118,13 +119,21 @@ class WqpProgram(object):
 
     def _get_samples_for_id(self, sample_id_set, file_path):
         file_name = self._get_file_name_without_extension(file_path)
-
+        header = None
         sample_ids = query_csv(self.sample_id_query.format(file_name, self.sample_id_field, sample_id_set[0]), [file_path])
         if len(sample_ids) > 0:
             #: remove header cell
-            sample_ids.pop(0)
+            header = sample_ids.pop(0)
 
-        return sample_ids
+            def return_value_if_not_in_config(key):
+                if key in self.config:
+                    return self.config[key]
+
+                return key
+
+            header = map(lambda x: return_value_if_not_in_config(x), header)
+
+        return map(lambda x: dict(zip(header, x)), sample_ids)
 
     def _get_file_name_without_extension(self, file_path):
         return splitext(basename(file_path))[0]
