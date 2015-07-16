@@ -87,6 +87,10 @@ class WqpProgram(object):
         #: create charge balance
         #: return rows
         for csv_file in self._get_files(self.stations_folder):
+            #: create csv reader
+            #: cast to correct type
+            #: normalize station id
+            #: insert rows
             print(csv_file)
 
         #: this could be more functional
@@ -95,6 +99,11 @@ class WqpProgram(object):
 
             for sample_id in unique_sample_ids:
                 samples = self._get_samples_for_id(sample_id, csv_file)
+                #: etl samples
+                #: cast to corrent type
+                #: normalize chemical names amounts and units
+                #: calculate charge balance
+                #: insert rows
 
     def _get_files(self, location):
         if not location:
@@ -119,8 +128,11 @@ class WqpProgram(object):
 
     def _get_samples_for_id(self, sample_id_set, file_path):
         file_name = self._get_file_name_without_extension(file_path)
-        header = None
         sample_ids = query_csv(self.sample_id_query.format(file_name, self.sample_id_field, sample_id_set[0]), [file_path])
+
+        return self._etl_column_names(sample_ids)
+
+    def _etl_column_names(self, sample_ids):
         if len(sample_ids) > 0:
             #: remove header cell
             header = sample_ids.pop(0)
