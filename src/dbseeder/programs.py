@@ -22,7 +22,7 @@ class WqpProgram(object):
     distinct_sample_id_query = 'select distinct({}) from {}'
     sample_id_query = 'select * from {} where {} = \'{}\''
 
-    config = OrderedDict([
+    station_config = OrderedDict([
         ('OrgId', 'OrganizationIdentifier'),
         ('OrgName', 'OrganizationFormalName'),
         ('StationId', 'MonitoringLocationIdentifier'),
@@ -57,6 +57,51 @@ class WqpProgram(object):
         ('WIN', None)
     ])
 
+    result_config = OrderedDict([
+        ('AnalysisDate', 'AnalysisStartDate'),
+        ('AnalytMeth', 'ResultAnalyticalMethod/MethodName'),
+        ('AnalytMethId', 'ResultAnalyticalMethod/MethodIdentifier'),
+        ('AutoQual', None),
+        ('CAS_Reg', None),
+        ('Chrg', None),
+        ('DataSource', None),
+        ('DetectCond', 'ResultDetectionConditionText'),
+        ('IdNum', None),
+        ('LabComments', 'ResultLaboratoryCommentText'),
+        ('LabName', 'LaboratoryName'),
+        ('Lat_Y', None),
+        ('LimitType', 'DetectionQuantitationLimitTypeName'),
+        ('Lon_X', None),
+        ('MDL', 'DetectionQuantitationLimitMeasure/MeasureValue'),
+        ('MDLUnit', 'DetectionQuantitationLimitMeasure/MeasureUnitCode'),
+        ('MethodDescript', 'MethodDescriptionText'),
+        ('OrgId', 'OrganizationIdentifier'),
+        ('OrgName', 'OrganizationFormalName'),
+        ('Param', 'CharacteristicName'),
+        ('ParamGroup', None),
+        ('ProjectId', 'ProjectIdentifier'),
+        ('QualCode', 'MeasureQualifierCode'),
+        ('ResultComment', 'ResultCommentText'),
+        ('ResultStatus', 'ResultStatusIdentifier'),
+        ('ResultValue', 'ResultMeasureValue'),
+        ('SampComment', 'ActivityCommentText'),
+        ('SampDepth', 'ActivityDepthHeightMeasure/MeasureValue'),
+        ('SampDepthRef', 'ActivityDepthAltitudeReferencePointText'),
+        ('SampDepthU', 'ActivityDepthHeightMeasure/MeasureUnitCode'),
+        ('SampEquip', 'SampleCollectionEquipmentName'),
+        ('SampFrac', 'ResultSampleFractionText'),
+        ('SampleDate', 'ActivityStartDate'),
+        ('SampleTime', 'ActivityStartTime/Time'),
+        ('SampleId', 'ActivityIdentifier'),
+        ('SampMedia', 'ActivityMediaSubdivisionName'),
+        ('SampMeth', 'SampleCollectionMethod/MethodIdentifier'),
+        ('SampMethName', 'SampleCollectionMethod/MethodName'),
+        ('SampType', 'ActivityTypeCode'),
+        ('StationId', 'MonitoringLocationIdentifier'),
+        ('Unit', 'ResultMeasure/MeasureUnitCode'),
+        ('USGSPCode', 'USGSPCode')
+    ])
+
     def __init__(self, file_location):
         super(WqpProgram, self).__init__()
 
@@ -87,10 +132,6 @@ class WqpProgram(object):
         #: create charge balance
         #: return rows
         for csv_file in self._get_files(self.stations_folder):
-            #: create csv reader
-            #: cast to correct type
-            #: normalize station id
-            #: insert rows
             print(csv_file)
 
         #: this could be more functional
@@ -99,11 +140,6 @@ class WqpProgram(object):
 
             for sample_id in unique_sample_ids:
                 samples = self._get_samples_for_id(sample_id, csv_file)
-                #: etl samples
-                #: cast to corrent type
-                #: normalize chemical names amounts and units
-                #: calculate charge balance
-                #: insert rows
 
     def _get_files(self, location):
         if not location:
@@ -128,11 +164,8 @@ class WqpProgram(object):
 
     def _get_samples_for_id(self, sample_id_set, file_path):
         file_name = self._get_file_name_without_extension(file_path)
+        header = None
         sample_ids = query_csv(self.sample_id_query.format(file_name, self.sample_id_field, sample_id_set[0]), [file_path])
-
-        return self._etl_column_names(sample_ids)
-
-    def _etl_column_names(self, sample_ids):
         if len(sample_ids) > 0:
             #: remove header cell
             header = sample_ids.pop(0)
