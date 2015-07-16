@@ -22,7 +22,7 @@ from docopt import docopt
 def main():
     arguments = docopt(__doc__)
 
-    args = {
+    params = {
         'source': arguments['<source>'],
         'who': arguments['<configuration>']
     }
@@ -30,14 +30,11 @@ def main():
     seeder = Seeder()
 
     if arguments['seed']:
-        if not args['source']:
-            args['source'] = ['WQP', 'SDWIS', 'DOGM', 'DWR', 'UGS']
-        else:
-            args['source'] = map(str.strip, args['source'].split(','))
+        params['file_location'] = arguments['<file_location>']
 
-        return seeder.seed(**args)
+        return seeder.seed(**params)
     elif arguments['createdb']:
-        return seeder.create_tables(who=args['who'])
+        return seeder.create_tables(who=params['who'])
 
 
 if __name__ == '__main__':

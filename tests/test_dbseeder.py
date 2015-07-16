@@ -48,16 +48,13 @@ class TestParseSourceArgs(unittest.TestCase):
 
 class TestWqpProgram(unittest.TestCase):
     def setUp(self):
-        self.test_folder = join('tests', 'data')
+        self.test_get_files_folder = join('tests', 'data', 'WQP', 'get_files')
+        self.patient = WqpProgram(self.test_get_files_folder)
 
-    def test_class_creation_finds_files(self):
-        patient = WqpProgram(self.test_folder)
-
+    def test_get_files_finds_files(self):
         expected_results = [
-            'sample_balance.csv',
             'sample_chemistry.csv',
             'sample_chemistry2.csv',
-            'sample_multiple_balance.csv',
             'test.csv'
         ]
 
@@ -65,8 +62,11 @@ class TestWqpProgram(unittest.TestCase):
             'sample_stations.csv'
         ]
 
-        results_folder = map(basename, patient._get_files(patient.results_folder))
-        stations_folder = map(basename, patient._get_files(patient.stations_folder))
+        results_folder = map(basename, self.patient._get_files(self.patient.results_folder))
+        stations_folder = map(basename, self.patient._get_files(self.patient.stations_folder))
 
         self.assertItemsEqual(results_folder, expected_results)
         self.assertItemsEqual(stations_folder, expected_stations)
+
+    def test_get_samples_for_id_returns_correnct_list(self):
+        csv_file = None
