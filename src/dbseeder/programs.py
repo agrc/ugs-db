@@ -10,6 +10,7 @@ the different source programs
 from querycsv import query_csv
 from os.path import join, isdir, basename, splitext
 from glob import glob
+from collections import OrderedDict
 
 
 #: this should probably get organized into a module
@@ -21,9 +22,40 @@ class WqpProgram(object):
     distinct_sample_id_query = 'select distinct({}) from {}'
     sample_id_query = 'select * from {} where {} = \'{}\''
 
-    config = {
-        'destination field name': 'source field name'
-    }
+    config = OrderedDict([
+        ('OrgId', 'OrganizationIdentifier'),
+        ('OrgName', 'OrganizationFormalName'),
+        ('StationId', 'MonitoringLocationIdentifier'),
+        ('StationName', 'MonitoringLocationName'),
+        ('StationType', 'MonitoringLocationTypeName'),
+        ('StationComment', 'MonitoringLocationDescriptionText'),
+        ('HUC8', 'HUCEightDigitCode'),
+        ('Lon_X', 'LongitudeMeasure'),
+        ('Lat_Y', 'LatitudeMeasure'),
+        ('HorAcc', 'HorizontalAccuracyMeasure/MeasureValue'),
+        ('HorAccUnit', 'HorizontalAccuracyMeasure/MeasureUnitCode'),
+        ('HorCollMeth', 'HorizontalCollectionMethodName'),
+        ('HorRef', 'HorizontalCoordinateReferenceSystemDatumName'),
+        ('Elev', 'VerticalMeasure/MeasureValue'),
+        ('ElevUnit', 'VerticalMeasure/MeasureUnitCode'),
+        ('ElevAcc', 'VerticalAccuracyMeasure/MeasureValue'),
+        ('ElevAccUnit', 'VerticalAccuracyMeasure/MeasureUnitCode'),
+        ('ElevMeth', 'VerticalCollectionMethodName'),
+        ('ElevRef', 'VerticalCoordinateReferenceSystemDatumName'),
+        ('StateCode', 'StateCode'),
+        ('CountyCode', 'CountyCode'),
+        ('Aquifer', 'AquiferName'),
+        ('FmType', 'FormationTypeText'),
+        ('AquiferType', 'AquiferTypeName'),
+        ('ConstDate', 'ConstructionDateText'),
+        ('Depth', 'WellDepthMeasure/MeasureValue'),
+        ('DepthUnit', 'WellDepthMeasure/MeasureUnitCode'),
+        ('HoleDepth', 'WellHoleDepthMeasure/MeasureValue'),
+        ('HoleDUnit', 'WellHoleDepthMeasure/MeasureUnitCode'),
+        ('demELEVm', None),
+        ('DataSource', None),
+        ('WIN', None)
+    ])
 
     def __init__(self, file_location):
         super(WqpProgram, self).__init__()
