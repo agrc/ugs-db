@@ -7,13 +7,13 @@ Programs.py
 the different source programs
 '''
 
+import csv
 from querycsv import query_csv
 from os.path import join, isdir, basename, splitext
 from glob import glob
 from collections import OrderedDict
 
 
-#: this should probably get organized into a module
 class WqpProgram(object):
     '''class for handling wqp csv files'''
 
@@ -21,84 +21,87 @@ class WqpProgram(object):
     sample_id_field = 'ActivityIdentifier'
     distinct_sample_id_query = 'select distinct({}) from {}'
     sample_id_query = 'select * from {} where {} = \'{}\''
+    station = False
+    result = True
 
     station_config = OrderedDict([
-        ('OrgId', 'OrganizationIdentifier'),
-        ('OrgName', 'OrganizationFormalName'),
-        ('StationId', 'MonitoringLocationIdentifier'),
-        ('StationName', 'MonitoringLocationName'),
-        ('StationType', 'MonitoringLocationTypeName'),
-        ('StationComment', 'MonitoringLocationDescriptionText'),
-        ('HUC8', 'HUCEightDigitCode'),
-        ('Lon_X', 'LongitudeMeasure'),
-        ('Lat_Y', 'LatitudeMeasure'),
-        ('HorAcc', 'HorizontalAccuracyMeasure/MeasureValue'),
-        ('HorAccUnit', 'HorizontalAccuracyMeasure/MeasureUnitCode'),
-        ('HorCollMeth', 'HorizontalCollectionMethodName'),
-        ('HorRef', 'HorizontalCoordinateReferenceSystemDatumName'),
-        ('Elev', 'VerticalMeasure/MeasureValue'),
-        ('ElevUnit', 'VerticalMeasure/MeasureUnitCode'),
-        ('ElevAcc', 'VerticalAccuracyMeasure/MeasureValue'),
-        ('ElevAccUnit', 'VerticalAccuracyMeasure/MeasureUnitCode'),
-        ('ElevMeth', 'VerticalCollectionMethodName'),
-        ('ElevRef', 'VerticalCoordinateReferenceSystemDatumName'),
+        ('OrganizationIdentifier', 'OrgId'),
+        ('OrganizationFormalName', 'OrgName'),
+        ('MonitoringLocationIdentifier', 'StationId'),
+        ('MonitoringLocationName', 'StationName'),
+        ('MonitoringLocationTypeName', 'StationType'),
+        ('MonitoringLocationDescriptionText', 'StationComment'),
+        ('HUCEightDigitCode', 'HUC8'),
+        ('LongitudeMeasure', 'Lon_X'),
+        ('LatitudeMeasure', 'Lat_Y'),
+        ('HorizontalAccuracyMeasure/MeasureValue', 'HorAcc'),
+        ('HorizontalAccuracyMeasure/MeasureUnitCode', 'HorAccUnit'),
+        ('HorizontalCollectionMethodName', 'HorCollMeth'),
+        ('HorizontalCoordinateReferenceSystemDatumName', 'HorRef'),
+        ('VerticalMeasure/MeasureValue', 'Elev'),
+        ('VerticalMeasure/MeasureUnitCode', 'ElevUnit'),
+        ('VerticalAccuracyMeasure/MeasureValue', 'ElevAcc'),
+        ('VerticalAccuracyMeasure/MeasureUnitCode', 'ElevAccUnit'),
+        ('VerticalCollectionMethodName', 'ElevMeth'),
+        ('VerticalCoordinateReferenceSystemDatumName', 'ElevRef'),
         ('StateCode', 'StateCode'),
         ('CountyCode', 'CountyCode'),
-        ('Aquifer', 'AquiferName'),
-        ('FmType', 'FormationTypeText'),
-        ('AquiferType', 'AquiferTypeName'),
-        ('ConstDate', 'ConstructionDateText'),
-        ('Depth', 'WellDepthMeasure/MeasureValue'),
-        ('DepthUnit', 'WellDepthMeasure/MeasureUnitCode'),
-        ('HoleDepth', 'WellHoleDepthMeasure/MeasureValue'),
-        ('HoleDUnit', 'WellHoleDepthMeasure/MeasureUnitCode'),
-        ('demELEVm', None),
-        ('DataSource', None),
-        ('WIN', None)
+        ('AquiferName', 'Aquifer'),
+        ('FormationTypeText', 'FmType'),
+        ('AquiferTypeName', 'AquiferType'),
+        ('ConstructionDateText', 'ConstDate'),
+        ('WellDepthMeasure/MeasureValue', 'Depth'),
+        ('WellDepthMeasure/MeasureUnitCode', 'DepthUnit'),
+        ('WellHoleDepthMeasure/MeasureValue', 'HoleDepth'),
+        ('WellHoleDepthMeasure/MeasureUnitCode', 'HoleDUnit'),
+        ('demELEVm', '!demELEVm'),
+        ('DataSource', '!DataSource'),
+        ('WIN', '!WIN'),
+        ('Shape', '!Shape')
     ])
 
     result_config = OrderedDict([
-        ('AnalysisDate', 'AnalysisStartDate'),
-        ('AnalytMeth', 'ResultAnalyticalMethod/MethodName'),
-        ('AnalytMethId', 'ResultAnalyticalMethod/MethodIdentifier'),
-        ('AutoQual', None),
-        ('CAS_Reg', None),
-        ('Chrg', None),
-        ('DataSource', None),
-        ('DetectCond', 'ResultDetectionConditionText'),
-        ('IdNum', None),
-        ('LabComments', 'ResultLaboratoryCommentText'),
-        ('LabName', 'LaboratoryName'),
-        ('Lat_Y', None),
-        ('LimitType', 'DetectionQuantitationLimitTypeName'),
-        ('Lon_X', None),
-        ('MDL', 'DetectionQuantitationLimitMeasure/MeasureValue'),
-        ('MDLUnit', 'DetectionQuantitationLimitMeasure/MeasureUnitCode'),
-        ('MethodDescript', 'MethodDescriptionText'),
-        ('OrgId', 'OrganizationIdentifier'),
-        ('OrgName', 'OrganizationFormalName'),
-        ('Param', 'CharacteristicName'),
-        ('ParamGroup', None),
-        ('ProjectId', 'ProjectIdentifier'),
-        ('QualCode', 'MeasureQualifierCode'),
-        ('ResultComment', 'ResultCommentText'),
-        ('ResultStatus', 'ResultStatusIdentifier'),
-        ('ResultValue', 'ResultMeasureValue'),
-        ('SampComment', 'ActivityCommentText'),
-        ('SampDepth', 'ActivityDepthHeightMeasure/MeasureValue'),
-        ('SampDepthRef', 'ActivityDepthAltitudeReferencePointText'),
-        ('SampDepthU', 'ActivityDepthHeightMeasure/MeasureUnitCode'),
-        ('SampEquip', 'SampleCollectionEquipmentName'),
-        ('SampFrac', 'ResultSampleFractionText'),
-        ('SampleDate', 'ActivityStartDate'),
-        ('SampleTime', 'ActivityStartTime/Time'),
-        ('SampleId', 'ActivityIdentifier'),
-        ('SampMedia', 'ActivityMediaSubdivisionName'),
-        ('SampMeth', 'SampleCollectionMethod/MethodIdentifier'),
-        ('SampMethName', 'SampleCollectionMethod/MethodName'),
-        ('SampType', 'ActivityTypeCode'),
-        ('StationId', 'MonitoringLocationIdentifier'),
-        ('Unit', 'ResultMeasure/MeasureUnitCode'),
+        ('AnalysisStartDate', 'AnalysisDate'),
+        ('ResultAnalyticalMethod/MethodName', 'AnalytMeth'),
+        ('ResultAnalyticalMethod/MethodIdentifier', 'AnalytMethId'),
+        ('AutoQual', '!AutoQual'),
+        ('CAS_Reg', '!CAS_Reg'),
+        ('Chrg', '!Chrg'),
+        ('DataSource', '!DataSource'),
+        ('ResultDetectionConditionText', 'DetectCond'),
+        ('IdNum', '!IdNum'),
+        ('ResultLaboratoryCommentText', 'LabComments'),
+        ('LaboratoryName', 'LabName'),
+        ('Lat_Y', '!Lat_Y'),
+        ('DetectionQuantitationLimitTypeName', 'LimitType'),
+        ('Lon_X', '!Lon_X'),
+        ('DetectionQuantitationLimitMeasure/MeasureValue', 'MDL'),
+        ('DetectionQuantitationLimitMeasure/MeasureUnitCode', 'MDLUnit'),
+        ('MethodDescriptionText', 'MethodDescript'),
+        ('OrganizationIdentifier', 'OrgId'),
+        ('OrganizationFormalName', 'OrgName'),
+        ('CharacteristicName', 'Param'),
+        ('ParamGroup', '*ParamGroup'),
+        ('ProjectIdentifier', 'ProjectId'),
+        ('MeasureQualifierCode', 'QualCode'),
+        ('ResultCommentText', 'ResultComment'),
+        ('ResultStatusIdentifier', 'ResultStatus'),
+        ('ResultMeasureValue', 'ResultValue'),
+        ('ActivityCommentText', 'SampComment'),
+        ('ActivityDepthHeightMeasure/MeasureValue', 'SampDepth'),
+        ('ActivityDepthAltitudeReferencePointText', 'SampDepthRef'),
+        ('ActivityDepthHeightMeasure/MeasureUnitCode', 'SampDepthU'),
+        ('SampleCollectionEquipmentName', 'SampEquip'),
+        ('ResultSampleFractionText', 'SampFrac'),
+        ('ActivityStartDate', 'SampleDate'),
+        ('ActivityStartTime/Time', 'SampleTime'),
+        ('ActivityIdentifier', 'SampleId'),
+        ('ActivityMediaSubdivisionName', 'SampMedia'),
+        ('SampleCollectionMethod/MethodIdentifier', 'SampMeth'),
+        ('SampleCollectionMethod/MethodName', 'SampMethName'),
+        ('ActivityTypeCode', 'SampType'),
+        ('MonitoringLocationIdentifier', 'StationId'),
+        ('ResultMeasure/MeasureUnitCode', 'Unit'),
         ('USGSPCode', 'USGSPCode')
     ])
 
@@ -131,15 +134,30 @@ class WqpProgram(object):
         #: normalize chemical units
         #: create charge balance
         #: return rows
+        print('processing stations')
         for csv_file in self._get_files(self.stations_folder):
             #: create csv reader
+            with open(csv_file, 'r') as f:
+                print('processing {}'.format(basename(csv_file)))
+
+                stations = []
+                reader = csv.reader(f)
+
+                header = reader.next()
+                for row in reader:
+                    stations.append(self._etl_column_names(row, self.station_config, header=header))
+
+                print('processing {}: done'.format(basename(csv_file)))
+
             #: cast to correct type
             #: normalize station id
             #: insert rows
-            print(csv_file)
 
+        print('processing results')
         #: this could be more functional
         for csv_file in self._get_files(self.results_folder):
+            print('processing {}'.format(basename(csv_file)))
+
             unique_sample_ids = self._get_distinct_sample_ids_from(csv_file)
 
             for sample_id in unique_sample_ids:
@@ -149,8 +167,11 @@ class WqpProgram(object):
                 #: normalize chemical names amounts and units
                 #: calculate charge balance
                 #: insert rows
+            print('processing {}: done'.format(basename(csv_file)))
 
     def _get_files(self, location):
+        '''Takes the file location and returns the csv's within it.'''
+
         if not location:
             raise Exception('Pass in a location containing csv files to import.')
 
@@ -162,6 +183,8 @@ class WqpProgram(object):
         return files
 
     def _get_distinct_sample_ids_from(self, file_path):
+        '''Given a file_path, this returns a set of unique sample ids.'''
+
         file_name = self._get_file_name_without_extension(file_path)
 
         unique_sample_ids = query_csv(self.distinct_sample_id_query.format(self.sample_id_field, file_name), [file_path])
@@ -171,26 +194,43 @@ class WqpProgram(object):
 
         return unique_sample_ids
 
-    def _get_samples_for_id(self, sample_id_set, file_path):
+    def _get_samples_for_id(self, sample_id_set, file_path, config=None):
+        '''Given a `(id,)` styled set of sample ids, this will return the sample
+        rows for the given csv file_path. The format will be an array of dictionaries
+        with the key being the destination field name and the value being the source csv value.
+
+        This is only invoked for result files.
+        '''
+
         file_name = self._get_file_name_without_extension(file_path)
-        sample_ids = query_csv(self.sample_id_query.format(file_name, self.sample_id_field, sample_id_set[0]), [file_path])
+        samples_for_id = query_csv(self.sample_id_query.format(file_name, self.sample_id_field, sample_id_set[0]), [file_path])
 
-        return self._etl_column_names(sample_ids)
+        return self._etl_column_names(samples_for_id, config or self.result_config)
 
-    def _etl_column_names(self, sample_ids):
-        if len(sample_ids) > 0:
-            #: remove header cell
+    def _etl_column_names(self, sample_ids, config, header=None):
+        if len(sample_ids) == 0:
+            return None
+
+        if not header:
+            #: get header cell from sample_ids and remove
             header = sample_ids.pop(0)
 
-            def return_value_if_not_in_config(key):
-                if key in self.config:
-                    return self.config[key]
+        def return_value_if_not_in_config(key):
+            if key in config:
+                return config[key]
 
-                return key
+            return key
 
-            header = map(lambda x: return_value_if_not_in_config(x), header)
+        header = map(lambda x: return_value_if_not_in_config(x), header)
+
+        #: if we are passing a single item, not an array of sets, don't map over it.
+        #: this is when we have a station and not a set of results
+        if len(sample_ids) > 0 and not isinstance(sample_ids[0], tuple):
+            return dict(zip(header, sample_ids))
 
         return map(lambda x: dict(zip(header, x)), sample_ids)
 
     def _get_file_name_without_extension(self, file_path):
+        '''Given a filename with an extension, the file name is returned without the extension.'''
+
         return splitext(basename(file_path))[0]

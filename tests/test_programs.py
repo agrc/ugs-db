@@ -52,12 +52,12 @@ class TestWqpProgram(unittest.TestCase):
         self.patient = WqpProgram(join('tests', 'data', 'WQP', 'incorrect_child_structure'))
 
     def test_get_samples_for_id_returns_correct_list(self):
-        self.patient.config = OrderedDict([('a', 'eh'), ('b', 'bee'), ('c', 'sea')])
         self.patient.sample_id_field = 'id'
+        config = OrderedDict([('a', 'eh'), ('b', 'bee'), ('c', 'sea')])
         sample_id_set = (1,)
         file_path = join('tests', 'data', 'WQP', 'get_sample_ids.csv')
 
-        rows = self.patient._get_samples_for_id(sample_id_set, file_path)
+        rows = self.patient._get_samples_for_id(sample_id_set, file_path, config=config)
 
         self.assertEqual(len(rows), 2)
         self.assertItemsEqual([
