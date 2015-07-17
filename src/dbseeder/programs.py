@@ -162,6 +162,7 @@ class WqpProgram(object):
 
             for sample_id in unique_sample_ids:
                 samples = self._get_samples_for_id(sample_id, csv_file)
+                print(samples[0])
                 #: etl samples
                 #: cast to corrent type
                 #: normalize chemical names amounts and units
