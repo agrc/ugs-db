@@ -32,10 +32,14 @@ class TestCaster(unittest.TestCase):
         })
 
 
-class TestRreproject(unittest.TestCase):
+class TestReproject(unittest.TestCase):
     def test_inverts_impropert_longitudes(self):
         actual = Reproject.to_utm(120, 40)
         valid = Reproject.to_utm(-120, 40)
 
         self.assertEqual(actual, valid)
-        self.asertEqual(actual, ('whatever this is', 'in utm'))
+
+        actual = Reproject.to_utm(-114, 40)
+        expected = (243900.35202192425, 4432069.056632294)
+        self.assertAlmostEqual(actual[0], expected[0], places=0)
+        self.assertAlmostEqual(actual[1], expected[1], places=0)

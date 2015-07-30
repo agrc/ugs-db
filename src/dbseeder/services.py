@@ -18,14 +18,11 @@ class Reproject(object):
     input_system = Proj(init='epsg:4326')
     ouput_system = Proj(init='epsg:26912')
 
-    #: these determine if the lon should be inverted
-    valid_longitude_range = range(-100, -120)
-
     @classmethod
     def to_utm(cls, x, y):
         '''reproject x and y from 4326 to 26912'''
 
-        if x not in cls.valid_longitude_range:
+        if x > 0:
             x = x * -1
 
         return transform(cls.input_system, cls.ouput_system, x, y)
