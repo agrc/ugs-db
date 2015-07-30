@@ -8,7 +8,8 @@ modules for acting on items
 '''
 
 import datetime
-# from dateutil.parser import parse
+import re
+from dateutil.parser import parse
 from pyproj import Proj, transform
 
 
@@ -31,17 +32,27 @@ class Reproject(object):
 class Caster(object):
     '''A utility class for casting data to its defined schema type'''
 
-    @staticmethod
-    def cast(row, schema):
+    wqx_re = re.compile('(_WQX)-')
+
+    @classmethod
+    def cast(cls, row, schema):
         '''Given a {string, string} dictionary (row) and the schema
         for the row (result or station) a new {string, string} dictionary
         (row) is returned with the values properly formatted.
         '''
 
-        def cast_field(row, field):
-            print(field)
-            value = row[field[0]]
+        for field in schema.iteritems():
+            def strip_wxp(id):
+                return re.sub(cls.wqx_re, '-', id)
 
+            #: if the value is not in the csv skip it
+            try:
+                value = row[field[0]]
+            except KeyError:
+                row[field[0]] = None
+                continue
+
+            #: try to remove all whitespace from strings
             try:
                 value = value.strip()
             except:
@@ -55,64 +66,38 @@ class Caster(object):
                 cast = int
             elif field[1]['type'] == 'Double':
                 cast = float
-            # elif field.type == 'Date':
-            #     if isinstance(value, datetime.datetime):
-            #         cast = lambda x: x
-            #     elif value == '':
-            #         return None
-            #     else:
-            #         cast = parse
+            elif field.type == 'Date':
+                if isinstance(value, datetime.datetime):
+                    cast = lambda x: x
+                elif value == '':
+                    row[field[0]] = None
+                    continue
+                else:
+                    cast = parse
 
             try:
                 value = cast(value)
-
-                if value == '':
-                    return {field[0]: None}
-
-                try:
-                    if field[1]['length']:
-                        value = value[:field[1]['length']]
-                except KeyError:
-                    pass
-
-                return {field[0]: value}
             except:
-                return {field[0]: None}
+                row[field[0]] = None
+                continue
 
-        row = map(lambda field: cast_field(row, field), schema.items())
+            if value == '':
+                row[field[0]] = None
+                continue
 
-        return row[0]
-        # if destination_value is None:
-        #     return None
-        #
-        # try:
-        #     destination_value = destination_value.strip()
-        # except:
-        #     pass
-        #
-        # if destination_field_type == 'TEXT':
-        #     cast = str
-        # elif destination_field_type == 'LONG':
-        #     cast = long
-        # elif destination_field_type == 'SHORT':
-        #     cast = int
-        # elif (destination_field_type == 'FLOAT' or
-        #       destination_field_type == 'DOUBLE'):
-        #     cast = float
-        # elif destination_field_type == 'DATE':
-        #     if isinstance(destination_value, datetime.datetime):
-        #         cast = lambda x: x
-        #     elif destination_value == '':
-        #         return None
-        #     else:
-        #         cast = parse
-        #
-        # try:
-        #     value = cast(destination_value)
-        #
-        #     if value == '':
-        #         return None
-        #
-        #     return value
-        # except:
-        #     return None
+            try:
+                if field[1]['length']:
+                    value = value[:field[1]['length']]
+            except KeyError:
+                pass
+
+            try:
+                if field[1]['actions']:
+                    for action in field[1]['actions']:
+                        value = locals()[action](value)
+            except KeyError:
+                pass
+
+            row[field[0]] = value
+
+        return row

@@ -8,6 +8,7 @@ the different source programs
 '''
 
 import csv
+from dbseeder.services import Caster
 from querycsv import query_csv
 from os.path import join, isdir, basename, splitext
 from glob import glob
@@ -157,7 +158,8 @@ class WqpProgram(object):
                         continue
 
                     #: cast (plus strip _WXP)
-                    #: normalize
+                    row = Caster.cast(row, self.station_onfig)
+
                     stations.append(row)
 
                     station_id = row['StationId']
