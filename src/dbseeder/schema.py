@@ -23,7 +23,8 @@ station = OrderedDict([
     ('StationId', {
         'alias': 'Monitoring Location Id',
         'type': 'String',
-        'length': 100
+        'length': 100,
+        'actions': ['strip_wxp']
     }),
     ('StationName', {
         'alias': 'Monitoring Location Name',
@@ -347,7 +348,8 @@ result = OrderedDict([
     ('StationId', {
         'alias': 'Station Id',
         'type': 'Text',
-        'length': 50
+        'length': 50,
+        'actions': ['strip_wxp']
     }),
     ('Unit', {
         'alias': 'Result Measure Unit',

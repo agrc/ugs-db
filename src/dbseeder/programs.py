@@ -150,7 +150,15 @@ class WqpProgram(object):
 
                 header = reader.next()
                 for row in reader:
-                    stations.append(self._etl_column_names(row, self.station_config, header=header))
+                    row = self._etl_column_names(row, self.station_config, header=header)
+
+                    station_id = row['StationId']
+                    if not station_id.contains('_WXP') and station_id in wxps:
+                        continue
+
+                    #: cast (plus strip _WXP)
+                    #: normalize
+                    stations.append(row)
 
                     station_id = row['StationId']
                     if not self.wqx_re.search(station_id) and station_id in wxps:
