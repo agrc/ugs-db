@@ -14,6 +14,7 @@ from os.path import join, isdir, basename, splitext
 from glob import glob
 from collections import OrderedDict
 import re
+import pyodbc
 
 
 class WqpProgram(object):
@@ -110,7 +111,7 @@ class WqpProgram(object):
         ('USGSPCode', 'USGSPCode')
     ])
 
-    def __init__(self, file_location):
+    def __init__(self, file_location, db):
         super(WqpProgram, self).__init__()
 
         #: check that file_location exists wqp/results and wqp/stations
@@ -128,6 +129,8 @@ class WqpProgram(object):
         #: all is well set the folders for seeding later on
         self.results_folder = results_folder
         self.stations_folder = stations_folder
+
+        self.db = db
 
     def seed(self):
         #: loop over each csv file
@@ -161,10 +164,13 @@ class WqpProgram(object):
                     #: cast (plus strip _WXP)
                     row = Caster.cast(row, self.station_onfig)
 
-                    #: reproject
+                    #: reproject and update shape
                     row = self._update_shape(row)
 
                     stations.append(row)
+
+                #: insert stations
+                self._insert_rows(stations)
 
                 print('processing {}: done'.format(basename(csv_file)))
 
@@ -280,3 +286,11 @@ class WqpProgram(object):
         row['Shape'] = template.format(shape[0], shape[1])
 
         return row
+
+    def _insert_rows(self, stations):
+        if not self.cursor:
+            c = pyodbc.connect(self.db['connection_string'])
+            self.cursor = c.cursor()
+
+
+        self.cursor.execute(sql)

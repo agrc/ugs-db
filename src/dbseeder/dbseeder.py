@@ -10,16 +10,15 @@ the dbseeder module
 import pyodbc
 import factory
 from os.path import join, dirname
+try:
+    import secrets
+except Exception:
+    import secrets_sample as secrets
 
 
 class Seeder(object):
 
     def create_tables(self, who):
-        try:
-            import secrets
-        except Exception:
-            import secrets_sample as secrets
-
         db = secrets.dev
         if who == 'stage':
             db = secrets.stage
@@ -50,12 +49,18 @@ class Seeder(object):
         return True
 
     def seed(self, source, file_location, who):
+        db = secrets.dev
+        if who == 'stage':
+            db = secrets.stage
+        elif who == 'prod':
+            db = secrets.prod
+
         programs = self._parse_source_args(source)
 
         for program in programs:
             seederClass = factory.create(program)
 
-            seeder = seederClass(file_location)
+            seeder = seederClass(file_location, db)
             seeder.seed()
 
     def _parse_source_args(self, source):
