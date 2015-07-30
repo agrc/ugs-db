@@ -76,3 +76,24 @@ class TestWqpProgram(unittest.TestCase):
         ids = self.patient._get_wxps_duplicate_ids(join('tests', 'data', 'WQP', 'wqxids.csv'))
 
         self.assertItemsEqual(set([u'UTAHDWQ-4904410', u'UTAHDWQ-4904640', u'UTAHDWQ-4904610']), ids)
+
+    def test_update_shape_with_valid_lat_lon(self):
+        row = {
+            'Shape': None,
+            'Lon_X': -114,
+            'Lat_Y': 40
+        }
+        actual = self.patient._update_shape(row)['Shape']
+        expected = 'geometry::STGeomFromText(\'POINT ({} {})\', 26912)'.format(243900.352024, 4432069.05679)
+
+        self.assertEqual(actual, expected)
+
+    def test_shape_is_none_with_invalid_lat_lon(self):
+        row = {
+            'Shape': None,
+            'Lon_X': None,
+            'Lat_Y': 40
+        }
+        actual = self.patient._update_shape(row)['Shape']
+
+        self.assertIsNone(actual)

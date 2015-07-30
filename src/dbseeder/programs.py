@@ -8,7 +8,7 @@ the different source programs
 '''
 
 import csv
-from dbseeder.services import Caster
+from services import Caster, Reproject
 from querycsv import query_csv
 from os.path import join, isdir, basename, splitext
 from glob import glob
@@ -153,21 +153,17 @@ class WqpProgram(object):
                 for row in reader:
                     row = self._etl_column_names(row, self.station_config, header=header)
 
-                    station_id = row['StationId']
-                    if not station_id.contains('_WXP') and station_id in wxps:
-                        continue
-
-                    #: cast (plus strip _WXP)
-                    row = Caster.cast(row, self.station_onfig)
-
-                    stations.append(row)
-
+                    #: check for duplicate stationid and skip if found
                     station_id = row['StationId']
                     if not self.wqx_re.search(station_id) and station_id in wxps:
                         continue
 
                     #: cast (plus strip _WXP)
-                    #: normalize
+                    row = Caster.cast(row, self.station_onfig)
+
+                    #: reproject
+                    row = self._update_shape(row)
+
                     stations.append(row)
 
                 print('processing {}: done'.format(basename(csv_file)))
@@ -269,3 +265,18 @@ class WqpProgram(object):
         '''Given a filename with an extension, the file name is returned without the extension.'''
 
         return splitext(basename(file_path))[0]
+
+    def _update_shape(self, row):
+        template = 'geometry::STGeomFromText(\'POINT ({} {})\', 26912)'
+
+        x = row['Lon_X']
+        y = row['Lat_Y']
+
+        if not (x and y):
+            return row
+
+        shape = Reproject.to_utm(x, y)
+
+        row['Shape'] = template.format(shape[0], shape[1])
+
+        return row
