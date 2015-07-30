@@ -159,6 +159,9 @@ station = OrderedDict([
     ('WIN', {
         'alias': 'WR Well Id',
         'type': 'Long Int'
+    }),
+    ('Shape', {
+        'type': 'Geometry'
     })
 ])
 

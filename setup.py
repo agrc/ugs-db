@@ -73,7 +73,8 @@ setup(
         'docopt==0.6.2',
         'pyodbc==3.0.10',
         'querycsv-redux==3.1.1',
-        'pyproj==1.9.4'
+        'pyproj==1.9.4',
+        'dateutils==0.6.6'
     ],
     dependency_links=[
     ],
