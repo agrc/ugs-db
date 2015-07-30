@@ -12,6 +12,7 @@ from querycsv import query_csv
 from os.path import join, isdir, basename, splitext
 from glob import glob
 from collections import OrderedDict
+import re
 
 
 class WqpProgram(object):
@@ -21,6 +22,9 @@ class WqpProgram(object):
     sample_id_field = 'ActivityIdentifier'
     distinct_sample_id_query = 'select distinct({}) from {}'
     sample_id_query = 'select * from {} where {} = \'{}\''
+    monitoring_location_id_field = 'MonitoringLocationIdentifier'
+    wqxids_query = 'select {0} from {1} where {0} LIKE \'%_WQX%\''
+    wqx_re = re.compile('(_WQX)-')
     station = False
     result = True
 
@@ -141,11 +145,20 @@ class WqpProgram(object):
                 print('processing {}'.format(basename(csv_file)))
 
                 stations = []
+                wxps = self._get_wxps_duplicate_ids(csv_file)
                 reader = csv.reader(f)
 
                 header = reader.next()
                 for row in reader:
                     stations.append(self._etl_column_names(row, self.station_config, header=header))
+
+                    station_id = row['StationId']
+                    if not self.wqx_re.search(station_id) and station_id in wxps:
+                        continue
+
+                    #: cast (plus strip _WXP)
+                    #: normalize
+                    stations.append(row)
 
                 print('processing {}: done'.format(basename(csv_file)))
 
@@ -194,6 +207,17 @@ class WqpProgram(object):
             unique_sample_ids.pop(0)
 
         return unique_sample_ids
+
+    def _get_wxps_duplicate_ids(self, file_path):
+        '''Given the file_path, return the list of stripped station ids that have the _WQX suffix'''
+
+        file_name = self._get_file_name_without_extension(file_path)
+
+        rows = query_csv(self.wqxids_query.format(self.monitoring_location_id_field, file_name), [file_path])
+        if len(rows) > 0:
+            rows.pop(0)
+
+        return set([re.sub(self.wqx_re, '-', row[0]) for row in rows])
 
     def _get_samples_for_id(self, sample_id_set, file_path, config=None):
         '''Given a `(id,)` styled set of sample ids, this will return the sample

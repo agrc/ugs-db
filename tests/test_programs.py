@@ -71,3 +71,8 @@ class TestWqpProgram(unittest.TestCase):
 
         self.assertEqual(len(rows), 2)
         self.assertItemsEqual([('1',), ('2',)], rows)
+
+    def test_get_wxps_duplicate_ids(self):
+        ids = self.patient._get_wxps_duplicate_ids(join('tests', 'data', 'WQP', 'wqxids.csv'))
+
+        self.assertItemsEqual(set([u'UTAHDWQ-4904410', u'UTAHDWQ-4904640', u'UTAHDWQ-4904610']), ids)
