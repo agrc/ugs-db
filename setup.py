@@ -72,7 +72,8 @@ setup(
     install_requires=[
         'docopt==0.6.2',
         'pyodbc==3.0.10',
-        'querycsv-redux==3.1.1'
+        'querycsv-redux==3.1.1',
+        'pyproj==1.9.4'
     ],
     dependency_links=[
     ],
