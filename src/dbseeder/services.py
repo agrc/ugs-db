@@ -66,7 +66,7 @@ class Caster(object):
                 cast = int
             elif field[1]['type'] == 'Double':
                 cast = float
-            elif field.type == 'Date':
+            elif field[1]['type'] == 'Date':
                 if isinstance(value, datetime.datetime):
                     cast = lambda x: x
                 elif value == '':
