@@ -8,24 +8,30 @@ the different source programs
 '''
 
 import csv
-from services import Caster, Reproject
-from querycsv import query_csv
-from os.path import join, isdir, basename, splitext
-from glob import glob
-from collections import OrderedDict
-import re
 import pyodbc
+import re
+import schema
+from collections import OrderedDict
+from glob import glob
+from os.path import join, isdir, basename, splitext
+from querycsv import query_csv
+from services import Caster, Reproject
 
 
 class WqpProgram(object):
     '''class for handling wqp csv files'''
 
     datasouce = 'WQP'
-    sample_id_field = 'ActivityIdentifier'
-    distinct_sample_id_query = 'select distinct({}) from {}'
-    sample_id_query = 'select * from {} where {} = \'{}\''
-    monitoring_location_id_field = 'MonitoringLocationIdentifier'
-    wqxids_query = 'select {0} from {1} where {0} LIKE \'%_WQX%\''
+
+    fields = {
+        'sample_id': 'ActivityIdentifier',
+        'monitoring_location_id': 'MonitoringLocationIdentifier'
+    }
+    sql = {
+        'distinct_sample_id': 'select distinct({}) from {}',
+        'sample_id': 'select * from {} where {} = \'{}\'',
+        'wqxids': 'select {0} from {1} where {0} LIKE \'%_WQX%\'',
+        'station_insert': 'insert into Stations (OrgId, OrgName, StationId, StationName, StationType, StationComment, HUC8, Lon_X, Lat_Y, HorAcc, HorAccUnit, HorCollMeth, HorRef, Elev, ElevUnit, ElevAcc, ElevAccUnit, ElevMeth, ElevRef, StateCode, CountyCode, Aquifer, FmType, AquiferType, ConstDate, Depth, DepthUnit, HoleDepth, HoleDUnit, demELEVm, DataSource, WIN, Shape) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', }
     wqx_re = re.compile('(_WQX)-')
     station = False
     result = True
@@ -162,12 +168,19 @@ class WqpProgram(object):
                         continue
 
                     #: cast (plus strip _WXP)
-                    row = Caster.cast(row, self.station_onfig)
+                    row = Caster.cast(row, schema.station)
 
                     #: reproject and update shape
                     row = self._update_shape(row)
 
-                    stations.append(row)
+                    # TODO: we do need to remove items that aren't in the schema
+                    # and the order needs to be set
+                    for key in row.keys():
+                        if key in schema.station:
+                            continue
+                        row.pop(key, None)
+
+                    stations.append(row.values())
 
                 #: insert stations
                 self._insert_rows(stations)
@@ -213,7 +226,7 @@ class WqpProgram(object):
 
         file_name = self._get_file_name_without_extension(file_path)
 
-        unique_sample_ids = query_csv(self.distinct_sample_id_query.format(self.sample_id_field, file_name), [file_path])
+        unique_sample_ids = query_csv(self.sql['distinct_sample_id'].format(self.fields['sample_id'], file_name), [file_path])
         if len(unique_sample_ids) > 0:
             #: remove header cell
             unique_sample_ids.pop(0)
@@ -225,7 +238,7 @@ class WqpProgram(object):
 
         file_name = self._get_file_name_without_extension(file_path)
 
-        rows = query_csv(self.wqxids_query.format(self.monitoring_location_id_field, file_name), [file_path])
+        rows = query_csv(self.sql['wqxids'].format(self.fields['monitoring_location_id'], file_name), [file_path])
         if len(rows) > 0:
             rows.pop(0)
 
@@ -240,7 +253,7 @@ class WqpProgram(object):
         '''
 
         file_name = self._get_file_name_without_extension(file_path)
-        samples_for_id = query_csv(self.sample_id_query.format(file_name, self.sample_id_field, sample_id_set[0]), [file_path])
+        samples_for_id = query_csv(self.sql['sample_id'].format(file_name, self.fields['sample_id'], sample_id_set[0]), [file_path])
 
         return self._etl_column_names(samples_for_id, config or self.result_config)
 
@@ -288,9 +301,9 @@ class WqpProgram(object):
         return row
 
     def _insert_rows(self, stations):
-        if not self.cursor:
+        if not hasattr(self, 'cursor') or not self.cursor:
             c = pyodbc.connect(self.db['connection_string'])
             self.cursor = c.cursor()
 
-
-        self.cursor.execute(sql)
+        # TODO: stations are way out of order with the schema doc
+        self.cursor.executemany(self.sql['station_insert'], stations)
