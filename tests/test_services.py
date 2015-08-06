@@ -116,8 +116,7 @@ class TestReproject(unittest.TestCase):
         self.assertAlmostEqual(actual[1], expected[1], places=0)
 
 
-class TestNormalizer(unittest.TestCase):
-
+class TestNormalizer_NormalizeSample(unittest.TestCase):
     def setUp(self):
         self.patient = Normalizer()
 
@@ -128,6 +127,29 @@ class TestNormalizer(unittest.TestCase):
             'ResultValue': 0
         })
         self.assertEqual(row['Unit'], 'unit')
+
+
+class TestNormalizer_ReorderFilter(unittest.TestCase):
+    schema = OrderedDict([
+        ('a', {}),
+        ('b', {}),
+        ('c', {})
+    ])
+
+    def setUp(self):
+        self.patient = Normalizer()
+
+    def test_reorders_row_according_to_schema(self):
+        row = {'a': 1, 'c': 3, 'b': 2}
+        expected = {'a': 1, 'b': 2, 'c': 3}
+
+        self.assertEqual(self.patient.reorder_filter(row, self.schema), expected)
+
+    def test_filters_values_not_in_schema(self):
+        row = {'a': 1, 'c': 3, 'b': 2, 'd': 5}
+        expected = {'a': 1, 'b': 2, 'c': 3}
+
+        self.assertEqual(self.patient.reorder_filter(row, self.schema), expected)
 
 
 class TestChargeBalancer(unittest.TestCase):

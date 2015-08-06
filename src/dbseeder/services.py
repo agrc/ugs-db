@@ -11,6 +11,7 @@ import datetime
 import re
 from dateutil.parser import parse
 from pyproj import Proj, transform
+from collections import OrderedDict
 
 
 class Reproject(object):
@@ -266,6 +267,13 @@ class Normalizer(object):
 
         return row
 
+    @classmethod
+    def reorder_filter(cls, row, schema):
+        new_row = OrderedDict()
+        for field in schema:
+            new_row[field] = row[field]
+
+        return new_row
 
 class ChargeBalancer(object):
     """https://github.com/agrc/ugs-chemistry/issues/22"""
