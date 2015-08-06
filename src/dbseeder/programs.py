@@ -15,7 +15,7 @@ from collections import OrderedDict
 from glob import glob
 from os.path import join, isdir, basename, splitext
 from querycsv import query_csv
-from services import Caster, Reproject
+from services import Caster, Reproject, Normalizer
 
 
 class WqpProgram(object):
