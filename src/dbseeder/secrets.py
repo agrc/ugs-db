@@ -1,5 +1,5 @@
 dev = {
-    'connection_string': 'DRIVER={SQL Server};SERVER=(local);DATABASE=UGSWaterChemistry;UID=UGSAdmin;PWD=test'
+    'connection_string': 'DRIVER={SQL Server};SERVER=(local);DATABASE=UGSWaterChemistry;UID=UGSAdmin;PWD=UGSAdmin'
 }
 
 stage = {
