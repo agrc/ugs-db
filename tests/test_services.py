@@ -122,17 +122,12 @@ class TestNormalizer(unittest.TestCase):
         self.patient = Normalizer()
 
     def test_unit_is_unchanged_if_chemical_is_none(self):
-        amount, unit, chemical = self.patient.normalize_unit(None, 'unit', 0)
-        self.assertEqual(unit, 'unit')
-
-    def test_station_id_normalization(self):
-        # self.patient = Normalizable(self.patient)
-
-        self.patient.normalize_fields['stationid'] = ('UTAHDWQ_WQX-4946750', 0)
-
-        actual = self.patient.normalize(['UTAHDWQ_WQX-4946750', 'Junk'])
-
-        self.assertListEqual(actual, ['UTAHDWQ-4946750', 'Junk'])
+        row = self.patient.normalize_sample({
+            'Param': None,
+            'Unit': 'unit',
+            'ResultValue': 0
+        })
+        self.assertEqual(row['Unit'], 'unit')
 
 
 class TestChargeBalancer(unittest.TestCase):

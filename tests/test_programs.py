@@ -17,7 +17,7 @@ from os.path import join, basename
 class TestWqpProgram(unittest.TestCase):
     def setUp(self):
         self.test_get_files_folder = join('tests', 'data', 'WQP', 'get_files')
-        self.patient = WqpProgram(self.test_get_files_folder)
+        self.patient = WqpProgram(self.test_get_files_folder, 'bad db connection')
 
     def test_get_files_finds_files(self):
         expected_results = [
@@ -61,8 +61,8 @@ class TestWqpProgram(unittest.TestCase):
 
         self.assertEqual(len(rows), 2)
         self.assertItemsEqual([
-                              {'eh': 'a1', 'bee': 'b1', 'sea': 'c1', 'id': '1'},
-                              {'eh': 'a2', 'bee': 'b2', 'sea': 'c2', 'id': '1'}
+                              {'eh': 'a1', 'bee': 'b1', 'sea': 'c1', 'ActivityIdentifier': '1'},
+                              {'eh': 'a2', 'bee': 'b2', 'sea': 'c2', 'ActivityIdentifier': '1'}
                               ], rows)
 
     def test_get_distict_samples(self):
