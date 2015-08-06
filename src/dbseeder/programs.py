@@ -173,12 +173,8 @@ class WqpProgram(object):
                     #: reproject and update shape
                     row = self._update_shape(row)
 
-                    # TODO: we do need to remove items that aren't in the schema
-                    # and the order needs to be set
-                    for key in row.keys():
-                        if key in schema.station:
-                            continue
-                        row.pop(key, None)
+                    #: reorder and filter out any fields not in the schema
+                    row = Normalizer.reorder_filter(row, schema.station)
 
                     stations.append(row.values())
 
@@ -186,10 +182,6 @@ class WqpProgram(object):
                 self._insert_rows(stations)
 
                 print('processing {}: done'.format(basename(csv_file)))
-
-            #: cast to correct type
-            #: normalize station id
-            #: insert rows
 
         print('processing results')
         #: this could be more functional
@@ -305,5 +297,4 @@ class WqpProgram(object):
             c = pyodbc.connect(self.db['connection_string'])
             self.cursor = c.cursor()
 
-        # TODO: stations are way out of order with the schema doc
         self.cursor.executemany(self.sql['station_insert'], stations)
