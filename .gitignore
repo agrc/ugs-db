@@ -58,3 +58,4 @@ src/**/*.csv
 *.xlsx
 *.sublime-workspace
 *.sde
+secrets.py
