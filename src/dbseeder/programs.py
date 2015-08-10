@@ -31,7 +31,12 @@ class WqpProgram(object):
         'distinct_sample_id': 'select distinct({}) from {}',
         'sample_id': 'select * from {} where {} = \'{}\'',
         'wqxids': 'select {0} from {1} where {0} LIKE \'%_WQX%\'',
-        'station_insert': 'insert into Stations (OrgId, OrgName, StationId, StationName, StationType, StationComment, HUC8, Lon_X, Lat_Y, HorAcc, HorAccUnit, HorCollMeth, HorRef, Elev, ElevUnit, ElevAcc, ElevAccUnit, ElevMeth, ElevRef, StateCode, CountyCode, Aquifer, FmType, AquiferType, ConstDate, Depth, DepthUnit, HoleDepth, HoleDUnit, demELEVm, DataSource, WIN, Shape) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', }
+        'station_insert': ('insert into Stations (OrgId, OrgName, StationId, StationName, StationType, StationComment,'
+                           + ' HUC8, Lon_X, Lat_Y, HorAcc, HorAccUnit, HorCollMeth, HorRef, Elev, ElevUnit, ElevAcc,'
+                           + ' ElevAccUnit, ElevMeth, ElevRef, StateCode, CountyCode, Aquifer, FmType, AquiferType,'
+                           + ' ConstDate, Depth, DepthUnit, HoleDepth, HoleDUnit, demELEVm, DataSource, WIN, Shape)'
+                           + ' values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
+    }
     wqx_re = re.compile('(_WQX)-')
     station = False
     result = True

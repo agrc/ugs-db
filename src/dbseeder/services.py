@@ -275,6 +275,7 @@ class Normalizer(object):
 
         return new_row
 
+
 class ChargeBalancer(object):
     """https://github.com/agrc/ugs-chemistry/issues/22"""
 
