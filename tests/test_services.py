@@ -11,9 +11,10 @@ import unittest
 from collections import OrderedDict
 from dbseeder.services import Caster, Reproject, ChargeBalancer, Normalizer
 from dbseeder.models import Concentration
+import datetime
 
 
-class TestCaster(unittest.TestCase):
+class TestCaster_Cast(unittest.TestCase):
     def test_can_cast_to_string_and_truncate(self):
         number = 12345
         simple_row = {
@@ -101,6 +102,38 @@ class TestCaster(unittest.TestCase):
             'Something': 'does not get removed',
             'Missing': None
         })
+
+
+class TestCaster_CastForSQL(unittest.TestCase):
+    def test_doesnt_touch_shape(self):
+        input = {'Shape': 'blah'}
+        actual = Caster.cast_for_sql(input)
+
+        self.assertEqual(actual['Shape'], 'blah')
+
+    def test_quotes_strings(self):
+        input = {'hello': 'blah', 'hello2': 'blah2'}
+        actual = Caster.cast_for_sql(input)
+
+        self.assertEqual(actual['hello2'], "'blah2'")
+
+    def test_casts_dates(self):
+        input = {'date': datetime.datetime(2015, 8, 11)}
+        actual = Caster.cast_for_sql(input)
+
+        self.assertEqual(actual['date'], "Cast('2015-08-11' as datetime)")
+
+    def test_null_for_none(self):
+        input = {'test': None}
+        actual = Caster.cast_for_sql(input)
+
+        self.assertEqual(actual['test'], 'Null')
+
+    def test_convert_numbers_to_strings(self):
+        input = {'num': 1.2345}
+        actual = Caster.cast_for_sql(input)
+
+        self.assertEqual(actual['num'], '1.2345')
 
 
 class TestReproject(unittest.TestCase):

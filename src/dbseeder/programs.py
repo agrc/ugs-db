@@ -35,7 +35,7 @@ class WqpProgram(object):
                            + ' HUC8, Lon_X, Lat_Y, HorAcc, HorAccUnit, HorCollMeth, HorRef, Elev, ElevUnit, ElevAcc,'
                            + ' ElevAccUnit, ElevMeth, ElevRef, StateCode, CountyCode, Aquifer, FmType, AquiferType,'
                            + ' ConstDate, Depth, DepthUnit, HoleDepth, HoleDUnit, demELEVm, DataSource, WIN, Shape)'
-                           + ' values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
+                           + ' values ({})')
     }
     wqx_re = re.compile('(_WQX)-')
     station = False
@@ -179,7 +179,10 @@ class WqpProgram(object):
                     row = self._update_shape(row)
 
                     #: reorder and filter out any fields not in the schema
+                    #: TODO: this is not necessary if we dynamically build the sql statement
                     row = Normalizer.reorder_filter(row, schema.station)
+
+                    row = Caster.cast_for_sql(row)
 
                     stations.append(row.values())
 
@@ -302,4 +305,8 @@ class WqpProgram(object):
             c = pyodbc.connect(self.db['connection_string'])
             self.cursor = c.cursor()
 
-        self.cursor.executemany(self.sql['station_insert'], stations)
+        for s in stations:
+            statement = self.sql['station_insert'].format(','.join(s))
+            self.cursor.execute(statement)
+
+        self.cursor.commit()

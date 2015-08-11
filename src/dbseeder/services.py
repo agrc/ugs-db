@@ -103,6 +103,28 @@ class Caster(object):
 
         return row
 
+    @classmethod
+    def cast_for_sql(cls, row):
+        '''
+        Format the values for the sql insert statement
+        '''
+
+        for key in row.keys():
+            value = row[key]
+            if key == 'Shape':
+                continue
+            elif isinstance(value, basestring):
+                new_value = "'{}'".format(value)
+            elif isinstance(value, datetime.datetime):
+                new_value = 'Cast(\'{}\' as datetime)'.format(value.strftime('%Y-%m-%d'))
+            elif value is None:
+                new_value = 'Null'
+            else:
+                new_value = str(value)
+            row[key] = new_value
+
+        return row
+
 
 class Normalizer(object):
 
