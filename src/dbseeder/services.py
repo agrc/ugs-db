@@ -12,6 +12,7 @@ import re
 from dateutil.parser import parse
 from pyproj import Proj, transform
 from collections import OrderedDict
+from models import Concentration
 
 
 class Reproject(object):
@@ -41,7 +42,6 @@ class Caster(object):
         for the row (result or station) a new {string, string} dictionary
         (row) is returned with the values properly formatted.
         '''
-
         for field in schema.iteritems():
             def strip_wxp(id):
                 return re.sub(cls.wqx_re, '-', id)
@@ -323,22 +323,20 @@ class ChargeBalancer(object):
                     'no2': 0.021736513,
                     'no3': 0.016129032}
 
-    def __init__(self):
-        super(ChargeBalancer, self).__init__()
-
-    def calculate_charge_balance(self, concentration):
-        calcium = self._conversions['ca'] * (concentration.calcium or 0)
-        magnesium = self._conversions['mg'] * (concentration.magnesium or 0)
-        sodium = self._conversions['na'] * (concentration.sodium or 0)
-        potassium = self._conversions['k'] * (concentration.potassium or 0)
-        chloride = self._conversions['cl'] * (concentration.chloride or 0)
-        bicarbonate = self._conversions[
+    @classmethod
+    def calculate_charge_balance(cls, concentration, sampleId):
+        calcium = cls._conversions['ca'] * (concentration.calcium or 0)
+        magnesium = cls._conversions['mg'] * (concentration.magnesium or 0)
+        sodium = cls._conversions['na'] * (concentration.sodium or 0)
+        potassium = cls._conversions['k'] * (concentration.potassium or 0)
+        chloride = cls._conversions['cl'] * (concentration.chloride or 0)
+        bicarbonate = cls._conversions[
             'hco3'] * (concentration.bicarbonate or 0)
-        sulfate = self._conversions['so4'] * (concentration.sulfate or 0)
-        carbonate = self._conversions['co3'] * (concentration.carbonate or 0)
-        nitrate = self._conversions['no3'] * (concentration.nitrate or 0)
-        nitrite = self._conversions['no2'] * (concentration.nitrite or 0)
-        sodium_plus_potassium = self._conversions[
+        sulfate = cls._conversions['so4'] * (concentration.sulfate or 0)
+        carbonate = cls._conversions['co3'] * (concentration.carbonate or 0)
+        nitrate = cls._conversions['no3'] * (concentration.nitrate or 0)
+        nitrite = cls._conversions['no2'] * (concentration.nitrite or 0)
+        sodium_plus_potassium = cls._conversions[
             'na+k'] * (concentration.sodium_plus_potassium or 0)
 
         cation = sum(
@@ -349,4 +347,28 @@ class ChargeBalancer(object):
         balance = 100 * float((cation - anion) / (cation + anion))
 
         # returns charge balance (%), cation total (meq/l), anion total (meq/l)
-        return round(balance, 2), round(cation, 2), round(anion, 2)
+        return [{
+            'SampleId': sampleId,
+            'Param': 'Charge Balance',
+            'ResultValue': round(balance, 2)
+        }, {
+            'SampleId': sampleId,
+            'Param': 'Cation Total',
+            'ResultValue': round(cation, 2)
+        }, {
+            'SampleId': sampleId,
+            'Param': 'Anions Total',
+            'ResultValue': round(anion, 2)
+        }]
+
+    @classmethod
+    def get_charge_balance(cls, rows):
+        con = Concentration()
+
+        for r in rows:
+            con.set(r['Param'], r['ResultValue'], r['DetectCond'])
+
+        if con.has_major_params():
+            return cls.calculate_charge_balance(con, rows[0]['SampleId'])
+        else:
+            return []

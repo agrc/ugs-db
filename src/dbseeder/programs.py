@@ -15,7 +15,8 @@ from collections import OrderedDict
 from glob import glob
 from os.path import join, isdir, basename, splitext
 from querycsv import query_csv
-from services import Caster, Reproject, Normalizer
+from functools import partial
+from services import Caster, Reproject, Normalizer, ChargeBalancer
 from timeit import default_timer
 
 
@@ -36,7 +37,13 @@ class WqpProgram(object):
                            + ' HUC8, Lon_X, Lat_Y, HorAcc, HorAccUnit, HorCollMeth, HorRef, Elev, ElevUnit, ElevAcc,'
                            + ' ElevAccUnit, ElevMeth, ElevRef, StateCode, CountyCode, Aquifer, FmType, AquiferType,'
                            + ' ConstDate, Depth, DepthUnit, HoleDepth, HoleDUnit, demELEVm, DataSource, WIN, Shape)'
-                           + ' values ({})')
+                           + ' values ({})'),
+        'result_insert': ('insert into Results (AnalysisDate, AnalytMeth, AnalytMethId, AutoQual, CAS_Reg, Chrg,'
+                          + ' DataSource, DetectCond, IdNum, LabComments, LabName, Lat_Y, LimitType, Lon_X, MDL,'
+                          + ' MDLUnit, MethodDescript, OrgId, OrgName, Param, ParamGroup, ProjectId, QualCode,'
+                          + ' ResultComment, ResultStatus, ResultValue, SampComment, SampDepth, SampDepthRef,'
+                          + ' SampDepthU, SampEquip, SampFrac, SampleDate, SampleTime, SampleId, SampMedia, SampMeth,'
+                          + ' SampMethName, SampType, StationId, Unit, USGSPCode) values ({})')
     }
     wqx_re = re.compile('(_WQX)-')
     station = False
@@ -145,15 +152,6 @@ class WqpProgram(object):
         self.db = db
 
     def seed(self):
-        #: loop over each csv file
-        #: load all stations first so you can validate results station id
-        #: csv query for distinct sampleid's on results
-        #: loop over query results and search for all sampleid's
-        #: for each group of sampleid's
-        #: etl the resulting rows
-        #: normalize chemical units
-        #: create charge balance
-        #: return rows
         print('processing stations')
         for csv_file in self._get_files(self.stations_folder):
             #: create csv reader
@@ -188,7 +186,7 @@ class WqpProgram(object):
                     stations.append(row.values())
 
                 #: insert stations
-                self._insert_rows(stations)
+                self._insert_rows(stations, self.sql['station_insert'])
 
                 print('processing {}: done'.format(basename(csv_file)))
 
@@ -200,13 +198,21 @@ class WqpProgram(object):
             unique_sample_ids = self._get_distinct_sample_ids_from(csv_file)
 
             for sample_id in unique_sample_ids:
+                import pdb; pdb.set_trace()
                 samples = self._get_samples_for_id(sample_id, csv_file)
-                print(samples[0])
-                #: etl samples
-                #: cast to corrent type
-                #: normalize chemical names amounts and units
-                #: calculate charge balance
-                #: insert rows
+
+                samples = map(partial(Caster.cast, schema=schema.result), samples)
+
+                samples = map(Normalizer.normalize_sample, samples)
+
+                samples.extend(ChargeBalancer.get_charge_balance(samples))
+
+                samples = map(Normalizer.reorder_filter, samples)
+
+                samples = map(Caster.cast_for_sql, samples)
+
+                self._insert_rows(samples, self.sql['result_insert'])
+
             print('processing {}: done'.format(basename(csv_file)))
 
     def _get_files(self, location):
@@ -258,13 +264,13 @@ class WqpProgram(object):
 
         return self._etl_column_names(samples_for_id, config or self.result_config)
 
-    def _etl_column_names(self, sample_ids, config, header=None):
-        if len(sample_ids) == 0:
+    def _etl_column_names(self, rows, config, header=None):
+        if len(rows) == 0:
             return None
 
         if not header:
-            #: get header cell from sample_ids and remove
-            header = sample_ids.pop(0)
+            #: get header cell from rows and remove
+            header = rows.pop(0)
 
         def return_value_if_not_in_config(key):
             if key in config:
@@ -276,10 +282,10 @@ class WqpProgram(object):
 
         #: if we are passing a single item, not an array of sets, don't map over it.
         #: this is when we have a station and not a set of results
-        if len(sample_ids) > 0 and not isinstance(sample_ids[0], tuple):
-            return dict(zip(header, sample_ids))
+        if not isinstance(rows[0], tuple):
+            return dict(zip(header, rows))
 
-        return map(lambda x: dict(zip(header, x)), sample_ids)
+        return map(lambda x: dict(zip(header, x)), rows)
 
     def _get_file_name_without_extension(self, file_path):
         '''Given a filename with an extension, the file name is returned without the extension.'''
@@ -301,15 +307,15 @@ class WqpProgram(object):
 
         return row
 
-    def _insert_rows(self, stations):
+    def _insert_rows(self, rows, insert_statement):
         if not hasattr(self, 'cursor') or not self.cursor:
             c = pyodbc.connect(self.db['connection_string'])
             self.cursor = c.cursor()
 
         i = 1
         start = default_timer()
-        for s in stations:
-            statement = self.sql['station_insert'].format(','.join(s))
+        for row in rows:
+            statement = insert_statement.format(','.join(row))
 
             try:
                 self.cursor.execute(statement)

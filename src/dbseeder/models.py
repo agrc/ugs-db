@@ -160,9 +160,9 @@ class Concentration(object):
         new = concentration.chemical_amount
 
         for key in new.keys():
-            self._set(key, new[key], detect_cond)
+            self.set(key, new[key], detect_cond)
 
-    def _set(self, chemical, amount, detect_cond=None):
+    def set(self, chemical, amount, detect_cond=None):
         """
         sets the chemical value. Handles duplicate chemicals
         """

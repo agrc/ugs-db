@@ -202,48 +202,71 @@ class TestNormalizer_ReorderFilter(unittest.TestCase):
 class TestChargeBalancer(unittest.TestCase):
 
     def setUp(self):
-        self.patient = ChargeBalancer()
+        self.patient = ChargeBalancer
 
     def test_calculate_charge_balance_correctly(self):
-        # sample = nwisaz.01.92600003
+        sampleId = 'nwisaz.01.92600003'
         expected_balance = 0.27
         expected_cations = 10.45
         expected_anions = 10.39
 
         dep = Concentration()
 
-        dep._set('Bicarbonate', 188, None)
-        dep._set('Calcium', 66, None)
-        dep._set('Chloride', 57, None)
-        dep._set('Magnesium', 27, None)
-        dep._set('Nitrate', 0.8, None)
-        dep._set('Potassium', 7.4, None)
-        dep._set('Sodium', 109, None)
-        dep._set('Sulfate', 273, None)
+        dep.set('Bicarbonate', 188, None)
+        dep.set('Calcium', 66, None)
+        dep.set('Chloride', 57, None)
+        dep.set('Magnesium', 27, None)
+        dep.set('Nitrate', 0.8, None)
+        dep.set('Potassium', 7.4, None)
+        dep.set('Sodium', 109, None)
+        dep.set('Sulfate', 273, None)
 
-        balance, cations, anions = self.patient.calculate_charge_balance(dep)
+        row = self.patient.calculate_charge_balance(dep, sampleId)
 
-        self.assertEqual(balance, expected_balance)
-        self.assertEqual(cations, expected_cations)
-        self.assertEqual(anions, expected_anions)
+        self.assertEqual(row[0], {
+            'SampleId': sampleId,
+            'Param': 'Charge Balance',
+            'ResultValue': expected_balance
+        })
+        self.assertEqual(row[1], {
+            'SampleId': sampleId,
+            'Param': 'Cation Total',
+            'ResultValue': expected_cations
+        })
+        self.assertEqual(row[2], {
+            'SampleId': sampleId,
+            'Param': 'Anions Total',
+            'ResultValue': expected_anions
+        })
 
-        # sample = nwisaz.01.92600006
         expected_balance = -0.02
         expected_cations = 4.21
         expected_anions = 4.21
 
         dep = Concentration()
 
-        dep._set('Bicarbonate', 139, None)
-        dep._set('Calcium', 46, None)
-        dep._set('Chloride', 12, None)
-        dep._set('Magnesium', 10, None)
-        dep._set('Nitrate', 0.5, None)
-        dep._set('Sodium plus potassium', 25, None)
-        dep._set('Sulfate', 76, None)
+        dep.set('Bicarbonate', 139, None)
+        dep.set('Calcium', 46, None)
+        dep.set('Chloride', 12, None)
+        dep.set('Magnesium', 10, None)
+        dep.set('Nitrate', 0.5, None)
+        dep.set('Sodium plus potassium', 25, None)
+        dep.set('Sulfate', 76, None)
 
-        balance, cations, anions = self.patient.calculate_charge_balance(dep)
+        row = self.patient.calculate_charge_balance(dep, sampleId)
 
-        self.assertEqual(balance, expected_balance)
-        self.assertEqual(cations, expected_cations)
-        self.assertEqual(anions, expected_anions)
+        self.assertEqual(row[0], {
+            'SampleId': sampleId,
+            'Param': 'Charge Balance',
+            'ResultValue': expected_balance
+        })
+        self.assertEqual(row[1], {
+            'SampleId': sampleId,
+            'Param': 'Cation Total',
+            'ResultValue': expected_cations
+        })
+        self.assertEqual(row[2], {
+            'SampleId': sampleId,
+            'Param': 'Anions Total',
+            'ResultValue': expected_anions
+        })
