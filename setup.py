@@ -77,6 +77,7 @@ setup(
         'dateutils==0.6.6'
     ],
     dependency_links=[
+        "git+https://github.com/steveoh/querycsv-redux.git#egg=querycsv-redux"
     ],
     extras_require={
     },

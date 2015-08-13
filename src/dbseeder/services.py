@@ -91,6 +91,10 @@ class Caster(object):
                     value = value[:field[1]['length']]
             except KeyError:
                 pass
+            except TypeError:
+                #: you can't trim a datetime object
+                #: but it has a length for some reason?
+                pass
 
             try:
                 if field[1]['actions']:
@@ -114,9 +118,15 @@ class Caster(object):
             if key == 'Shape':
                 continue
             elif isinstance(value, basestring):
-                new_value = "'{}'".format(value)
+                new_value = "'{}'".format(value.replace('\'', '\'\''))
             elif isinstance(value, datetime.datetime):
-                new_value = 'Cast(\'{}\' as datetime)'.format(value.strftime('%Y-%m-%d'))
+                try:
+                    new_value = 'Cast(\'{}\' as datetime)'.format(value.strftime('%Y-%m-%d'))
+                except ValueError:
+                    #: year is before 1900
+                    iso = value.isoformat()
+                    date_string = iso.strip().split('T')[0]
+                    new_value = 'Cast(\'{}\' as datetime)'.format(date_string)
             elif value is None:
                 new_value = 'Null'
             else:
