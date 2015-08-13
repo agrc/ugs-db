@@ -12,6 +12,7 @@ import re
 from dateutil.parser import parse
 from pyproj import Proj, transform
 from collections import OrderedDict
+from models import Concentration
 
 
 class Reproject(object):
@@ -41,7 +42,6 @@ class Caster(object):
         for the row (result or station) a new {string, string} dictionary
         (row) is returned with the values properly formatted.
         '''
-
         for field in schema.iteritems():
             def strip_wxp(id):
                 return re.sub(cls.wqx_re, '-', id)
@@ -91,6 +91,10 @@ class Caster(object):
                     value = value[:field[1]['length']]
             except KeyError:
                 pass
+            except TypeError:
+                #: you can't trim a datetime object
+                #: but it has a length for some reason?
+                pass
 
             try:
                 if field[1]['actions']:
@@ -114,9 +118,15 @@ class Caster(object):
             if key == 'Shape':
                 continue
             elif isinstance(value, basestring):
-                new_value = "'{}'".format(value)
+                new_value = "'{}'".format(value.replace('\'', '\'\''))
             elif isinstance(value, datetime.datetime):
-                new_value = 'Cast(\'{}\' as datetime)'.format(value.strftime('%Y-%m-%d'))
+                try:
+                    new_value = 'Cast(\'{}\' as datetime)'.format(value.strftime('%Y-%m-%d'))
+                except ValueError:
+                    #: year is before 1900
+                    iso = value.isoformat()
+                    date_string = iso.strip().split('T')[0]
+                    new_value = 'Cast(\'{}\' as datetime)'.format(date_string)
             elif value is None:
                 new_value = 'Null'
             else:
@@ -178,6 +188,7 @@ class Normalizer(object):
 
         chemical = chemical.lower()
         milli_per_liter = new_unit = 'mg/l'
+        conversion_rate = None
 
         if (chemical in inorganics_major_metals or chemical in inorganics_major_nonmetals) and unit == 'ug/l':
             conversion_rate = 0.001
@@ -195,67 +206,67 @@ class Normalizer(object):
             conversion_rate = 3.131265779
         elif chemical == 'carbonate as caco3' and unit == milli_per_liter:
             conversion_rate = 0.60
-            new_chemical = 'Carbonate'
+            chemical = 'Carbonate'
         elif ((chemical == 'bicarbonate as caco3' and (unit == milli_per_liter or unit == 'mg/l as caco3')) or
               (chemical == 'alkalinity, bicarbonate as caco3' and unit == milli_per_liter)):
             conversion_rate = 1.22
-            new_chemical = 'Bicarbonate'
+            chemical = 'Bicarbonate'
         elif chemical == 'alkalinity, carbonate' and unit == 'mg/l as caco3':
             conversion_rate = 0.60
-            new_chemical = 'Carbonate'
+            chemical = 'Carbonate'
         elif (chemical == 'carbonate as co3' or chemical == 'carbonate (co3)') and unit == milli_per_liter:
-            new_chemical = 'Carbonate'
+            chemical = 'Carbonate'
         elif chemical == 'bicarbonate as hco3' and unit == milli_per_liter:
-            new_chemical = 'Bicarbonate'
+            chemical = 'Bicarbonate'
         elif chemical == 'alkalinity, carbonate as caco3' and unit == 'mg/l as caco3':
             conversion_rate = 0.60
-            new_chemical = 'Carbonate based on alkalinity'
+            chemical = 'Carbonate based on alkalinity'
         elif (((chemical == 'alkalinity, bicarbonate' or chemical == 'alkalinity') and unit == 'mg/l as caco3') or
               ((chemical == 't.alk/caco3' or chemical == 'total alkalinity as caco3') and unit == milli_per_liter)):
             conversion_rate = 1.22
-            new_chemical = 'Bicarbonate based on alkalinity'
+            chemical = 'Bicarbonate based on alkalinity'
         elif chemical == 'bicarbonate' and unit == 'mg/l as caco3':
             conversion_rate = 1.22
         elif chemical == 'phosphate-phosphorus' and (unit == 'mg/l as p' or unit == milli_per_liter):
             conversion_rate = 3.131265779
-            new_chemical = 'Phosphate'
+            chemical = 'Phosphate'
         elif chemical == 'sulfate as s' and unit == milli_per_liter:
             conversion_rate = 0.333792756
-            new_chemical = 'Sulfate'
+            chemical = 'Sulfate'
         elif ((chemical == 'nitrate-nitrogen' and unit == 'mg/l as n') or
               (chemical == 'nitrate as n' and (unit == 'mg/l as n' or unit == milli_per_liter))):
             conversion_rate = 4.426802887
-            new_chemical = 'Nitrate'
+            chemical = 'Nitrate'
         elif chemical == 'nitrate-nitrogen' and unit == milli_per_liter:
             conversion_rate = 4.426802887
-            new_chemical = 'Nitrite'
+            chemical = 'Nitrite'
         elif chemical == 'nitrite as n' and (unit == 'mg/l as n' or unit == milli_per_liter):
             conversion_rate = 3.284535258
-            new_chemical = 'Nitrite'
+            chemical = 'Nitrite'
         elif ((chemical == 'nitrate-nitrite' or
                chemical == 'inorganic nitrogen (nitrate and nitrite) as n' or
                chemical == 'nitrate + nitrate as n' or
                chemical == 'no2+no3 as n') and
               (unit == 'mg/l as n' or unit == milli_per_liter)):
             conversion_rate = 4.426802887
-            new_chemical = 'Nitrate and nitrite as NO3'
+            chemical = 'Nitrate and nitrite as NO3'
         elif ((chemical == 'phosphate-phosphorus as p' and unit == 'mg/l as p') or
               (chemical == 'orthophosphate as p' and unit == 'mg/l as p') or
               (chemical == 'phosphate-phosphorus as p' and unit == milli_per_liter) or
               (chemical == 'orthophosphate as p' and unit == milli_per_liter) or
               (chemical == 'orthophosphate' and unit == 'mg/l as p')):
             conversion_rate = 3.131265779
-            new_chemical = 'Phosphate'
+            chemical = 'Phosphate'
         elif chemical == 'ammonia and ammonium' and unit == 'mg/l nh4':
             conversion_rate = 1.05918619
-            new_chemical = 'Ammonia'
+            chemical = 'Ammonia'
         elif ((chemical == 'ammonia-nitrogen as n' and unit == 'mg/l as n') or
               (chemical == 'ammonia-nitrogen' and unit == 'mg/l as n') or
               (chemical == 'ammonia-nitrogen as n' and unit == milli_per_liter) or
               (chemical == 'ammonia-nitrogen' and unit == milli_per_liter) or
               (chemical == 'ammonia' and unit == 'mg/l as n')):
             conversion_rate = 1.21587526
-            new_chemical = 'Ammonia'
+            chemical = 'Ammonia'
         elif chemical == 'specific conductance' and unit == 'ms/cm':
             conversion_rate = 1000
             new_unit = 'uS/cm'
@@ -280,10 +291,12 @@ class Normalizer(object):
         else:
             return row
 
-        row['Param'] = new_chemical
+        row['Param'] = chemical
         row['Unit'] = new_unit
-        row['ResultValue'] = calculate_amount(row['ResultValue'], conversion_rate)
-        pgroup = calculate_paramgroup(new_chemical)
+        if conversion_rate is not None:
+            row['ResultValue'] = calculate_amount(row['ResultValue'], conversion_rate)
+
+        pgroup = calculate_paramgroup(chemical)
         if pgroup:
             row['ParamGroup'] = pgroup
 
@@ -313,22 +326,20 @@ class ChargeBalancer(object):
                     'no2': 0.021736513,
                     'no3': 0.016129032}
 
-    def __init__(self):
-        super(ChargeBalancer, self).__init__()
-
-    def calculate_charge_balance(self, concentration):
-        calcium = self._conversions['ca'] * (concentration.calcium or 0)
-        magnesium = self._conversions['mg'] * (concentration.magnesium or 0)
-        sodium = self._conversions['na'] * (concentration.sodium or 0)
-        potassium = self._conversions['k'] * (concentration.potassium or 0)
-        chloride = self._conversions['cl'] * (concentration.chloride or 0)
-        bicarbonate = self._conversions[
+    @classmethod
+    def calculate_charge_balance(cls, concentration, sampleId):
+        calcium = cls._conversions['ca'] * (concentration.calcium or 0)
+        magnesium = cls._conversions['mg'] * (concentration.magnesium or 0)
+        sodium = cls._conversions['na'] * (concentration.sodium or 0)
+        potassium = cls._conversions['k'] * (concentration.potassium or 0)
+        chloride = cls._conversions['cl'] * (concentration.chloride or 0)
+        bicarbonate = cls._conversions[
             'hco3'] * (concentration.bicarbonate or 0)
-        sulfate = self._conversions['so4'] * (concentration.sulfate or 0)
-        carbonate = self._conversions['co3'] * (concentration.carbonate or 0)
-        nitrate = self._conversions['no3'] * (concentration.nitrate or 0)
-        nitrite = self._conversions['no2'] * (concentration.nitrite or 0)
-        sodium_plus_potassium = self._conversions[
+        sulfate = cls._conversions['so4'] * (concentration.sulfate or 0)
+        carbonate = cls._conversions['co3'] * (concentration.carbonate or 0)
+        nitrate = cls._conversions['no3'] * (concentration.nitrate or 0)
+        nitrite = cls._conversions['no2'] * (concentration.nitrite or 0)
+        sodium_plus_potassium = cls._conversions[
             'na+k'] * (concentration.sodium_plus_potassium or 0)
 
         cation = sum(
@@ -339,4 +350,28 @@ class ChargeBalancer(object):
         balance = 100 * float((cation - anion) / (cation + anion))
 
         # returns charge balance (%), cation total (meq/l), anion total (meq/l)
-        return round(balance, 2), round(cation, 2), round(anion, 2)
+        return [{
+            'SampleId': sampleId,
+            'Param': 'Charge Balance',
+            'ResultValue': round(balance, 2)
+        }, {
+            'SampleId': sampleId,
+            'Param': 'Cation Total',
+            'ResultValue': round(cation, 2)
+        }, {
+            'SampleId': sampleId,
+            'Param': 'Anions Total',
+            'ResultValue': round(anion, 2)
+        }]
+
+    @classmethod
+    def get_charge_balance(cls, rows):
+        con = Concentration()
+
+        for r in rows:
+            con.set(r['Param'], r['ResultValue'], r['DetectCond'])
+
+        if con.has_major_params:
+            return cls.calculate_charge_balance(con, rows[0]['SampleId'])
+        else:
+            return []

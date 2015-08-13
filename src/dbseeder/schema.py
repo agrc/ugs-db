@@ -172,21 +172,21 @@ result = OrderedDict([
     }),
     ('AnalytMeth', {
         'alias': 'Analytical Method Name',
-        'type': 'Text',
+        'type': 'String',
         'length': 150
     }),
     ('AnalytMethId', {
         'alias': 'Analytical Method Id',
-        'type': 'Text',
+        'type': 'String',
         'length': 50
     }),
     ('AutoQual', {
         'alias': 'Auto Quality Check',
-        'type': 'Text'
+        'type': 'String'
     }),
     ('CAS_Reg', {
         'alias': 'CAS Registry',
-        'type': 'Text',
+        'type': 'String',
         'length': 50
     }),
     ('Chrg', {
@@ -195,11 +195,11 @@ result = OrderedDict([
     }),
     ('DataSource', {
         'alias': 'Database Source',
-        'type': 'Text'
+        'type': 'String'
     }),
     ('DetectCond', {
         'alias': 'Result Detection Condition',
-        'type': 'Text',
+        'type': 'String',
         'length': 50
     }),
     ('IdNum', {
@@ -208,12 +208,12 @@ result = OrderedDict([
     }),
     ('LabComments', {
         'alias': 'Laboratory Comment',
-        'type': 'Text',
+        'type': 'String',
         'length': 500
     }),
     ('LabName', {
         'alias': 'Laboratory Name',
-        'type': 'Text',
+        'type': 'String',
         'length': 100
     }),
     ('Lat_Y', {
@@ -222,7 +222,7 @@ result = OrderedDict([
     }),
     ('LimitType', {
         'alias': 'Detection Limit Type',
-        'type': 'Text',
+        'type': 'String',
         'length': 250
     }),
     ('Lon_X', {
@@ -235,51 +235,51 @@ result = OrderedDict([
     }),
     ('MDLUnit', {
         'alias': 'Detection Quantitation Limit Unit',
-        'type': 'Text',
+        'type': 'String',
         'length': 50
     }),
     ('MethodDescript', {
         'alias': 'Method Description',
-        'type': 'Text',
+        'type': 'String',
         'length': 100
     }),
     ('OrgId', {
         'alias': 'Organization Id',
-        'type': 'Text',
+        'type': 'String',
         'length': 50
     }),
     ('OrgName', {
         'alias': 'Organization Name',
-        'type': 'Text',
+        'type': 'String',
         'length': 150
     }),
     ('Param', {
         'alias': 'Parameter',
-        'type': 'Text',
+        'type': 'String',
         'length': 500
     }),
     ('ParamGroup', {
         'alias': 'Parameter Group',
-        'type': 'Text'
+        'type': 'String'
     }),
     ('ProjectId', {
         'alias': 'Project Id',
-        'type': 'Text',
+        'type': 'String',
         'length': 50
     }),
     ('QualCode', {
         'alias': 'Measure Qualifier Code',
-        'type': 'Text',
+        'type': 'String',
         'length': 50
     }),
     ('ResultComment', {
         'alias': 'Result Comment',
-        'type': 'Text',
+        'type': 'String',
         'length': 1500
     }),
     ('ResultStatus', {
         'alias': 'Result Status',
-        'type': 'Text',
+        'type': 'String',
         'length': 50
     }),
     ('ResultValue', {
@@ -288,7 +288,7 @@ result = OrderedDict([
     }),
     ('SampComment', {
         'alias': 'Sample Comment',
-        'type': 'Text',
+        'type': 'String',
         'length': 50
     }),
     ('SampDepth', {
@@ -297,22 +297,22 @@ result = OrderedDict([
     }),
     ('SampDepthRef', {
         'alias': 'Sample Depth Reference',
-        'type': 'Text',
+        'type': 'String',
         'length': 50
     }),
     ('SampDepthU', {
         'alias': 'Sample Depth Units',
-        'type': 'Text',
+        'type': 'String',
         'length': 50
     }),
     ('SampEquip', {
         'alias': 'Collection Equipment',
-        'type': 'Text',
+        'type': 'String',
         'length': 75
     }),
     ('SampFrac', {
         'alias': 'Result Sample Fraction',
-        'type': 'Text',
+        'type': 'String',
         'length': 50
     }),
     ('SampleDate', {
@@ -325,43 +325,43 @@ result = OrderedDict([
     }),
     ('SampleId', {
         'alias': 'Sample Id',
-        'type': 'Text',
+        'type': 'String',
         'length': 100
     }),
     ('SampMedia', {
         'alias': 'Sample Media',
-        'type': 'Text',
+        'type': 'String',
         'length': 50
     }),
     ('SampMeth', {
         'alias': 'Collection Method',
-        'type': 'Text',
+        'type': 'String',
         'length': 50
     }),
     ('SampMethName', {
         'alias': 'Collection Method Name',
-        'type': 'Text',
+        'type': 'String',
         'length': 75
     }),
     ('SampType', {
         'alias': 'Sample Type',
-        'type': 'Text',
+        'type': 'String',
         'length': 75
     }),
     ('StationId', {
         'alias': 'Station Id',
-        'type': 'Text',
+        'type': 'String',
         'length': 50,
         'actions': ['strip_wxp']
     }),
     ('Unit', {
         'alias': 'Result Measure Unit',
-        'type': 'Text',
+        'type': 'String',
         'length': 50
     }),
     ('USGSPCode', {
         'alias': 'USGS P Code',
-        'type': 'Text',
+        'type': 'String',
         'length': 50
     })
 ])
