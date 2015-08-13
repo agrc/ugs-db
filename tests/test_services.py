@@ -115,13 +115,27 @@ class TestCaster_CastForSQL(unittest.TestCase):
         input = {'hello': 'blah', 'hello2': 'blah2'}
         actual = Caster.cast_for_sql(input)
 
+        self.assertEqual(actual['hello'], "'blah'")
         self.assertEqual(actual['hello2'], "'blah2'")
+
+    def test_escape_quotes_in_strings(self):
+        input = {'hello': 'bl\'ah', 'hello2': 'bl\'\'ah2'}
+        actual = Caster.cast_for_sql(input)
+
+        self.assertEqual(actual['hello'], "'bl''ah'")
+        self.assertEqual(actual['hello2'], "'bl''''ah2'")
 
     def test_casts_dates(self):
         input = {'date': datetime.datetime(2015, 8, 11)}
         actual = Caster.cast_for_sql(input)
 
         self.assertEqual(actual['date'], "Cast('2015-08-11' as datetime)")
+
+    def test_casts_old_dates(self):
+        input = {'date': datetime.datetime(1800, 8, 11)}
+        actual = Caster.cast_for_sql(input)
+
+        self.assertEqual(actual['date'], "Cast('1800-08-11' as datetime)")
 
     def test_null_for_none(self):
         input = {'test': None}

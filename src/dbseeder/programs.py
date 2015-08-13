@@ -16,6 +16,7 @@ from glob import glob
 from os.path import join, isdir, basename, splitext
 from querycsv import query_csv
 from services import Caster, Reproject, Normalizer
+from timeit import default_timer
 
 
 class WqpProgram(object):
@@ -305,8 +306,22 @@ class WqpProgram(object):
             c = pyodbc.connect(self.db['connection_string'])
             self.cursor = c.cursor()
 
+        i = 1
+        start = default_timer()
         for s in stations:
             statement = self.sql['station_insert'].format(','.join(s))
-            self.cursor.execute(statement)
 
-        self.cursor.commit()
+            try:
+                self.cursor.execute(statement)
+                i += 1
+            except Exception, e:
+                print(statement)
+                del self.cursor
+                raise e
+
+            if i % 5000 == 0:
+                self.cursor.commit()
+                print('station total: {} in {}'.format(i, default_timer() - start))
+                start = default_timer()
+
+            self.cursor.commit()
