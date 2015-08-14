@@ -188,6 +188,7 @@ class Normalizer(object):
 
         chemical = chemical.lower()
         milli_per_liter = new_unit = 'mg/l'
+        conversion_rate = None
 
         if (chemical in inorganics_major_metals or chemical in inorganics_major_nonmetals) and unit == 'ug/l':
             conversion_rate = 0.001
@@ -205,67 +206,67 @@ class Normalizer(object):
             conversion_rate = 3.131265779
         elif chemical == 'carbonate as caco3' and unit == milli_per_liter:
             conversion_rate = 0.60
-            new_chemical = 'Carbonate'
+            chemical = 'Carbonate'
         elif ((chemical == 'bicarbonate as caco3' and (unit == milli_per_liter or unit == 'mg/l as caco3')) or
               (chemical == 'alkalinity, bicarbonate as caco3' and unit == milli_per_liter)):
             conversion_rate = 1.22
-            new_chemical = 'Bicarbonate'
+            chemical = 'Bicarbonate'
         elif chemical == 'alkalinity, carbonate' and unit == 'mg/l as caco3':
             conversion_rate = 0.60
-            new_chemical = 'Carbonate'
+            chemical = 'Carbonate'
         elif (chemical == 'carbonate as co3' or chemical == 'carbonate (co3)') and unit == milli_per_liter:
-            new_chemical = 'Carbonate'
+            chemical = 'Carbonate'
         elif chemical == 'bicarbonate as hco3' and unit == milli_per_liter:
-            new_chemical = 'Bicarbonate'
+            chemical = 'Bicarbonate'
         elif chemical == 'alkalinity, carbonate as caco3' and unit == 'mg/l as caco3':
             conversion_rate = 0.60
-            new_chemical = 'Carbonate based on alkalinity'
+            chemical = 'Carbonate based on alkalinity'
         elif (((chemical == 'alkalinity, bicarbonate' or chemical == 'alkalinity') and unit == 'mg/l as caco3') or
               ((chemical == 't.alk/caco3' or chemical == 'total alkalinity as caco3') and unit == milli_per_liter)):
             conversion_rate = 1.22
-            new_chemical = 'Bicarbonate based on alkalinity'
+            chemical = 'Bicarbonate based on alkalinity'
         elif chemical == 'bicarbonate' and unit == 'mg/l as caco3':
             conversion_rate = 1.22
         elif chemical == 'phosphate-phosphorus' and (unit == 'mg/l as p' or unit == milli_per_liter):
             conversion_rate = 3.131265779
-            new_chemical = 'Phosphate'
+            chemical = 'Phosphate'
         elif chemical == 'sulfate as s' and unit == milli_per_liter:
             conversion_rate = 0.333792756
-            new_chemical = 'Sulfate'
+            chemical = 'Sulfate'
         elif ((chemical == 'nitrate-nitrogen' and unit == 'mg/l as n') or
               (chemical == 'nitrate as n' and (unit == 'mg/l as n' or unit == milli_per_liter))):
             conversion_rate = 4.426802887
-            new_chemical = 'Nitrate'
+            chemical = 'Nitrate'
         elif chemical == 'nitrate-nitrogen' and unit == milli_per_liter:
             conversion_rate = 4.426802887
-            new_chemical = 'Nitrite'
+            chemical = 'Nitrite'
         elif chemical == 'nitrite as n' and (unit == 'mg/l as n' or unit == milli_per_liter):
             conversion_rate = 3.284535258
-            new_chemical = 'Nitrite'
+            chemical = 'Nitrite'
         elif ((chemical == 'nitrate-nitrite' or
                chemical == 'inorganic nitrogen (nitrate and nitrite) as n' or
                chemical == 'nitrate + nitrate as n' or
                chemical == 'no2+no3 as n') and
               (unit == 'mg/l as n' or unit == milli_per_liter)):
             conversion_rate = 4.426802887
-            new_chemical = 'Nitrate and nitrite as NO3'
+            chemical = 'Nitrate and nitrite as NO3'
         elif ((chemical == 'phosphate-phosphorus as p' and unit == 'mg/l as p') or
               (chemical == 'orthophosphate as p' and unit == 'mg/l as p') or
               (chemical == 'phosphate-phosphorus as p' and unit == milli_per_liter) or
               (chemical == 'orthophosphate as p' and unit == milli_per_liter) or
               (chemical == 'orthophosphate' and unit == 'mg/l as p')):
             conversion_rate = 3.131265779
-            new_chemical = 'Phosphate'
+            chemical = 'Phosphate'
         elif chemical == 'ammonia and ammonium' and unit == 'mg/l nh4':
             conversion_rate = 1.05918619
-            new_chemical = 'Ammonia'
+            chemical = 'Ammonia'
         elif ((chemical == 'ammonia-nitrogen as n' and unit == 'mg/l as n') or
               (chemical == 'ammonia-nitrogen' and unit == 'mg/l as n') or
               (chemical == 'ammonia-nitrogen as n' and unit == milli_per_liter) or
               (chemical == 'ammonia-nitrogen' and unit == milli_per_liter) or
               (chemical == 'ammonia' and unit == 'mg/l as n')):
             conversion_rate = 1.21587526
-            new_chemical = 'Ammonia'
+            chemical = 'Ammonia'
         elif chemical == 'specific conductance' and unit == 'ms/cm':
             conversion_rate = 1000
             new_unit = 'uS/cm'
@@ -290,10 +291,12 @@ class Normalizer(object):
         else:
             return row
 
-        row['Param'] = new_chemical
+        row['Param'] = chemical
         row['Unit'] = new_unit
-        row['ResultValue'] = calculate_amount(row['ResultValue'], conversion_rate)
-        pgroup = calculate_paramgroup(new_chemical)
+        if conversion_rate is not None:
+            row['ResultValue'] = calculate_amount(row['ResultValue'], conversion_rate)
+
+        pgroup = calculate_paramgroup(chemical)
         if pgroup:
             row['ParamGroup'] = pgroup
 

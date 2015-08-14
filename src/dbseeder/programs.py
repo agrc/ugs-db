@@ -226,8 +226,8 @@ class WqpProgram(object):
 
         files = glob(join(location, '*.csv'))
 
-        # if len(files) < 1:
-        #     raise Exception(location, 'No csv files found.')
+        if len(files) < 1:
+            raise Exception(location, 'No csv files found.')
 
         return files
 
@@ -324,7 +324,6 @@ class WqpProgram(object):
                 self.cursor.execute(statement)
                 i += 1
             except Exception, e:
-                print(statement)
                 del self.cursor
                 raise e
 
