@@ -368,7 +368,7 @@ class ChargeBalancer(object):
         for r in rows:
             con.set(r['Param'], r['ResultValue'], r['DetectCond'])
 
-        if con.has_major_params():
+        if con.has_major_params:
             return cls.calculate_charge_balance(con, rows[0]['SampleId'])
         else:
             return []

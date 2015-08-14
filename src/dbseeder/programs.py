@@ -198,20 +198,23 @@ class WqpProgram(object):
             unique_sample_ids = self._get_distinct_sample_ids_from(csv_file)
 
             for sample_id in unique_sample_ids:
-                import pdb; pdb.set_trace()
                 samples = self._get_samples_for_id(sample_id, csv_file)
 
                 samples = map(partial(Caster.cast, schema=schema.result), samples)
 
                 samples = map(Normalizer.normalize_sample, samples)
 
-                samples.extend(ChargeBalancer.get_charge_balance(samples))
+                charge_balances = ChargeBalancer.get_charge_balance(samples)
 
-                samples = map(Normalizer.reorder_filter, samples)
+                samples.extend(charge_balances)
+
+                samples = map(partial(Normalizer.reorder_filter, schema=schema.result), samples)
 
                 samples = map(Caster.cast_for_sql, samples)
 
-                self._insert_rows(samples, self.sql['result_insert'])
+                rows = map(lambda sample: sample.values(), samples)
+
+                self._insert_rows(rows, self.sql['result_insert'])
 
             print('processing {}: done'.format(basename(csv_file)))
 
@@ -223,8 +226,8 @@ class WqpProgram(object):
 
         files = glob(join(location, '*.csv'))
 
-        if len(files) < 1:
-            raise Exception(location, 'No csv files found.')
+        # if len(files) < 1:
+        #     raise Exception(location, 'No csv files found.')
 
         return files
 
