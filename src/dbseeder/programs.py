@@ -23,7 +23,7 @@ from timeit import default_timer
 class WqpProgram(object):
     '''class for handling wqp csv files'''
 
-    datasouce = 'WQP'
+    datasource = 'WQP'
 
     fields = {
         'sample_id': 'ActivityIdentifier',
@@ -134,7 +134,7 @@ class WqpProgram(object):
         super(WqpProgram, self).__init__()
 
         #: check that file_location exists wqp/results and wqp/stations
-        parent_folder = join(file_location, self.datasouce)
+        parent_folder = join(file_location, self.datasource)
 
         if not isdir(parent_folder):
             raise Exception('Pass in a location to the parent folder that contains WQP. {}'.format(parent_folder))
@@ -159,11 +159,13 @@ class WqpProgram(object):
                 print('processing {}'.format(basename(csv_file)))
 
                 stations = []
+                #: generate duplicate id list
                 wxps = self._get_wxps_duplicate_ids(csv_file)
                 reader = csv.reader(f)
 
                 header = reader.next()
                 for row in reader:
+                    #: push all the csv column names into the standard names
                     row = self._etl_column_names(row, self.station_config, header=header)
 
                     #: check for duplicate stationid and skip if found
@@ -174,15 +176,17 @@ class WqpProgram(object):
                     #: cast (plus strip _WXP)
                     row = Caster.cast(row, schema.station)
 
-                    #: reproject and update shape
-                    row = self._update_shape(row)
+                    #: set datasource, reproject and update shape
+                    row = self._update_row(row)
 
                     #: reorder and filter out any fields not in the schema
                     #: TODO: this is not necessary if we dynamically build the sql statement
                     row = Normalizer.reorder_filter(row, schema.station)
 
+                    #: have to generate sql manually because of quoting on spatial WKT
                     row = Caster.cast_for_sql(row)
 
+                    #: store row for later
                     stations.append(row.values())
 
                 #: insert stations
@@ -201,6 +205,9 @@ class WqpProgram(object):
                 samples = self._get_samples_for_id(sample_id, csv_file)
 
                 samples = map(partial(Caster.cast, schema=schema.result), samples)
+
+                #: set datasource
+                samples = map(self._update_row, samples)
 
                 samples = map(Normalizer.normalize_sample, samples)
 
@@ -268,6 +275,8 @@ class WqpProgram(object):
         return self._etl_column_names(samples_for_id, config or self.result_config)
 
     def _etl_column_names(self, rows, config, header=None):
+        '''TODO document this method'''
+
         if len(rows) == 0:
             return None
 
@@ -295,13 +304,20 @@ class WqpProgram(object):
 
         return splitext(basename(file_path))[0]
 
-    def _update_shape(self, row):
+    def _update_row(self, row):
+        '''Given a dictionary as a row, take the lat and long field, project it to UTM, and transform to WKT'''
+
         template = 'geometry::STGeomFromText(\'POINT ({} {})\', 26912)'
+
+        row['DataSource'] = self.datasource
 
         x = row['Lon_X']
         y = row['Lat_Y']
 
         if not (x and y):
+            return row
+
+        if 'Shape' not in row:
             return row
 
         shape = Reproject.to_utm(x, y)
@@ -311,12 +327,16 @@ class WqpProgram(object):
         return row
 
     def _insert_rows(self, rows, insert_statement):
+        '''Given a list of fields and an sql statement, execute the statement after `batch_size` number of statements'''
+        batch_size = 5000
+
         if not hasattr(self, 'cursor') or not self.cursor:
             c = pyodbc.connect(self.db['connection_string'])
             self.cursor = c.cursor()
 
         i = 1
         start = default_timer()
+        #: format and stage sql statements
         for row in rows:
             statement = insert_statement.format(','.join(row))
 
@@ -327,7 +347,8 @@ class WqpProgram(object):
                 del self.cursor
                 raise e
 
-            if i % 5000 == 0:
+            #: commit commands to database
+            if i % batch_size == 0:
                 self.cursor.commit()
                 print('station total: {} in {}'.format(i, default_timer() - start))
                 start = default_timer()

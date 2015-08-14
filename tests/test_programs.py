@@ -10,6 +10,7 @@ test the programs module
 import unittest
 from dbseeder.programs import WqpProgram
 from collections import OrderedDict
+from mock import Mock
 from nose.tools import raises
 from os.path import join, basename
 
@@ -77,16 +78,17 @@ class TestWqpProgram(unittest.TestCase):
 
         self.assertItemsEqual(set([u'UTAHDWQ-4904410', u'UTAHDWQ-4904640', u'UTAHDWQ-4904610']), ids)
 
-    def test_update_shape_with_valid_lat_lon(self):
+    def test_update_row_with_valid_lat_lon(self):
         row = {
             'Shape': None,
             'Lon_X': -114,
             'Lat_Y': 40
         }
-        actual = self.patient._update_shape(row)['Shape']
+        actual = self.patient._update_row(row)
         expected = 'geometry::STGeomFromText(\'POINT ({} {})\', 26912)'.format(243900.352024, 4432069.05679)
 
-        self.assertEqual(actual, expected)
+        self.assertEqual(actual['Shape'], expected)
+        self.assertEqual(actual['DataSource'], self.patient.datasource)
 
     def test_shape_is_none_with_invalid_lat_lon(self):
         row = {
@@ -94,6 +96,103 @@ class TestWqpProgram(unittest.TestCase):
             'Lon_X': None,
             'Lat_Y': 40
         }
-        actual = self.patient._update_shape(row)['Shape']
+        actual = self.patient._update_row(row)
 
-        self.assertIsNone(actual)
+        self.assertIsNone(actual['Shape'])
+        self.assertEqual(actual['DataSource'], self.patient.datasource)
+
+    def test_insert_args(self):
+        self.maxDiff = None
+        self.patient = WqpProgram(join('tests', 'data', 'WQP', 'insert'), 'db connection string')
+        mock = Mock()
+        self.patient._insert_rows = mock
+
+        self.patient.seed()
+
+        self.assertEqual(mock.call_count, 2)
+
+        station_call = mock.call_args_list[0]
+        result_call = mock.call_args_list[1]
+
+        station_row = station_call[0][0][0]
+
+        self.assertEqual(station_row, [
+            "'orgid'",
+            "'orgname'",
+            "'stationid'",
+            "'stationname'",
+            "'stationtype'",
+            "'stationcomment'",
+            "'huc8'",
+            "-114.0",  #: Longitude
+            "42.0",  #: latitude
+            "0.0",  #: HorAcc
+            "'hunit'",  #: HorAccUnit
+            "'horcollmeth'",
+            "'horref'",
+            "1.0",  #: Elev
+            "'elevunit'",
+            "2.0",
+            "'euni'",
+            "'elevmeth'",
+            "'elevref'",
+            "3",  #: StateCode
+            "4",  #: CountyCode
+            "'aquifer'",
+            "'fmtype'",
+            "'aquifertype'",
+            "Cast('2011-01-01' as datetime)",
+            "5.0",  #: depth
+            "'dunit'",
+            "6.0",  #: HoleDepth
+            "'hdunit'",
+            'Null',  #: demELEVm
+            "'WQP'",  #: DataSource
+            'Null',  #: WIN
+            "geometry::STGeomFromText('POINT (251535.079282 4654130.89121)', 26912)"
+        ])
+
+        result_rows = result_call[0][0][0]
+        self.assertEqual(result_rows, [
+            "Cast('2011-01-01' as datetime)",  #: analysis date
+            "'analythmeth'",
+            "'analythmethid'",
+            'Null',  #: AutoQual
+            'Null',  #: CAS_Reg
+            'Null',  #: Chrg
+            "'WQP'",  #: DataSource
+            "'detectcondition'",
+            'Null',  #: IdNum
+            "'labcomments'",
+            "'labname'",
+            'Null',  #: Lat
+            "'limittype'",
+            'Null',  #: Long
+            '0.0',  #: MDL
+            "'mdlunit'",
+            "'methoddescript'",
+            "'origid'",
+            "'orgname'",
+            "'param'",
+            "'projectid'",
+            "'qualcode'",
+            "'resultcomment'",
+            "'resultstatus'",
+            '1.0',  #: ResultValue
+            "'sampcomment'",
+            '2.0',  #: SampDepth
+            "'sampdepthref'",
+            "'sampdepthu'",
+            "'sampequip'",
+            "'sampfrac'",
+            "Cast('2011-01-02' as datetime)",  #: activity date
+            "Cast('2011-01-02 12:00:00' as datetime)",  #: activity Time
+            "'sampleid'",
+            "'sampmedia'",
+            "'sampmeth'",
+            "'sampmethname'",
+            "'samptype'",
+            "'stationid'",
+            "'unit'",
+            "'usgspcode'"
+        ])
