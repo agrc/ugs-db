@@ -174,6 +174,7 @@ class TestWqpProgram(unittest.TestCase):
             "'origid'",
             "'orgname'",
             "'param'",
+            'Null',  #: ParamGroup
             "'projectid'",
             "'qualcode'",
             "'resultcomment'",
@@ -186,7 +187,7 @@ class TestWqpProgram(unittest.TestCase):
             "'sampequip'",
             "'sampfrac'",
             "Cast('2011-01-02' as datetime)",  #: activity date
-            "Cast('2011-01-02 12:00:00' as datetime)",  #: activity Time
+            "'12:00:00'",  #: activity Time
             "'sampleid'",
             "'sampmedia'",
             "'sampmeth'",

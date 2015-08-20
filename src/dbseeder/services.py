@@ -123,9 +123,6 @@ class Caster(object):
         '''
 
         for key in row.keys():
-            if key == 'SampleTime':
-                from nose.tools import set_trace
-                set_trace()
             value = row[key]
             if key == 'Shape':
                 continue
@@ -139,6 +136,8 @@ class Caster(object):
                     iso = value.isoformat()
                     date_string = iso.strip().split('T')[0]
                     new_value = 'Cast(\'{}\' as datetime)'.format(date_string)
+            elif isinstance(value, datetime.time):
+                new_value = "'{}'".format(str(value))
             elif value is None:
                 new_value = 'Null'
             else:

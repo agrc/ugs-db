@@ -106,7 +106,7 @@ class WqpProgram(object):
         ('OrganizationIdentifier', 'OrgId'),
         ('OrganizationFormalName', 'OrgName'),
         ('CharacteristicName', 'Param'),
-        ('ParamGroup', '*ParamGroup'),
+        ('ParamGroup', '!ParamGroup'),
         ('ProjectIdentifier', 'ProjectId'),
         ('MeasureQualifierCode', 'QualCode'),
         ('ResultCommentText', 'ResultComment'),
