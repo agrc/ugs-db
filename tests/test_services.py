@@ -32,27 +32,11 @@ class TestCaster_Cast(unittest.TestCase):
             'OrgId': '12'
         })
 
-    def test_can_call_actions(self):
-        simple_row = {
-            'StationId': 'ABC_WQX-abc'
-        }
-        schema = OrderedDict([
-            ('StationId', {
-                'type': 'String',
-                'actions': ['strip_wxp']
-            })
-        ])
-
-        actual = Caster.cast(simple_row, schema)
-        self.assertEqual(actual, {
-            'StationId': 'ABC-abc'
-        })
-
     def test_output_format(self):
         number = 12345
         simple_row = {
             'OrgId': number,
-            'StationId': 'ABC_WQX-abc'
+            'StationId': 'ABC-abc'
         }
         schema = OrderedDict([
             ('OrgId', {
@@ -60,8 +44,7 @@ class TestCaster_Cast(unittest.TestCase):
                 'length': 2
             }),
             ('StationId', {
-                'type': 'String',
-                'actions': ['strip_wxp']
+                'type': 'String'
             })
         ])
 
@@ -70,22 +53,6 @@ class TestCaster_Cast(unittest.TestCase):
             'OrgId': '12',
             'StationId': 'ABC-abc'
         })
-
-        def test_can_call_actions(self):
-            simple_row = {
-                'StationId': 'ABC_WQX-abc'
-            }
-            schema = OrderedDict([
-                ('StationId', {
-                    'type': 'String',
-                    'actions': ['strip_wxp']
-                })
-            ])
-
-            actual = Caster.cast(simple_row, schema)
-            self.assertEqual(actual, {
-                'StationId': 'ABC-abc'
-            })
 
     def test_returns_none_for_missing_schema_items(self):
         simple_row = {
@@ -169,11 +136,39 @@ class TestNormalizer_NormalizeSample(unittest.TestCase):
 
     def test_unit_is_unchanged_if_chemical_is_none(self):
         row = self.patient.normalize_sample({
+            'StationId': 'ABC_WQX-abc',
             'Param': None,
             'Unit': 'unit',
             'ResultValue': 0
         })
         self.assertEqual(row['Unit'], 'unit')
+
+    def test_strips_wxp(self):
+        row = self.patient.normalize_sample({
+            'StationId': 'ABC_WQX-abc',
+            'Param': None,
+            'Unit': 'unit',
+            'ResultValue': 0
+        })
+        self.assertEqual(row['StationId'], 'ABC-abc')
+
+
+class TestNormalizer_NormlizeStation(unittest.TestCase):
+    def setUp(self):
+        self.patient = Normalizer()
+
+    def test_strips_wxp(self):
+        row = self.patient.normalize_station({
+            'StationId': 'ABC_WQX-abc'
+        })
+        self.assertEqual(row['StationId'], 'ABC-abc')
+
+    def test_normalizes_station_types(self):
+        row = self.patient.normalize_station({
+            'StationId': 'ABC_WQX-abc',
+            'StationType': 'Cave'
+        })
+        self.assertEqual(row['StationType'], 'Other Groundwater')
 
 
 class TestNormalizer_ReorderFilter(unittest.TestCase):

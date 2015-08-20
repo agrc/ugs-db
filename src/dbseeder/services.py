@@ -34,8 +34,6 @@ class Reproject(object):
 class Caster(object):
     '''A utility class for casting data to its defined schema type'''
 
-    wqx_re = re.compile('(_WQX)-')
-
     @classmethod
     def cast(cls, row, schema):
         '''Given a {string, string} dictionary (row) and the schema
@@ -43,9 +41,6 @@ class Caster(object):
         (row) is returned with the values properly formatted.
         '''
         for field in schema.iteritems():
-            def strip_wxp(id):
-                return re.sub(cls.wqx_re, '-', id)
-
             cast = None
             #: if the value is not in the csv skip it
             try:
@@ -154,17 +149,87 @@ class Normalizer(object):
          'Fluometuron', 'Fluoranthene', 'Fluoride', 'Fluorine', 'Fonofos', 'Gadolinium', 'Gage height', 'Gallium', 'Gasoline range organics', 'Germanium', 'Glyphosate', 'Gran acid neutralizing capacity', 'Gross alpha radioactivity, (Thorium-230 ref std)', 'Gross beta radioactivity, (Cesium-137 ref std)', 'Halon 1011', 'Hardness, Ca, Mg as CaCO3', 'Hardness, Ca, Mg', 'Hardness, carbonate', 'Hardness, non-carbonate', 'Height, gage', 'Helium', 'Heptachlor epoxide', 'Heptachlorobiphenyl', 'Heptachlor', 'Hexachlorobenzene', 'Hexachlorobutadiene', 'Hexachlorocyclopentadiene', 'Hexachloroethane', 'Hexazinone', 'Holmium', 'Hydrocarbons, petroleum', 'Hydrogen ion', 'Hydrogen', 'Hydroxide', 'Imazaquin', 'Imazethapyr', 'Imidacloprid', 'Indeno[1,2,3-cd]pyrene', 'Indole', 'Inorganic carbon', 'Inorganic nitrogen (nitrate and nitrite) as N', 'Inorganic nitrogen (nitrate and nitrite)', 'Instream features, est. stream width', 'Iodide', 'Iprodione', 'Iron, ion (Fe2+)', 'Iron', 'Isoborneol', 'Isofenphos', 'Isophorone', 'Isopropyl ether', 'Isoquinoline', 'Kjeldahl nitrogen', 'Krypton', 'Langelier index (pHs)', 'Lanthanum', 'Lead', 'Lindane', 'Linuron', 'Lithium', 'Lutetium', 'Magnesium', 'Malaoxon', 'Malathion', 'Manganese', 'MBAS', 'MCPA', 'MCPB', 'm-Dichlorobenzene', 'Mercury', 'meta & para Xylene mix', 'Metalaxyl', 'Methacrylonitrile', 'Methane', 'Methidathion', 'Methiocarb', 'Methomyl', 'Methoxychlor', 'Methyl acetate', 'Methyl acrylate', 'Methyl bromide', 'Methyl ethyl ketone', 'Methyl iodide', 'Methyl isobutyl ketone', 'Methyl methacrylate', 'Methyl paraoxon', 'Methyl parathion', 'Methyl salicylate', 'Methyl tert-butyl ether', 'Methylene chloride', 'Methylmercury(1+)', 'Metolachlor', 'Metribuzin', 'Metsulfuron-methyl', 'm-Nitroaniline', 'Molinate', 'Molybdenum', 'Morphinan-6-ol, 7,8-didehydro-4,5-epoxy-3-methoxy-17-methyl-, (5.alpha.,6.alpha.)-', 'Myclobutanil', 'N,N-Diethyl-m-toluamide', 'Naphthalene', 'Napropamide', 'n-Butylbenzene', 'Neburon', 'Neodymium', 'Neon', 'Nickel', 'Nicosulfuron', 'Niobium', 'Nitrate as N', 'Nitrate', 'Nitrate-Nitrogen', 'Nitrite as N', 'Nitrite', 'Nitrobenzene', 'Nitrogen, ammonium/ammonia ratio', 'Nitrogen, mixed forms (NH3), (NH4), organic, (NO2) and (NO3)', 'Nitrogen-15/14 ratio', 'Nitrogen', 'N-Nitrosodimethylamine', 'N-Nitrosodi-n-propylamine', 'N-Nitrosodiphenylamine', 'Norflurazon', 'n-Propylbenzene', 'o-Chlorophenol', 'o-Chlorotoluene', 'o-Cresol', 'Octachlorobiphenyl', 'o-Dichlorobenzene', 'Odor threshold number', 'Odor, atmospheric', 'o-Ethyltoluene', 'Oil and grease -- CWA 304B', 'Oil and grease', 'o-Nitroaniline', 'o-Nitrophenol', 'Organic anions', 'Organic carbon', 'Organic nitrogen', 'Orthophosphate as P', 'Orthophosphate', 'Oryzalin', 'Oxamyl', 'Oxidation reduction potential (ORP)', 'Oxyfluorfen', 'Oxygen', 'Oxygen-18/Oxygen-16 ratio', 'o-Xylene', 'p-(1,1,3,3-Tetramethylbutyl)phenol', 'p,p-DDD', 'p,p-DDE', 'p,p-DDT', 'Parathion', 'Partial pressure of dissolved gases', 'Particle size', 'Particle size, Sieve No. 230, 250 mesh, (0.063mm)', 'p-Bromophenyl phenyl ether', 'p-Chloroaniline', 'p-Chloro-m-cresol', 'p-Chlorophenyl phenyl ether', 'p-Chlorotoluene', 'p-Cresol', 'p-Cymene', 'p-Dichlorobenzene', 'Pebulate', 'Pendimethalin', 'Pentachlorobiphenyl', 'Pentachlorophenol', 'Perchlorate', 'pH, lab', 'Phenanthrene', 'Phenol, 2-(1,1-dimethylethyl)-4-methoxy-', 'Phenol, 4-(1-methyl-1-phenylethyl)-', 'Phenol', 'Pheophytin a', 'pH', 'Phorate', 'Phosmetoxon', 'Phosmet', 'Phosphate', 'Phosphate-phosphorus as P', 'Phosphate-phosphorus as PO4', 'Phosphate-phosphorus', 'Phosphoric acid, diethyl 6-methyl-2-(1-methylethyl)-4-pyrimidinyl ester', 'Phosphorus', 'Picloram', 'p-Nitroaniline', 'p-Nitrophenol', 'p-Octylphenol', 'Potassium', 'Praseodymium', 'Precipitation', 'Prometon', 'Prometryn', 'Pronamide', 'Propachlor', 'Propanil', 'Propargite', 'Propham', 'Propiconazole', 'Propoxur', 'Propylene glycol allyl ether', 'Pyrene', 'Radium-226', 'Radium-228', 'Radon-222', 'RBP Stream Depth - Run', 'RBP Stream Velocity', 'RBP2, Instream features, sampling reach area', 'Reservoir volume', 'Rhenium', 'Rubidium', 'Salinity', 'Samarium', 'Scandium', 'sec-Butylbenzene', 'Sediment', 'Selenium', 'S-Ethyl dipropylthiocarbamate', 'Siduron', 'Silica', 'Silicon', 'Silver', 'Silvex', 'Simazine', 'Sodium adsorption ratio [(Na)/(sq root of 1/2 Ca + Mg)]', 'Sodium adsorption ratio', 'Sodium plus potassium', 'Sodium, percent total cations', 'Sodium', 'Specific conductance', 'Specific conductivity', 'Specific gravity', 'Stigmast-5-en-3-ol, (3.beta.)-', 'Stigmastan-3-ol, (3.beta.)-', 'Stream flow, instantaneous', 'Stream flow, mean. daily', 'Stream width measure', 'Strontium-87/strontium-86, ratio', 'Strontium', 'Styrene', 'Sulfamethoxazole', 'Sulfate as S', 'Sulfate as SO4', 'Sulfate', 'Sulfide', 'Sulfometuron methyl', 'Sulfur hexafluoride', 'Sulfur-34/Sulfur-32 ratio', 'Sulfur', 'Sum of anions', 'Sum of cations', 'Suspended sediment concentration (SSC)', 'Suspended sediment discharge', 'Tebuthiuron', 'Tefluthrin', 'Tellurium', 'Temperature, air', 'Temperature, sample', 'Temperature, water', 'Terbacil', 'Terbium', 'Terbufos', 'Terbuthylazine', 'tert-Amyl methyl ether', 'tert-Butanol', 'tert-Butylbenzene', 'Tetrachlorobiphenyl', 'Tetrachloroethylene', 'Tetrahydrofuran', 'Thallium', 'Thiabendazole', 'Thiobencarb', 'Thorium-232', 'Thulium', 'Tin', 'Titanium', 'Toluene', 'Total Carbon', 'Total Coliform', 'Total coliforms', 'Total dissolved solids', 'Total fixed solids', 'Total hardness -- SDWA NPDWR', 'Total Sample Volume', 'Total suspended solids', 'Total volatile solids', 'Toxaphene', 'trans-1,2-Dichloroethylene', 'trans-1,3-Dichloropropene', 'trans-1,4-Dichloro-2-butene', 'trans-Nonachlor', 'Trash, Debris, Floatables', 'Triallate', 'Tribenuron-methyl', 'Tribromomethane', 'Tribufos', 'Tributyl phosphate', 'Trichloroacetic acid', 'Trichlorobiphenyl', 'Trichloroethylene', 'Triclopyr', 'Triclosan', 'Triethyl citrate', 'Trifluralin', 'Trihalomethanes (four), total, from SDWA NPDWR', 'Trihalomethanes', 'Triphenyl phosphate', 'Tris(2-butoxyethyl) phosphate', 'Tris(2-chloroethyl) phosphate', 'Tritium', 'True color', 'Tungsten', 'Turbidity severity', 'Turbidity', 'Uranium-234 and/or uranium-235 and/or uranium-238', 'Uranium-234/235/238', 'Uranium-234', 'Uranium-235', 'Uranium-238', 'Uranium', 'UV 254 -- SDWA NPDWR', 'Vanadium', 'Velocity - stream', 'Velocity-discharge', 'Vinyl bromide', 'Vinyl chloride', 'Volume Storage', 'Warfarin', 'Water content of snow', 'Water level in well, depth from a reference point', 'Water transparency, Secchi disc', 'Water', 'Wave height', 'Width', 'Wind direction (direction from, expressed 0-360 deg)', 'Wind velocity', 'Xenon', 'Xylenes mix of m + o + p', 'Xylene', 'Ytterbium', 'Yttrium', 'Zinc', 'Zirconium', 'Zooplankton')  # noqa
     q = ('Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Toxicity', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Toxicity', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, other', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, PCBs', 'Organics, other', 'Organics, pesticide', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Radiochemical', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Physical', 'Inorganics, Major, Non-metals', 'Inorganics, Major, Non-metals', 'Inorganics, Major, Non-metals', 'Inorganics, Major, Non-metals', 'Inorganics, Major, Non-metals', 'Inorganics, Major, Non-metals', 'Inorganics, Major, Non-metals', 'Organics, pesticide', 'Radiochemical', 'Inorganics, Minor, Metals', 'Organics, pesticide', 'Nutrient', 'Nutrient', 'Nutrient', 'Nutrient', 'Nutrient', 'Nutrient', 'Nutrient', 'Organics, other', '', 'Organics, other', 'Organics, other', 'Inorganics, Minor, Non-metals', 'Physical', 'Inorganics, Minor, Non-metals', 'Organics, PCBs', 'Organics, PCBs', 'Organics, PCBs', 'Organics, PCBs', 'Organics, PCBs', 'Organics, PCBs', 'Organics, PCBs', 'Organics, PCBs', 'Inorganics, Minor, Non-metals', 'Inorganics, Minor, Non-metals', 'Inorganics, Minor, Non-metals', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Inorganics, Minor, Metals', 'Physical', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, other', 'Toxicity', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Inorganics, Minor, Metals', 'Organics, pesticide', 'Radiochemical', 'Inorganics, Major, Non-metals', 'Physical', 'Biological', 'Organics, other', 'Organics, other', 'Organics, other', 'Inorganics, Minor, Metals', 'Inorganics, Minor, Non-metals', 'Organics, pesticide', 'Inorganics, Major, Non-metals', 'Inorganics, Minor, Non-metals', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, pesticide', '', '', '', '', 'Organics, pesticide', 'Inorganics, Minor, Metals', 'Organics, other', 'Inorganics, Major, Metals', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Inorganics, Major, Non-metals', 'Organics, pesticide', 'Toxicity', 'Stable Isotopes', 'Radiochemical', 'Physical', 'Inorganics, Major, Non-metals', 'Inorganics, Major, Non-metals', 'Inorganics, Minor, Metals', 'Inorganics, Minor, Metals', 'Organics, other', 'Organics, other', 'Organics, other', 'Physical', 'Organics, pesticide', '', 'Inorganics, Major, Non-metals', 'Organics, pesticide', 'Inorganics, Major, Non-metals', 'Organics, other', 'Toxicity', 'Organics, other', 'Organics, other', 'Toxicity', 'Organics, other', 'Biological', 'Biological', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Inorganics, Minor, Metals', 'Inorganics, Minor, Metals', 'Inorganics, Minor, Metals', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Inorganics, Minor, Metals', 'Physical', 'Inorganics, Minor, Metals', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Inorganics, Minor, Non-metals', 'Inorganics, Minor, Non-metals', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Biological', 'Physical', 'Physical', 'Information', 'Information', 'Physical', 'Physical', 'Physical', 'Information', 'Physical', 'Stable Isotopes', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Inorganics, Major, Non-metals', 'Inorganics, Major, Non-metals', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Inorganics, Minor, Metals', 'Physical', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Microbiological', 'Inorganics, Minor, Metals', 'Microbiological', 'Microbiological', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Inorganics, Minor, Metals', 'Organics, other', 'Microbiological', 'Microbiological', 'Microbiological', 'Microbiological', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Physical', 'Physical', 'Physical', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Inorganics, Major, Non-metals', 'Inorganics, Major, Non-metals', 'Organics, pesticide', 'Inorganics, Minor, Metals', 'Physical', 'Inorganics, Minor, Metals', 'Organics, other', 'Inorganics, Minor, Non-metals',  # noqa
          'Organics, pesticide', '', 'Radiochemical', 'Radiochemical', 'Organics, other', 'Physical', 'Physical', 'Physical', 'Physical', 'Physical', 'Inorganics, Minor, Non-metals', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Inorganics, Minor, Metals', 'Organics, other', 'Inorganics, Major, Non-metals', 'Inorganics, Major, Non-metals', 'Inorganics, Major, Non-metals', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Inorganics, Major, Non-metals', 'Nutrient', 'Nutrient', 'Physical', 'Inorganics, Minor, Non-metals', 'Organics, pesticide', 'Inorganics, Minor, Metals', 'Inorganics, Minor, Metals', 'Organics, other', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, other', 'Nutrient', 'Inorganics, Minor, Non-metals', '', 'Inorganics, Minor, Metals', 'Inorganics, Minor, Metals', 'Organics, pesticide', 'Organics, pesticide', 'Inorganics, Minor, Metals', 'Inorganics, Minor, Metals', 'Inorganics, Major, Metals', 'Organics, pesticide', 'Organics, pesticide', 'Inorganics, Minor, Metals', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Inorganics, Minor, Metals', '', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Toxicity', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, pesticide', 'Inorganics, Minor, Metals', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, pesticide', 'Organics, other', 'Organics, pesticide', 'Inorganics, Minor, Metals', 'Inorganics, Minor, Non-metals', 'Inorganics, Minor, Metals', 'Organics, pesticide', 'Inorganics, Minor, Metals', 'Nutrient', 'Nutrient', 'Nutrient', 'Nutrient', 'Nutrient', 'Organics, other', 'Nutrient', 'Nutrient', 'Stable Isotopes', 'Nutrient', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, PCBs', 'Organics, other', 'Physical', 'Physical', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Nutrient', 'Nutrient', 'Nutrient', 'Organics, pesticide', 'Organics, pesticide', 'Physical', 'Organics, pesticide', 'Inorganics, Major, Non-metals', 'Stable Isotopes', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Physical', 'Sediment', 'Sediment', 'Organics, other', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, other', 'Toxicity', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Inorganics, Minor, Non-metals', 'Physical', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Biological', 'Physical', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Nutrient', 'Nutrient', 'Nutrient', 'Nutrient', 'Organics, pesticide', 'Nutrient', 'Organics, pesticide', 'Organics, other', 'Organics, pesticide', 'Organics, other', 'Inorganics, Major, Metals', 'Inorganics, Minor, Metals', 'Physical', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', 'Organics, pesticide', '', 'Organics, other', 'Radiochemical', 'Radiochemical', 'Radiochemical', '', '', '', '', 'Inorganics, Minor, Metals', 'Inorganics, Minor, Metals', 'Physical', 'Inorganics, Minor, Metals', 'Inorganics, Minor, Metals', 'Organics, other', 'Sediment', 'Inorganics, Minor, Non-metals', 'Organics, pesticide', 'Organics, pesticide', 'Inorganics, Major, Non-metals', 'Inorganics, Major, Non-metals', 'Inorganics, Minor, Metals', 'Organics, pesticide', 'Organics, pesticide', 'Inorganics, Major, Metals', 'Inorganics, Major, Metals', 'Inorganics, Major, Metals', 'Inorganics, Major, Metals', 'Inorganics, Major, Metals', 'Physical', 'Physical', 'Physical', 'Organics, other', 'Organics, other', 'Physical', 'Physical', 'Physical', 'Stable Isotopes', 'Inorganics, Minor, Metals', 'Organics, other', 'Organics, other', 'Inorganics, Minor, Metals', 'Inorganics, Minor, Metals', 'Inorganics, Major, Non-metals', 'Inorganics, Major, Non-metals', 'Organics, pesticide', 'Inorganics, Minor, Non-metals', 'Stable Isotopes', 'Inorganics, Major, Non-metals', '', '', 'Sediment', 'Sediment', 'Organics, pesticide', 'Organics, pesticide', 'Inorganics, Minor, Non-metals', 'Physical', 'Physical', 'Physical', 'Organics, pesticide', 'Inorganics, Minor, Metals', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Toxicity', 'Organics, other', 'Inorganics, Minor, Metals', 'Organics, pesticide', 'Organics, pesticide', 'Radiochemical', 'Inorganics, Minor, Metals', 'Inorganics, Minor, Metals', 'Inorganics, Minor, Metals', 'Organics, other', 'Inorganics, Major, Non-metals', 'Microbiological', 'Microbiological', 'Physical', 'Physical', 'Physical', 'Information', 'Physical', 'Physical', 'Organics, pesticide', 'Organics, other', 'Organics, pesticide', 'Organics, other', 'Organics, pesticide', 'Physical', 'Organics, pesticide', 'Organics, pesticide', 'Organics, other', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, other', 'Toxicity', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, pesticide', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Organics, other', 'Radiochemical', 'Physical', 'Inorganics, Minor, Metals', 'Physical', 'Physical', 'Radiochemical', 'Radiochemical', 'Radiochemical', 'Radiochemical', 'Radiochemical', 'Radiochemical', 'Physical', 'Inorganics, Minor, Metals', 'Physical', 'Physical', 'Organics, other', 'Toxicity', 'Physical', 'Organics, other', 'Physical', 'Physical', 'Physical', 'Physical', 'Physical', 'Information', 'Physical', 'Physical', 'Inorganics, Minor, Non-metals', 'Organics, other', 'Organics, other', 'Inorganics, Minor, Metals', 'Inorganics, Minor, Metals', 'Inorganics, Minor, Metals', 'Inorganics, Minor, Metals', 'Biological')  # noqa
+    stationTypes = {
+        'Atmosphere': 'Atmosphere',
+        'CERCLA Superfund Site': 'Other',
+        'CG-2': 'Other',
+        'Canal Drainage': 'Surface Water',
+        'Canal Irrigation': 'Surface Water',
+        'Canal Transport': 'Surface Water',
+        'Cave': 'Other Groundwater',
+        'Combined Sewer': 'Other',
+        'Facility Industrial': 'Facility',
+        'Facility Municipal Sewage (POTW)': 'Facility',
+        'Facility Other': 'Facility',
+        'Facility Privately Owned Non-industrial': 'Facility',
+        'Facility Public Water Supply (PWS)': 'Facility',
+        'Facility: Cistern': 'Facility',
+        'Facility: Diversion': 'Facility',
+        'Facility: Laboratory or sample-preparation area': 'Facility',
+        'Facility: Outfall': 'Facility',
+        'Facility: Storm sewer': 'Facility',
+        'Facility: Waste injection well': 'Facility',
+        'Facility: Wastewater land application': 'Facility',
+        'Facility: Wastewater sewer': 'Facility',
+        'Facility: Water-distribution system': 'Facility',
+        'GW': 'Other Groundwater',
+        'Lake': 'Lake, Reservoir,  Impoundment',
+        'Lake, Reservoir, Impoundment': 'Lake, Reservoir,  Impoundment',
+        'Lake; Sediment Pond; Stagnant water': 'Lake, Reservoir,  Impoundment',
+        'Land': 'Land',
+        'Land Runoff': 'Land',
+        'Land: Excavation': 'Land',
+        'Land: Outcrop': 'Land',
+        'Land: Sinkhole': 'Land',
+        'MD': 'Other Groundwater',
+        'Mine/Mine Discharge Adit (Mine Entrance)': 'Other Groundwater',
+        'Other': 'Other',
+        'Other-Ground Water': 'Other Groundwater',
+        'Reservoir': 'Lake, Reservoir,  Impoundment',
+        'River/Stream': 'Stream',
+        'River/Stream Ephemeral': 'Stream',
+        'River/Stream Perennial': 'Stream',
+        'SP': 'Spring',
+        'SW': 'Surface Water',
+        'Seep': 'Spring',
+        'Spring': 'Spring',
+        'Storm Sewer': 'Other',
+        'Stream': 'Stream',
+        'Stream: Canal': 'Stream',
+        'Stream: Ditch': 'Stream',
+        'Subsurface: Cave': 'Other Groundwater',
+        'Subsurface: Groundwater drain': 'Other Groundwater',
+        'Subsurface: Tunnel, shaft, or mine': 'Other Groundwater',
+        'UPDES Permit discharge point': 'Other Groundwater',
+        'WL': 'Well',
+        'Well': 'Well',
+        'Well: Collector or Ranney type well': 'Well',
+        'Well: Hyporheic-zone well': 'Well',
+        'Well: Multiple wells': 'Well',
+        'Well: Test hole not completed as a well': 'Well',
+        'Wetland': 'Wetland',
+        'Wetland Riverine-Emergent': 'Wetland'
+    }
 
     paramgroup = dict(zip(p, q))
+
+    wqx_re = re.compile('(_WQX)-')
+
+    @classmethod
+    def strip_wxp(cls, id):
+        return re.sub(cls.wqx_re, '-', id)
 
     @classmethod
     def normalize_sample(cls, row):
         '''In the units field, make all mg/L and ug/L lowercase while preserving
-         other uppercase letters, convert units,  normalize chemical
+         other uppercase letters, convert units, normalize chemical
+         strip wxp
         '''
 
         chemical = row['Param']
         unit = row['Unit']
+
+        row['StationId'] = cls.strip_wxp(row['StationId'])
 
         if chemical is None:
             return row
@@ -306,6 +371,20 @@ class Normalizer(object):
         pgroup = calculate_paramgroup(chemical)
         if pgroup:
             row['ParamGroup'] = pgroup
+
+        return row
+
+    @classmethod
+    def normalize_station(cls, row):
+        '''strip wxp
+        normalize fields
+        '''
+        row['StationId'] = cls.strip_wxp(row['StationId'])
+
+        try:
+            row['StationType'] = cls.stationTypes[row['StationType']]
+        except KeyError:
+            pass
 
         return row
 

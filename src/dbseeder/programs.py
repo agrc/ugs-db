@@ -173,11 +173,14 @@ class WqpProgram(object):
                     if not self.wqx_re.search(station_id) and station_id in wxps:
                         continue
 
-                    #: cast (plus strip _WXP)
+                    #: cast
                     row = Caster.cast(row, schema.station)
 
                     #: set datasource, reproject and update shape
                     row = self._update_row(row)
+
+                    #: normalize data including stripping _WXP etc
+                    row = Normalizer.normalize_station(row)
 
                     #: reorder and filter out any fields not in the schema
                     #: TODO: this is not necessary if we dynamically build the sql statement
