@@ -107,6 +107,9 @@ class TestWqpProgram(unittest.TestCase):
         mock = Mock()
         self.patient._insert_rows = mock
 
+        #: prevent sql error for missing table
+        self.patient._add_sample_index = lambda x: None
+
         self.patient.seed()
 
         self.assertEqual(mock.call_count, 2)

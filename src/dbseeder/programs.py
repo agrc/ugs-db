@@ -11,13 +11,31 @@ import csv
 import pyodbc
 import re
 import schema
+import sqlite3
 from collections import OrderedDict
 from glob import glob
 from os.path import join, isdir, basename, splitext
 from querycsv import query_csv
 from functools import partial
 from services import Caster, Reproject, Normalizer, ChargeBalancer
-from timeit import default_timer
+from time import clock
+from contextlib import contextmanager
+
+
+TEMPDB = 'temp.sqlite3'
+
+
+def get_milliseconds():
+    return round(clock() * 1000, 5)
+
+
+@contextmanager
+def measure_time(title):
+    start = get_milliseconds()
+    yield
+    print('{}:{}{} ms'.format(title,
+                              ''.join([' ' for x in range(1, 35 - len(title))]),
+                              round(get_milliseconds() - start, 5)))
 
 
 class WqpProgram(object):
@@ -43,11 +61,10 @@ class WqpProgram(object):
                           + ' MDLUnit, MethodDescript, OrgId, OrgName, Param, ParamGroup, ProjectId, QualCode,'
                           + ' ResultComment, ResultStatus, ResultValue, SampComment, SampDepth, SampDepthRef,'
                           + ' SampDepthU, SampEquip, SampFrac, SampleDate, SampleTime, SampleId, SampMedia, SampMeth,'
-                          + ' SampMethName, SampType, StationId, Unit, USGSPCode) values ({})')
+                          + ' SampMethName, SampType, StationId, Unit, USGSPCode) values ({})'),
+        'create_index': "CREATE INDEX IF NOT EXISTS 'ActivityIdentifier_{0}' ON '{0}' ('ActivityIdentifier' ASC)"
     }
     wqx_re = re.compile('(_WQX)-')
-    station = False
-    result = True
 
     station_config = OrderedDict([
         ('OrganizationIdentifier', 'OrgId'),
@@ -204,6 +221,11 @@ class WqpProgram(object):
 
             unique_sample_ids = self._get_distinct_sample_ids_from(csv_file)
 
+            #: this needs to be done after get_distinct so that the table is loaded into the database
+            self._add_sample_index(csv_file)
+
+            sample_sets = 0
+            sets_start = get_milliseconds()
             for sample_id in unique_sample_ids:
                 samples = self._get_samples_for_id(sample_id, csv_file)
 
@@ -224,7 +246,14 @@ class WqpProgram(object):
 
                 rows = map(lambda sample: sample.values(), samples)
 
+                #: should this be batched in sets bigger than just a sample set?
                 self._insert_rows(rows, self.sql['result_insert'])
+
+                sample_sets += 1
+                elapsed = get_milliseconds() - sets_start
+                print('{} total sample sets in {} (avg {} per set)'.format(sample_sets,
+                                                                           elapsed,
+                                                                           round(elapsed/sample_sets, 5)))
 
             print('processing {}: done'.format(basename(csv_file)))
 
@@ -246,7 +275,9 @@ class WqpProgram(object):
 
         file_name = self._get_file_name_without_extension(file_path)
 
-        unique_sample_ids = query_csv(self.sql['distinct_sample_id'].format(self.fields['sample_id'], file_name), [file_path])
+        unique_sample_ids = query_csv(self.sql['distinct_sample_id'].format(self.fields['sample_id'], file_name),
+                                      [file_path],
+                                      TEMPDB)
         if len(unique_sample_ids) > 0:
             #: remove header cell
             unique_sample_ids.pop(0)
@@ -258,7 +289,9 @@ class WqpProgram(object):
 
         file_name = self._get_file_name_without_extension(file_path)
 
-        rows = query_csv(self.sql['wqxids'].format(self.fields['monitoring_location_id'], file_name), [file_path])
+        rows = query_csv(self.sql['wqxids'].format(self.fields['monitoring_location_id'], file_name),
+                         [file_path],
+                         TEMPDB)
         if len(rows) > 0:
             rows.pop(0)
 
@@ -273,7 +306,9 @@ class WqpProgram(object):
         '''
 
         file_name = self._get_file_name_without_extension(file_path)
-        samples_for_id = query_csv(self.sql['sample_id'].format(file_name, self.fields['sample_id'], sample_id_set[0]), [file_path])
+        samples_for_id = query_csv(self.sql['sample_id'].format(file_name, self.fields['sample_id'], sample_id_set[0]),
+                                   [file_path],
+                                   TEMPDB)
 
         return self._etl_column_names(samples_for_id, config or self.result_config)
 
@@ -338,7 +373,6 @@ class WqpProgram(object):
             self.cursor = c.cursor()
 
         i = 1
-        start = default_timer()
         #: format and stage sql statements
         for row in rows:
             statement = insert_statement.format(','.join(row))
@@ -353,7 +387,10 @@ class WqpProgram(object):
             #: commit commands to database
             if i % batch_size == 0:
                 self.cursor.commit()
-                print('station total: {} in {}'.format(i, default_timer() - start))
-                start = default_timer()
 
             self.cursor.commit()
+
+    def _add_sample_index(self, filepath):
+        #: add index to ActivityIdentifier field
+        with sqlite3.connect(TEMPDB) as conn:
+            conn.cursor().execute(self.sql['create_index'].format(basename(filepath)[:-4]))

@@ -59,3 +59,5 @@ src/**/*.csv
 *.sublime-workspace
 *.sde
 secrets.py
+
+*temp.sqlite3
