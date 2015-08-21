@@ -13,6 +13,7 @@ from dateutil.parser import parse
 from pyproj import Proj, transform
 from collections import OrderedDict
 from models import Concentration
+import schema
 
 
 class Reproject(object):
@@ -435,20 +436,28 @@ class ChargeBalancer(object):
 
         balance = 100 * float((cation - anion) / (cation + anion))
 
-        # returns charge balance (%), cation total (meq/l), anion total (meq/l)
-        return [{
+        def get_row(values):
+            #: add all fields from result schema with None as the default value
+            new_row = dict(map(lambda field: (field, None), schema.result.keys()))
+            new_row.update(values)
+            return new_row
+
+        return [get_row({
             'SampleId': sampleId,
             'Param': 'Charge Balance',
-            'ResultValue': round(balance, 2)
-        }, {
+            'ResultValue': round(balance, 2),
+            'Unit': '%'
+        }), get_row({
             'SampleId': sampleId,
             'Param': 'Cation Total',
-            'ResultValue': round(cation, 2)
-        }, {
+            'ResultValue': round(cation, 2),
+            'Unit': 'meq/l'
+        }), get_row({
             'SampleId': sampleId,
             'Param': 'Anions Total',
-            'ResultValue': round(anion, 2)
-        }]
+            'ResultValue': round(anion, 2),
+            'Unit': 'meq/l'
+        })]
 
     @classmethod
     def get_charge_balance(cls, rows):

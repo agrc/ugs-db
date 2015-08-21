@@ -216,23 +216,17 @@ class TestChargeBalancer(unittest.TestCase):
         dep.set('Sodium', 109, None)
         dep.set('Sulfate', 273, None)
 
-        row = self.patient.calculate_charge_balance(dep, sampleId)
+        rows = self.patient.calculate_charge_balance(dep, sampleId)
 
-        self.assertEqual(row[0], {
-            'SampleId': sampleId,
-            'Param': 'Charge Balance',
-            'ResultValue': expected_balance
-        })
-        self.assertEqual(row[1], {
-            'SampleId': sampleId,
-            'Param': 'Cation Total',
-            'ResultValue': expected_cations
-        })
-        self.assertEqual(row[2], {
-            'SampleId': sampleId,
-            'Param': 'Anions Total',
-            'ResultValue': expected_anions
-        })
+        self.assertEqual(rows[0]['SampleId'], sampleId)
+        self.assertEqual(rows[0]['Param'], 'Charge Balance')
+        self.assertEqual(rows[0]['ResultValue'], expected_balance)
+        self.assertEqual(rows[1]['SampleId'], sampleId)
+        self.assertEqual(rows[1]['Param'], 'Cation Total')
+        self.assertEqual(rows[1]['ResultValue'], expected_cations)
+        self.assertEqual(rows[2]['SampleId'], sampleId)
+        self.assertEqual(rows[2]['Param'], 'Anions Total')
+        self.assertEqual(rows[2]['ResultValue'], expected_anions)
 
         expected_balance = -0.02
         expected_cations = 4.21
@@ -248,20 +242,33 @@ class TestChargeBalancer(unittest.TestCase):
         dep.set('Sodium plus potassium', 25, None)
         dep.set('Sulfate', 76, None)
 
-        row = self.patient.calculate_charge_balance(dep, sampleId)
+        rows = self.patient.calculate_charge_balance(dep, sampleId)
 
-        self.assertEqual(row[0], {
-            'SampleId': sampleId,
-            'Param': 'Charge Balance',
-            'ResultValue': expected_balance
-        })
-        self.assertEqual(row[1], {
-            'SampleId': sampleId,
-            'Param': 'Cation Total',
-            'ResultValue': expected_cations
-        })
-        self.assertEqual(row[2], {
-            'SampleId': sampleId,
-            'Param': 'Anions Total',
-            'ResultValue': expected_anions
-        })
+        self.assertEqual(rows[0]['SampleId'], sampleId)
+        self.assertEqual(rows[0]['Param'], 'Charge Balance')
+        self.assertEqual(rows[0]['ResultValue'], expected_balance)
+        self.assertEqual(rows[1]['SampleId'], sampleId)
+        self.assertEqual(rows[1]['Param'], 'Cation Total')
+        self.assertEqual(rows[1]['ResultValue'], expected_cations)
+        self.assertEqual(rows[2]['SampleId'], sampleId)
+        self.assertEqual(rows[2]['Param'], 'Anions Total')
+        self.assertEqual(rows[2]['ResultValue'], expected_anions)
+
+    def test_fills_in_other_fields_with_none(self):
+        sampleId = 'nwisaz.01.92600003'
+
+        dep = Concentration()
+
+        dep.set('Bicarbonate', 188, None)
+        dep.set('Calcium', 66, None)
+        dep.set('Chloride', 57, None)
+        dep.set('Magnesium', 27, None)
+        dep.set('Nitrate', 0.8, None)
+        dep.set('Potassium', 7.4, None)
+        dep.set('Sodium', 109, None)
+        dep.set('Sulfate', 273, None)
+
+        rows = self.patient.calculate_charge_balance(dep, sampleId)
+
+        self.assertEqual(len(rows[0]), 42)
+        self.assertIsNone(rows[0]['AnalysisDate'])
