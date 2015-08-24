@@ -12,30 +12,17 @@ import pyodbc
 import re
 import schema
 import sqlite3
+import os
 from collections import OrderedDict
 from glob import glob
 from os.path import join, isdir, basename, splitext
 from querycsv import query_csv
 from functools import partial
 from services import Caster, Reproject, Normalizer, ChargeBalancer
-from time import clock
-from contextlib import contextmanager
+from benchmarking import get_milliseconds
 
 
 TEMPDB = 'temp.sqlite3'
-
-
-def get_milliseconds():
-    return round(clock() * 1000, 5)
-
-
-@contextmanager
-def measure_time(title):
-    start = get_milliseconds()
-    yield
-    print('{}:{}{} ms'.format(title,
-                              ''.join([' ' for x in range(1, 35 - len(title))]),
-                              round(get_milliseconds() - start, 5)))
 
 
 class WqpProgram(object):
@@ -251,11 +238,12 @@ class WqpProgram(object):
 
                 sample_sets += 1
                 elapsed = get_milliseconds() - sets_start
-                print('{} total sample sets in {} (avg {} per set)'.format(sample_sets,
-                                                                           elapsed,
-                                                                           round(elapsed/sample_sets, 5)))
+                if sample_sets % 5000 == 0:
+                    print('{} total sample sets (avg {} milliseconds per set)'.format(sample_sets,
+                                                                                      round(elapsed/sample_sets, 5)))
 
             print('processing {}: done'.format(basename(csv_file)))
+            os.remove(TEMPDB)
 
     def _get_files(self, location):
         '''Takes the file location and returns the csv's within it.'''
@@ -313,7 +301,8 @@ class WqpProgram(object):
         return self._etl_column_names(samples_for_id, config or self.result_config)
 
     def _etl_column_names(self, rows, config, header=None):
-        '''TODO document this method'''
+        '''Given a dictionary or list of dictionaries, return a new row or
+        list of rows with the correct field names'''
 
         if len(rows) == 0:
             return None
@@ -391,6 +380,6 @@ class WqpProgram(object):
             self.cursor.commit()
 
     def _add_sample_index(self, filepath):
-        #: add index to ActivityIdentifier field
+        '''Add an index to ActivityIdentifier field for the table matching the file'''
         with sqlite3.connect(TEMPDB) as conn:
             conn.cursor().execute(self.sql['create_index'].format(basename(filepath)[:-4]))
