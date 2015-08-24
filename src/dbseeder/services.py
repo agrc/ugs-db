@@ -434,7 +434,10 @@ class ChargeBalancer(object):
         anion = sum(
             [chloride, bicarbonate, carbonate, sulfate, nitrate, nitrite])
 
-        balance = 100 * float((cation - anion) / (cation + anion))
+        try:
+            balance = 100 * float((cation - anion) / (cation + anion))
+        except ZeroDivisionError:
+            balance = 0
 
         def get_row(values):
             #: add all fields from result schema with None as the default value
