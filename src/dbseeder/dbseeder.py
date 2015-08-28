@@ -69,6 +69,9 @@ class Seeder(object):
 
     def post_process(self, who):
         stations_fc = 'Stations'
+        stations_identity = 'Stations_identity'
+        dem = 'connection_files\SGID10.sde\SGID10.RASTER.DEM_10METER'
+
         arcpy.env.workspace = dirname(__file__)
         db = r'connection_files\{}.sde'.format(who)
 
@@ -79,7 +82,7 @@ class Seeder(object):
         print('identity on counties')
         stationsIdent = arcpy.Identity_analysis(stationsLyr,
                                                 r'ReferenceData.gdb\US_Counties',
-                                                r'in_memory\Stations_identity')
+                                                join('in_memory', stations_identity))
 
         print('joining to layer')
         arcpy.AddJoin_management(stationsLyr, 'Id', stationsIdent, 'FID_' + stations_fc)
@@ -87,9 +90,25 @@ class Seeder(object):
         print('calculating fields')
         arcpy.CalculateField_management(stationsLyr, 'StateCode', '!STATE_FIPS!', 'PYTHON')
         arcpy.CalculateField_management(stationsLyr, 'CountyCode', '!FIPS!', 'PYTHON')
+
+        print('removing join')
+        arcpy.RemoveJoin_management(stationsLyr, stations_identity)
+
         #: Elevation
-        #: Extract Values to Points
-        #: join to original fc and calc fields
+        print('selecting points with null values')
+        arcpy.SelectLayerByAttribute_management(stationsLyr, where_clause='Elev IS NULL')
+
+        print('extracting values to points')
+        arcpy.CheckOutExtension('Spatial')
+        dem_points = arcpy.sa.ExtractValuesToPoints(stationsLyr, dem, r'in_memory\DEMPoints', add_attributes='VALUE_ONLY')
+
+        print('joining to layer')
+        arcpy.AddJoin_management(stationsLyr, 'StationId', dem_points, 'StationId')
+
+        print('calulcating fields')
+        arcpy.CalculateField_management(stationsLyr, 'Elev', '!RASTERVALU!', 'PYTHON')
+        arcpy.CalculateField_management(stationsLyr, 'ElevUnit', '"meters"')
+        arcpy.CalculateField_management(stationsLyr, 'ElevMeth', '"Other"')
 
     def _parse_source_args(self, source):
         all_sources = ['WQP', 'SDWIS', 'DOGM', 'DWR', 'UGS']
