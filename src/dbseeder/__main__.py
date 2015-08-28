@@ -5,7 +5,7 @@
 Usage:
   dbseeder createdb <configuration>
   dbseeder seed <source> <file_location> <configuration>
-  dbseeder length <source>
+  dbseeder postprocess <configuration>
   dbseeder (-h | --help)
 Options:
   -h --help     Show this screen.
@@ -35,7 +35,8 @@ def main():
         return seeder.seed(**params)
     elif arguments['createdb']:
         return seeder.create_tables(who=params['who'])
-
+    elif arguments['postprocess']:
+        return seeder.post_process(who=params['who'])
 
 if __name__ == '__main__':
     sys.exit(main())

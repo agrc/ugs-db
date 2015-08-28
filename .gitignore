@@ -61,3 +61,4 @@ src/**/*.csv
 secrets.py
 
 *temp.sqlite3
+*.lock
