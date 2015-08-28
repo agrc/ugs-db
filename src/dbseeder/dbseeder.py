@@ -9,6 +9,7 @@ the dbseeder module
 
 import pyodbc
 import factory
+import requests
 from os.path import join, dirname
 try:
     import secrets
@@ -71,9 +72,13 @@ class Seeder(object):
             seeder.seed()
 
     def post_process(self, who):
-        stations_fc = 'Stations'
+        '''
+        Recalculate StateCode and CountyCode for the entire dataset (not sure that we can trust what's there)
+        Populate Elev, ElevUnit, & ElevMeth only for records that have missing or bad data
+        '''
+        stations_fc = 'UGSWaterChemistry.dbo.Stations'
         stations_identity = 'Stations_identity'
-        dem = 'connection_files\SGID10.sde\SGID10.RASTER.DEM_10METER'
+        epqs_service_url = r'http://nationalmap.gov/epqs/pqs.php'
 
         arcpy.env.workspace = dirname(__file__)
         db = r'connection_files\{}.sde'.format(who)
@@ -90,28 +95,47 @@ class Seeder(object):
         print('joining to layer')
         arcpy.AddJoin_management(stationsLyr, 'Id', stationsIdent, 'FID_' + stations_fc)
 
-        print('calculating fields')
+        print('calculating state')
         arcpy.CalculateField_management(stationsLyr, 'StateCode', '!STATE_FIPS!', 'PYTHON')
+        print('calculating county')
         arcpy.CalculateField_management(stationsLyr, 'CountyCode', '!FIPS!', 'PYTHON')
 
         print('removing join')
         arcpy.RemoveJoin_management(stationsLyr, stations_identity)
 
         #: Elevation
-        print('selecting points with null values')
-        arcpy.SelectLayerByAttribute_management(stationsLyr, where_clause='Elev IS NULL')
+        print('looping through points with null elevation values')
+        connection = pyodbc.connect(self._get_db(who)['connection_string'])
+        cursor = connection.cursor()
+        cursor.execute('''
+            SELECT Lon_X, Lat_Y, Id
+            FROM Stations
+            WHERE Elev IS NULL OR Elev = 0 OR Elev > 20000
+        ''')
+        i = 0
+        batch_size = 100
+        rows = cursor.fetchall()
+        total = len(rows)
+        for row in rows:
+            payload = {'x': row.Lon_X, 'y': row.Lat_Y, 'units': 'Meters', 'output': 'json'}
+            r = requests.get(epqs_service_url, params=payload)
+            try:
+                elev = r.json()['USGS_Elevation_Point_Query_Service']['Elevation_Query']['Elevation']
+            except:
+                print('error retrieving elevation for Lon: {} & Lat: {}. Skipping'.format(row.Lon_X, row.Lat_Y))
+                continue
 
-        print('extracting values to points')
-        arcpy.CheckOutExtension('Spatial')
-        dem_points = arcpy.sa.ExtractValuesToPoints(stationsLyr, dem, r'in_memory\DEMPoints', add_attributes='VALUE_ONLY')
+            unit = 'meters'
+            method = 'Other'
+            cursor.execute('''
+                UPDATE Stations set Elev=?, ElevUnit=?, ElevMeth=?
+                WHERE Id=?
+            ''', elev, unit, method, row.Id)
 
-        print('joining to layer')
-        arcpy.AddJoin_management(stationsLyr, 'StationId', dem_points, 'StationId')
-
-        print('calulcating fields')
-        arcpy.CalculateField_management(stationsLyr, 'Elev', '!RASTERVALU!', 'PYTHON')
-        arcpy.CalculateField_management(stationsLyr, 'ElevUnit', '"meters"')
-        arcpy.CalculateField_management(stationsLyr, 'ElevMeth', '"Other"')
+            i += 1
+            if i % batch_size == 0:
+                connection.commit()
+                print('{} out of {} completed ({}%)'.format(i, total, (i/float(total)*100.00)))
 
     def _parse_source_args(self, source):
         all_sources = ['WQP', 'SDWIS', 'DOGM', 'DWR', 'UGS']
