@@ -38,12 +38,15 @@ class Seeder(object):
         script_dir = dirname(__file__)
 
         with open(join(script_dir, join('..', '..', 'scripts', 'createTables.sql')), 'r') as f:
-            sql = f.read()
+            createTables_sql = f.read()
+        with open(join(script_dir, join('..', '..', 'scripts', 'createIndices.sql')), 'r') as f:
+            createIndices_sql = f.read()
 
         try:
             c = pyodbc.connect(db['connection_string'])
             cursor = c.cursor()
-            cursor.execute(sql)
+            cursor.execute(createTables_sql)
+            cursor.execute(createIndices_sql)
         except Exception, e:
             raise e
         finally:
