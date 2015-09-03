@@ -9,11 +9,13 @@ modules for acting on items
 
 import datetime
 import re
-from dateutil.parser import parse
-from pyproj import Proj, transform
-from collections import OrderedDict
-from models import Concentration
 import schema
+from collections import OrderedDict
+from csv import reader as csvreader
+from dateutil.parser import parse
+from models import Concentration
+from pyproj import Proj, transform
+from requests import get
 
 
 class Reproject(object):
@@ -475,3 +477,21 @@ class ChargeBalancer(object):
             return cls.calculate_charge_balance(con, rows[0]['SampleId'])
         else:
             return []
+
+
+class HttpClient(object):
+    """A wrapper around requests for testing"""
+
+    @staticmethod
+    def get_csv(url):
+        response = get(url)
+        response.raise_for_status()
+
+        try:
+            print('query completed in {}'.format(response.elapsed))
+            print('new sites found {}'.format(response.headers['total-site-count']))
+            print('new results found {}'.format(response.headers['total-result-count']))
+        except:
+            pass
+
+        return csvreader(response.text.splitlines())

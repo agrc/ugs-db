@@ -68,7 +68,7 @@ class Seeder(object):
         for program in programs:
             seederClass = factory.create(program)
 
-            seeder = seederClass(file_location, db)
+            seeder = seederClass(db, file_location=file_location)
             seeder.seed()
 
     def post_process(self, who):
@@ -137,6 +137,34 @@ class Seeder(object):
                 connection.commit()
                 print('{} out of {} completed ({}%)'.format(i, total, (i/float(total)*100.00)))
 
+        self._update_params_table(who)
+
+    def update(self, source, who):
+        db = self._get_db(who)
+
+        programs = self._parse_source_args(source)
+
+        for program in programs:
+            seederClass = factory.create(program)
+
+            seeder = seederClass(db)
+            seeder.update()
+
+        self._update_params_table(who)
+
+    def _parse_source_args(self, source):
+        all_sources = ['WQP', 'SDWIS', 'DOGM', 'DWR', 'UGS']
+        if not source:
+            return all_sources
+        else:
+            sources = [s.strip() for s in source.split(',')]
+            sources = filter(lambda s: s in all_sources, sources)
+            if len(sources) > 0:
+                return sources
+            else:
+                return None
+
+    def _update_params_table(self, who):
         script_dir = dirname(__file__)
         with open(join(script_dir, join('..', '..', 'scripts', 'populateParamsTable.sql')), 'r') as f:
             sql = f.read()
@@ -152,15 +180,3 @@ class Seeder(object):
                 del cursor
             if c:
                 del c
-
-    def _parse_source_args(self, source):
-        all_sources = ['WQP', 'SDWIS', 'DOGM', 'DWR', 'UGS']
-        if not source:
-            return all_sources
-        else:
-            sources = [s.strip() for s in source.split(',')]
-            sources = filter(lambda s: s in all_sources, sources)
-            if len(sources) > 0:
-                return sources
-            else:
-                return None

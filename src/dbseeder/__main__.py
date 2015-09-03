@@ -5,6 +5,7 @@
 Usage:
   dbseeder createdb <configuration>
   dbseeder seed <source> <file_location> <configuration>
+  dbseeder update <source> <configuration>
   dbseeder postprocess <configuration>
   dbseeder (-h | --help)
 Options:
@@ -21,22 +22,16 @@ from docopt import docopt
 
 def main():
     arguments = docopt(__doc__)
-
-    params = {
-        'source': arguments['<source>'],
-        'who': arguments['<configuration>']
-    }
-
     seeder = Seeder()
 
     if arguments['seed']:
-        params['file_location'] = arguments['<file_location>']
-
-        return seeder.seed(**params)
+        return seeder.seed(source=arguments['<source>'], file_location=arguments['<file_location>'], who=arguments['<configuration>'])
+    elif arguments['update']:
+        return seeder.update(source=arguments['<source>'], who=arguments['<configuration>'])
     elif arguments['createdb']:
-        return seeder.create_tables(who=params['who'])
+        return seeder.create_tables(who=arguments['<configuration>'])
     elif arguments['postprocess']:
-        return seeder.post_process(who=params['who'])
+        return seeder.post_process(who=arguments['<configuration>'])
 
 if __name__ == '__main__':
     sys.exit(main())

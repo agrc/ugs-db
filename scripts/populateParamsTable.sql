@@ -1,12 +1,6 @@
-USE UGSWaterChemistry
+TRUNCATE TABLE [UGSWaterChemistry].[dbo].[Params]
 
-GO
-TRUNCATE TABLE [dbo].[Params]
-GO
-
-GO
-INSERT INTO [dbo].[Params]
+INSERT INTO [UGSWaterChemistry].[dbo].[Params]
 SELECT DISTINCT Param
-FROM [dbo].[Results]
+FROM [UGSWaterChemistry].[dbo].[Results]
 WHERE Param IS NOT NULL
-GO

@@ -10,6 +10,7 @@ test the programs module
 import unittest
 from dbseeder.programs import WqpProgram
 from collections import OrderedDict
+from csv import reader as csvreader
 from mock import Mock
 from nose.tools import raises
 from os.path import join, basename
@@ -18,7 +19,7 @@ from os.path import join, basename
 class TestWqpProgram(unittest.TestCase):
     def setUp(self):
         self.test_get_files_folder = join('tests', 'data', 'WQP', 'get_files')
-        self.patient = WqpProgram(self.test_get_files_folder, 'bad db connection')
+        self.patient = WqpProgram('bad db connection', file_location=self.test_get_files_folder)
 
     def test_get_files_finds_files(self):
         expected_results = [
@@ -46,11 +47,11 @@ class TestWqpProgram(unittest.TestCase):
 
     @raises(Exception)
     def test_folder_without_required_folders_throws(self):
-        self.patient = WqpProgram(join('tests', 'data', 'WQP', 'incorrect_structure'))
+        self.patient = WqpProgram(db=None, file_location=join('tests', 'data', 'WQP', 'incorrect_structure'))
 
     @raises(Exception)
     def test_folder_without_required_child_folders_throws(self):
-        self.patient = WqpProgram(join('tests', 'data', 'WQP', 'incorrect_child_structure'))
+        self.patient = WqpProgram(db=None, file_location=join('tests', 'data', 'WQP', 'incorrect_child_structure'))
 
     def test_get_samples_for_id_returns_correct_list(self):
         self.patient.sample_id_field = 'id'
@@ -73,10 +74,19 @@ class TestWqpProgram(unittest.TestCase):
         self.assertEqual(len(rows), 2)
         self.assertItemsEqual([('1',), ('2',)], rows)
 
-    def test_get_wxps_duplicate_ids(self):
-        ids = self.patient._get_wxps_duplicate_ids(join('tests', 'data', 'WQP', 'wqxids.csv'))
+    def test_get_wqx_duplicate_ids(self):
+        ids = self.patient._get_wqx_duplicate_ids(join('tests', 'data', 'WQP', 'wqxids.csv'))
 
         self.assertItemsEqual(set([u'UTAHDWQ-4904410', u'UTAHDWQ-4904640', u'UTAHDWQ-4904610']), ids)
+
+    def test_wqx_duplicates_for_update(self):
+        rows = [{'StationId': 'UTAHDWQ_WQX-4904410'},
+                {'StationId': 'UTAHDWQ_WQX-4904610'},
+                {'StationId': 'UTAHDWQ-111'}]
+
+        actual = self.patient._get_wqx_duplicate_ids(rows)
+
+        self.assertEqual(set(['UTAHDWQ-4904610', 'UTAHDWQ-4904410']), actual)
 
     def test_update_row_with_valid_lat_lon(self):
         row = {
@@ -103,7 +113,7 @@ class TestWqpProgram(unittest.TestCase):
 
     def test_insert_args(self):
         self.maxDiff = None
-        self.patient = WqpProgram(join('tests', 'data', 'WQP', 'insert'), 'db connection string')
+        self.patient = WqpProgram(db=None, file_location=join('tests', 'data', 'WQP', 'insert'))
         mock = Mock()
         self.patient._insert_rows = mock
 
@@ -200,3 +210,128 @@ class TestWqpProgram(unittest.TestCase):
             "'unit'",
             "'usgspcode'"
         ])
+
+    @raises(Exception)
+    def test_seed_with_no_file_location(self):
+        self.patient = WqpProgram('bad db connection')
+        self.patient.seed()
+
+    def test_format_url(self):
+        template = 'type={}&lastupdated={}&today={}'
+        self.assertEqual(self.patient._format_url(template, 'Result', '01/01/1999', today='01/01/2000'),
+                         'type=Result&lastupdated=01-01-1999&today=01-01-2000')
+
+    def test_group_sample_ids(self):
+        sample_response = join('tests', 'data', 'WQP', 'webservice.csv.as.txt')
+        with open(sample_response, 'rb') as f:
+            wqp_service_csv = csvreader(f)
+
+            unique_sample_ids = self.patient._group_rows_by_id(wqp_service_csv)
+
+            self.assertEqual(len(unique_sample_ids.keys()), 1)
+            self.assertEqual(len(unique_sample_ids['nwisaz.01.00000154']), 3)
+            self.assertTrue('nwisaz.01.00000154' in unique_sample_ids)
+
+    def test_find_new_station_ids(self):
+        mock = Mock()
+        mock.side_effect = lambda x: [[i] for i in x]
+
+        self.patient._get_unique_station_ids = mock
+
+        rows = {
+            'sampleid1': [{
+                'StationId': 1
+            }, {
+                'StationId': 2
+            }, {
+                'StationId': 1
+            }]
+        }
+
+        expected = self.patient._find_new_station_ids(rows)
+
+        self.assertEqual(expected, [1, 2])
+
+    def test_find_new_station_ids_with_empty(self):
+        mock = Mock()
+        mock.side_effect = lambda x: [[i] for i in x]
+
+        self.patient._get_unique_station_ids = mock
+
+        rows = []
+
+        expected = self.patient._find_new_station_ids(rows)
+
+        self.assertEqual(expected, [])
+
+    def test_extract_stations_by_id(self):
+        station_config = {
+            'a': 'StationId',
+            'b': 'someValue'
+        }
+
+        cursor = (x for x in [[1, 'insert1'], [2, 'missed'], [3, 'insert3']])
+
+        self.patient.station_config = station_config
+
+        actual = self.patient._extract_stations_by_id(cursor, [1, 3], ['a', 'b'])
+
+        self.assertEqual(actual, [{'StationId': 1, 'someValue': 'insert1'}, {'StationId': 3, 'someValue': 'insert3'}])
+
+    def test_new_stations_sql_format(self):
+        station_ids = ['(1)', '(2)', '(3)']
+        statement = self.patient.sql['new_stations'].format(','.join(station_ids))
+
+        self.assertEqual(('SELECT * FROM (VALUES(1),(2),(3)) AS t(StationId) WHERE NOT EXISTS(' +
+                          'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Stations] WHERE [StationId] = t.StationId)'),
+                         statement)
+
+    def test_etl_column_names_with_dict(self):
+        row = {'StationId': 1}
+
+        actual = self.patient._etl_column_names(row, None)
+
+        self.assertEqual(row, actual)
+
+    def test_remove_existing_wqx_station_ids_that_exist_in_database(self):
+        new_station_ids = ['123_WQX-ABC', '1234']
+
+        mock = Mock()
+        mock.side_effect = lambda x: [[i] for i in ['123-ABC']]
+
+        self.patient._get_unique_station_ids = mock
+
+        ids = self.patient._remove_existing_wqx_station_ids(new_station_ids)
+
+        self.assertEqual(ids, ['123_WQX-ABC'])
+
+    def test_remove_existing_wqx_station_ids_returns_ids_when_no_wqx(self):
+        new_station_ids = ['123', '1234']
+
+        ids = self.patient._remove_existing_wqx_station_ids(new_station_ids)
+
+        self.assertEqual(ids, ['123', '1234'])
+
+    def test_remove_existing_wqx_station_ids_where_there_are_duplicate_input(self):
+        new_station_ids = ['123_WQX-ABC', '123-ABC']
+
+        mock = Mock()
+        mock.side_effect = lambda x: [[i] for i in ['123-ABC', '123-ABC']]
+
+        self.patient._get_unique_station_ids = mock
+
+        ids = self.patient._remove_existing_wqx_station_ids(new_station_ids)
+
+        self.assertEqual(ids, ['123_WQX-ABC', '123-ABC'])
+
+    def test_get_unique_sample_ids(self):
+        results = {'sampleid1': [], 'sampleid2': [], 'existingsampleid': []}
+
+        mock = Mock()
+        mock.side_effect = lambda x: [[i] for i in ['sampleid1', 'sampleid2']]
+
+        self.patient._get_unique_sample_ids = mock
+
+        new_results = self.patient._remove_existing_results(results)
+
+        self.assertItemsEqual(new_results.keys(), ['sampleid1', 'sampleid2'])
