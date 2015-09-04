@@ -70,6 +70,36 @@ class TestCaster_Cast(unittest.TestCase):
             'Missing': None
         })
 
+    def test_strips_whitespace(self):
+        simple_row = {
+            'Something': '    padded    '
+        }
+        schema = OrderedDict([
+            ('Something', {
+                'type': 'String'
+            })
+        ])
+
+        actual = Caster.cast(simple_row, schema)
+        self.assertEqual(actual, {
+            'Something': 'padded',
+        })
+
+    def test_sets_dates_in_future_to_none(self):
+        simple_row = {
+            'Something': '2060-02-24'
+        }
+        schema = OrderedDict([
+            ('Something', {
+                'type': 'Date'
+            })
+        ])
+
+        actual = Caster.cast(simple_row, schema)
+        self.assertEqual(actual, {
+            'Something': None,
+        })
+
 
 class TestCaster_CastForSQL(unittest.TestCase):
     def test_doesnt_touch_shape(self):

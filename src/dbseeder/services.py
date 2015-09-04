@@ -83,6 +83,8 @@ class Caster(object):
 
             try:
                 value = cast(value)
+                if isinstance(value, datetime.datetime) and value > datetime.datetime.now():
+                    value = None
             except:
                 row[field[0]] = None
                 continue
