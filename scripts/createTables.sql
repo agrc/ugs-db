@@ -8,6 +8,9 @@ IF OBJECT_ID('dbo.Results', 'U') IS NOT NULL
 IF OBJECT_ID('dbo.Stations', 'U') IS NOT NULL
 	DROP TABLE [dbo].[Stations]
 
+IF OBJECT_ID('dbo.Params', 'U') IS NOT NULL
+	DROP TABLE [dbo].[Params]
+
 CREATE TABLE [dbo].[Results](
 	[Id] [int] IDENTITY(1,1) NOT NULL,
 	[AnalysisDate] [date] NULL,
@@ -98,3 +101,7 @@ CREATE TABLE [dbo].[Stations](
 	[Id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+CREATE TABLE [dbo].[Params](
+	[Param] [nvarchar](500) NULL
+) ON [PRIMARY]

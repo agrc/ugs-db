@@ -137,6 +137,22 @@ class Seeder(object):
                 connection.commit()
                 print('{} out of {} completed ({}%)'.format(i, total, (i/float(total)*100.00)))
 
+        script_dir = dirname(__file__)
+        with open(join(script_dir, join('..', '..', 'scripts', 'populateParamsTable.sql')), 'r') as f:
+            sql = f.read()
+
+        try:
+            c = pyodbc.connect(self._get_db(who)['connection_string'])
+            cursor = c.cursor()
+            cursor.execute(sql)
+        except Exception, e:
+            raise e
+        finally:
+            if cursor:
+                del cursor
+            if c:
+                del c
+
     def _parse_source_args(self, source):
         all_sources = ['WQP', 'SDWIS', 'DOGM', 'DWR', 'UGS']
         if not source:
