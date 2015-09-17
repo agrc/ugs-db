@@ -13,7 +13,7 @@ IF OBJECT_ID('dbo.Params', 'U') IS NOT NULL
 
 CREATE TABLE [dbo].[Results](
 	[Id] [int] IDENTITY(1,1) NOT NULL,
-	[AnalysisDate] [date] NULL,
+	[AnalysisDate] [datetime2(7)] NULL,
 	[AnalytMeth] [nvarchar](150) NULL,
 	[AnalytMethId] [nvarchar](50) NULL,
 	[AutoQual] [nvarchar](50) NULL,
@@ -45,7 +45,7 @@ CREATE TABLE [dbo].[Results](
 	[SampDepthU] [nvarchar](50) NULL,
 	[SampEquip] [nvarchar](75) NULL,
 	[SampFrac] [nvarchar](50) NULL,
-	[SampleDate] [date] NULL,
+	[SampleDate] [datetime2(7)] NULL,
 	[SampleTime] [time](7) NULL,
 	[SampleId] [nvarchar](100) NULL,
 	[SampMedia] [nvarchar](50) NULL,
@@ -87,7 +87,7 @@ CREATE TABLE [dbo].[Stations](
 	[Aquifer] [nvarchar](100) NULL,
 	[FmType] [nvarchar](100) NULL,
 	[AquiferType] [nvarchar](100) NULL,
-	[ConstDate] [date] NULL,
+	[ConstDate] [datetime2(7)] NULL,
 	[Depth] [float] NULL,
 	[DepthUnit] [nvarchar](10) NULL,
 	[HoleDepth] [float] NULL,
