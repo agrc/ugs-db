@@ -1,3 +1,5 @@
+USE [UGSWaterChemistry]
+
 TRUNCATE TABLE [UGSWaterChemistry].[dbo].[Params]
 
 INSERT INTO [UGSWaterChemistry].[dbo].[Params]
