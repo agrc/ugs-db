@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 
 '''
-programs
+test_programs.py
 ----------------------------------
 test the programs module
 '''
 
 import unittest
 from dbseeder.programs import WqpProgram
+from dbseeder import sql
 from collections import OrderedDict
 from csv import reader as csvreader
 from mock import Mock
@@ -19,7 +20,9 @@ from os.path import join, basename
 class TestWqpProgram(unittest.TestCase):
     def setUp(self):
         self.test_get_files_folder = join('tests', 'data', 'WQP', 'get_files')
-        self.patient = WqpProgram('bad db connection', file_location=self.test_get_files_folder)
+        self.patient = WqpProgram(db='bad db connection',
+                                  update=False,
+                                  source=self.test_get_files_folder)
 
     def test_get_files_finds_files(self):
         expected_results = [
@@ -88,44 +91,29 @@ class TestWqpProgram(unittest.TestCase):
 
         self.assertEqual(set(['UTAHDWQ-4904610', 'UTAHDWQ-4904410']), actual)
 
-    def test_update_row_with_valid_lat_lon(self):
-        row = {
-            'Shape': None,
-            'Lon_X': -114,
-            'Lat_Y': 40
-        }
-        actual = self.patient._update_row(row)
-        expected = 'geometry::STGeomFromText(\'POINT ({} {})\', 26912)'.format(243900.352024, 4432069.05679)
-
-        self.assertEqual(actual['Shape'], expected)
-        self.assertEqual(actual['DataSource'], self.patient.datasource)
-
-    def test_shape_is_none_with_invalid_lat_lon(self):
-        row = {
-            'Shape': None,
-            'Lon_X': None,
-            'Lat_Y': 40
-        }
-        actual = self.patient._update_row(row)
-
-        self.assertIsNone(actual['Shape'])
-        self.assertEqual(actual['DataSource'], self.patient.datasource)
-
     def test_insert_args(self):
         self.maxDiff = None
-        self.patient = WqpProgram(db=None, file_location=join('tests', 'data', 'WQP', 'insert'))
-        mock = Mock()
-        self.patient._insert_rows = mock
+        insert_mock = Mock()
+        cursor_mock = Mock()
+        db = {
+            'connection_string': ''
+        }
+        self.patient = WqpProgram(db=db,
+                                  source=join('tests', 'data', 'WQP', 'insert'),
+                                  update=False,
+                                  insert_rows=insert_mock,
+                                  update_row=sql.update_row,
+                                  cursor_factory=cursor_mock)
 
         #: prevent sql error for missing table
         self.patient._add_sample_index = lambda x: None
 
         self.patient.seed()
 
-        self.assertEqual(mock.call_count, 2)
+        self.assertEqual(insert_mock.call_count, 2)
 
-        station_call = mock.call_args_list[0]
-        result_call = mock.call_args_list[1]
+        station_call = insert_mock.call_args_list[0]
+        result_call = insert_mock.call_args_list[1]
 
         station_row = station_call[0][0][0]
 
@@ -154,7 +142,7 @@ class TestWqpProgram(unittest.TestCase):
             "'aquifer'",
             "'fmtype'",
             "'aquifertype'",
-            "Cast('2011-01-01' as datetime)",
+            "Cast('2011-01-01' as date)",
             "5.0",  #: depth
             "'dunit'",
             "6.0",  #: HoleDepth
@@ -167,7 +155,7 @@ class TestWqpProgram(unittest.TestCase):
 
         result_rows = result_call[0][0][0]
         self.assertEqual(result_rows, [
-            "Cast('2011-01-01' as datetime)",  #: analysis date
+            "Cast('2011-01-01' as date)",  #: analysis date
             "'analythmeth'",
             "'analythmethid'",
             'Null',  #: AutoQual
@@ -199,7 +187,7 @@ class TestWqpProgram(unittest.TestCase):
             "'sampdepthu'",
             "'sampequip'",
             "'sampfrac'",
-            "Cast('2011-01-02' as datetime)",  #: activity date
+            "Cast('2011-01-02' as date)",  #: activity date
             "'12:00:00'",  #: activity Time
             "'sampleid'",
             "'sampmedia'",
@@ -280,7 +268,7 @@ class TestWqpProgram(unittest.TestCase):
 
     def test_new_stations_sql_format(self):
         station_ids = ['(1)', '(2)', '(3)']
-        statement = self.patient.sql['new_stations'].format(','.join(station_ids))
+        statement = self.patient.new_stations_query.format(','.join(station_ids))
 
         self.assertEqual(('SELECT * FROM (VALUES(1),(2),(3)) AS t(StationId) WHERE NOT EXISTS(' +
                           'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Stations] WHERE [StationId] = t.StationId)'),
@@ -335,3 +323,22 @@ class TestWqpProgram(unittest.TestCase):
         new_results = self.patient._remove_existing_results(results)
 
         self.assertItemsEqual(new_results.keys(), ['sampleid1', 'sampleid2'])
+
+    def test_get_samples_for_id_returns_correct_list_when_quoted(self):
+        self.patient.sample_id_field = 'id'
+        sample_id_set = ('nwisnv.01.00901373',)
+        file_path = join('tests', 'data', 'WQP', 'quotes_in_csv.csv')
+
+        rows = self.patient._get_samples_for_id(sample_id_set, file_path, config=self.patient.result_config)
+
+        self.assertEqual(len(rows), 1)
+
+        result = rows[0]
+
+        self.assertEqual(result['OrgName'], 'USGS Nevada Water Science Center')
+        self.assertEqual(result['StationId'], 'USGS-362735114154501')
+        self.assertEqual(result['SampComment'], '"A-2400004 Filter lot Q625 L-2400004 Received August 27, 2009..  verified FA btl not received,paa,9/2/09"')
+        self.assertEqual(result['SampMeth'], 'USGS')
+        self.assertEqual(result['SampMethName'], 'USGS')
+        self.assertEqual(result['SampEquip'], 'Unknown')
+        self.assertEqual(result['Param'], 'Specific conductance')

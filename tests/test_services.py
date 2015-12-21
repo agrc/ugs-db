@@ -100,6 +100,21 @@ class TestCaster_Cast(unittest.TestCase):
             'Something': None,
         })
 
+    def test_sets_dates_prior_to_1800s_to_none(self):
+        simple_row = {
+            'Something': '1799-02-24'
+        }
+        schema = OrderedDict([
+            ('Something', {
+                'type': 'Date'
+            })
+        ])
+
+        actual = Caster.cast(simple_row, schema)
+        self.assertEqual(actual, {
+            'Something': None,
+        })
+
 
 class TestCaster_CastForSQL(unittest.TestCase):
     def test_doesnt_touch_shape(self):
@@ -126,13 +141,19 @@ class TestCaster_CastForSQL(unittest.TestCase):
         input = {'date': datetime.datetime(2015, 8, 11)}
         actual = Caster.cast_for_sql(input)
 
-        self.assertEqual(actual['date'], "Cast('2015-08-11' as datetime)")
+        self.assertEqual(actual['date'], "Cast('2015-08-11' as date)")
 
     def test_casts_old_dates(self):
         input = {'date': datetime.datetime(1800, 8, 11)}
         actual = Caster.cast_for_sql(input)
 
-        self.assertEqual(actual['date'], "Cast('1800-08-11' as datetime)")
+        self.assertEqual(actual['date'], "Cast('1800-08-11' as date)")
+
+    def test_times(self):
+        input = {'time': datetime.time(4, 30, 11)}
+        actual = Caster.cast_for_sql(input)
+
+        self.assertEqual(actual['time'], "'04:30:11'")
 
     def test_null_for_none(self):
         input = {'test': None}

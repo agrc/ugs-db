@@ -10,6 +10,8 @@ helper methods for creating a program
 import programs
 
 
-def create(source):
+def get(source):
     if source == 'WQP':
         return programs.WqpProgram
+    elif source == 'SDWIS':
+        return programs.SdwisProgram
