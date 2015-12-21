@@ -334,7 +334,9 @@ class Sdwis(Program, Balanceable):
         UTV80.TSASAMPL.TSALAB_IS_NUMBER = UTV80.TSALAB.TSALAB_IS_NUMBER
 
         WHERE (UTV80.TINWSF.TYPE_CODE = 'SP' Or
-                UTV80.TINWSF.TYPE_CODE = 'WL') AND
+                UTV80.TINWSF.TYPE_CODE = 'WL' Or
+                UTV80.TINWSF.TYPE_CODE = 'IN' Or
+                UTV80.TINWSF.TYPE_CODE = 'SS') AND
                 UTV80.TSASAR.CONCENTRATION_MSR IS NOT NULL
                 {}
 
