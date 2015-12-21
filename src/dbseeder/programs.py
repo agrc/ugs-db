@@ -648,3 +648,15 @@ class WqpProgram(object):
         self.cursor.execute(statement)
 
         return self.cursor.fetchall()
+
+
+class SdwisProgram(object):
+    '''class for handling sdwis database rows'''
+
+    datasource = 'SDWIS'
+
+    def seed(self):
+        pass
+
+    def update(self):
+        pass
