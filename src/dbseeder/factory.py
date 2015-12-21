@@ -13,3 +13,5 @@ import programs
 def create(source):
     if source == 'WQP':
         return programs.WqpProgram
+    elif source == 'SDWIS':
+        return programs.SdwisProgram
