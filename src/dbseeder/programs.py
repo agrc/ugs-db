@@ -22,13 +22,12 @@ from services import Caster, Normalizer, ChargeBalancer, HttpClient
 from benchmarking import get_milliseconds
 
 
-TEMPDB = 'temp.sqlite3'
-
-
 class WqpProgram(object):
     '''class for handling wqp csv files'''
 
     datasource = 'WQP'
+
+    TEMPDB = 'temp.sqlite3'
 
     wqp_url = ('http://www.waterqualitydata.us/{}/search?sampleMedia=Water&startDateLo={}&startDateHi={}&'
                'bBox=-115%2C35.5%2C-108%2C42.5&mimeType=csv')
@@ -283,7 +282,7 @@ class WqpProgram(object):
 
             finally:
                 #: in case something goes wrong always clean up the db
-                os.remove(TEMPDB)
+                os.remove(self.TEMPDB)
             print('processing {}: done'.format(basename(csv_file)))
 
     def _seed_stations(self, rows, header=None, wqx=None):
@@ -370,7 +369,7 @@ class WqpProgram(object):
 
         unique_sample_ids = query_csv(self.sql['distinct_sample_id'].format(self.fields['sample_id'], file_name),
                                       [file_path],
-                                      TEMPDB)
+                                      self.TEMPDB)
         if len(unique_sample_ids) > 0:
             #: remove header cell
             unique_sample_ids.pop(0)
@@ -391,7 +390,7 @@ class WqpProgram(object):
         if file_name:
             rows = query_csv(self.sql['wqxids'].format(self.fields['monitoring_location_id'], file_name),
                              [file_path],
-                             TEMPDB)
+                             self.TEMPDB)
             if len(rows) > 0:
                 rows.pop(0)
 
@@ -410,7 +409,7 @@ class WqpProgram(object):
         file_name = self._get_file_name_without_extension(file_path)
         samples_for_id = query_csv(self.sql['sample_id'].format(file_name, self.fields['sample_id'], sample_id_set[0]),
                                    [file_path],
-                                   TEMPDB)
+                                   self.TEMPDB)
 
         return self._etl_column_names(samples_for_id, config or self.result_config)
 
@@ -451,7 +450,7 @@ class WqpProgram(object):
 
     def _add_sample_index(self, filepath):
         '''Add an index to ActivityIdentifier field for the table matching the file'''
-        with sqlite3.connect(TEMPDB) as conn:
+        with sqlite3.connect(self.TEMPDB) as conn:
             conn.cursor().execute(self.sql['create_index'].format(basename(filepath)[:-4]))
 
     def _get_most_recent_result_date(self):
