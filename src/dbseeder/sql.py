@@ -35,16 +35,16 @@ def insert_rows(rows, insert_statement, cursor):
         try:
             cursor.execute(statement)
             i += 1
+
+            #: commit commands to database
+            if i % batch_size == 0:
+                cursor.commit()
+
+            cursor.commit()
         except Exception, e:
             del cursor
 
             raise e
-
-        #: commit commands to database
-        if i % batch_size == 0:
-            cursor.commit()
-
-        cursor.commit()
 
 
 def update_row(row, datasource):
