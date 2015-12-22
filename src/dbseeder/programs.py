@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 '''
-Programs.py
+programs.py
 ----------------------------------
 the different source programs
 '''
@@ -20,7 +19,7 @@ from glob import glob
 from os.path import join, isdir, basename, splitext
 from querycsv import query_csv
 from functools import partial
-from services import Caster, Reproject, Normalizer, ChargeBalancer, HttpClient
+from services import Caster, Normalizer, ChargeBalancer, HttpClient
 from benchmarking import get_milliseconds
 
 
@@ -146,17 +145,25 @@ class WqpProgram(object):
         ('USGSPCode', 'USGSPCode')
     ])
 
-    def __init__(self, db, file_location=None):
+    def __init__(self,
+                 db,
+                 file_location=None,
+                 sql={},
+                 update_row=None,
+                 insert_rows=None):
         '''create a new WQP program
         db - the connection string for the database to seed
         file_location - the path on disk to find csv files to ETL
+        update_row - the function to reproject a point and set the DataSource
+        insert_row - the function to batch insert rows
 
         if `file_location` is None, it is assumed to be an update
         operation
         '''
-        super(WqpProgram, self).__init__()
-
         self.db = db
+        self._update_row = update_row
+        self._insert_rows = insert_rows
+        self.sql.update(sql)
 
         #: if file_location is None then we are updating
         if file_location is not None:
@@ -294,7 +301,7 @@ class WqpProgram(object):
             row = Caster.cast(row, schema.station)
 
             #: set datasource, reproject and update shape
-            row = self._update_row(row)
+            row = self._update_row(row, self.datasource)
 
             #: normalize data including stripping _WXP etc
             row = Normalizer.normalize_station(row)
@@ -308,15 +315,19 @@ class WqpProgram(object):
             #: store row for later
             stations.append(row.values())
 
+        if not hasattr(self, 'cursor') or not self.cursor:
+            c = pyodbc.connect(self.db['connection_string'])
+            self.cursor = c.cursor()
+
         #: insert stations
-        self._insert_rows(stations, self.sql['station_insert'])
+        self._insert_rows(stations, self.sql['station_insert'], self.cursor)
 
     def _seed_results(self, samples_for_id):
         #: cast to defined schema types
         samples = map(partial(Caster.cast, schema=schema.result), samples_for_id)
 
         #: set datasource and spatial information
-        samples = map(self._update_row, samples)
+        samples = [self._update_row(sample, self.datasource) for sample in samples]
 
         #: normalize chemical names and units
         samples = map(Normalizer.normalize_sample, samples)
@@ -333,8 +344,12 @@ class WqpProgram(object):
 
         rows = map(lambda sample: sample.values(), samples)
 
+        if not hasattr(self, 'cursor') or not self.cursor:
+            c = pyodbc.connect(self.db['connection_string'])
+            self.cursor = c.cursor()
+
         #: TODO determine if this should this be batched in sets bigger than just a sample set?
-        self._insert_rows(rows, self.sql['result_insert'])
+        self._insert_rows(rows, self.sql['result_insert'], self.cursor)
 
     def _get_files(self, location):
         '''Takes the file location and returns the csv's within it.'''
@@ -434,54 +449,6 @@ class WqpProgram(object):
         '''Given a filename with an extension, the file name is returned without the extension.'''
 
         return splitext(basename(file_path))[0]
-
-    def _update_row(self, row):
-        '''Given a dictionary as a row, take the lat and long field, project it to UTM, and transform to WKT'''
-
-        template = 'geometry::STGeomFromText(\'POINT ({} {})\', 26912)'
-
-        row['DataSource'] = self.datasource
-
-        x = row['Lon_X']
-        y = row['Lat_Y']
-
-        if not (x and y):
-            return row
-
-        if 'Shape' not in row:
-            return row
-
-        shape = Reproject.to_utm(x, y)
-
-        row['Shape'] = template.format(shape[0], shape[1])
-
-        return row
-
-    def _insert_rows(self, rows, insert_statement):
-        '''Given a list of fields and an sql statement, execute the statement after `batch_size` number of statements'''
-        batch_size = 5000
-
-        if not hasattr(self, 'cursor') or not self.cursor:
-            c = pyodbc.connect(self.db['connection_string'])
-            self.cursor = c.cursor()
-
-        i = 1
-        #: format and stage sql statements
-        for row in rows:
-            statement = insert_statement.format(','.join(row))
-
-            try:
-                self.cursor.execute(statement)
-                i += 1
-            except Exception, e:
-                del self.cursor
-                raise e
-
-            #: commit commands to database
-            if i % batch_size == 0:
-                self.cursor.commit()
-
-            self.cursor.commit()
 
     def _add_sample_index(self, filepath):
         '''Add an index to ActivityIdentifier field for the table matching the file'''
@@ -744,13 +711,24 @@ class SdwisProgram(object):
                 UTV80.TINWLCAS.BOTTOM_DP_MSR_UOM'''
 
     def __init__(self, db, sdwis, file_location):
+    def __init__(self,
+                 db,
+                 sdwis,
+                 file_location,
+                 sql={},
+                 update_row=None,
+                 insert_rows=None):
         '''create a new SDWIS program
         db - the connection string for the database to seed
         sdwis - the connection information to the sdwis database
         file_location - ignored
+        update_row - the function to reproject a point and set the DataSource
+        insert_row - the function to batch insert rows
         '''
-        super(SdwisProgram, self).__init__()
 
+        self.sql.update(sql)
+        self._update_row = update_row
+        self._insert_rows = insert_rows
         self.db = db
         self.cursor = pyodbc.connect(sdwis['connection_string'])
 
@@ -775,7 +753,7 @@ class SdwisProgram(object):
             #: skip casting since database sets types
 
             #: set datasource, reproject and update shape
-            row = self._update_row(row)
+            row = self._update_row(row, self.datasource)
 
             #: normalize data including stripping _WXP etc
             row = Normalizer.normalize_station(row)
@@ -789,31 +767,12 @@ class SdwisProgram(object):
             #: store row for later
             stations.append(row.values())
 
+        if not hasattr(self, 'cursor') or not self.cursor:
+            c = pyodbc.connect(self.db['connection_string'])
+            self.cursor = c.cursor()
+
         #: insert stations
-        self._insert_rows(stations, self.sql['station_insert'])
-
-    #: Todo: refactor - same as WQP
-    def _update_row(self, row):
-        '''Given a dictionary as a row, take the lat and long field, project it to UTM, and transform to WKT'''
-
-        template = 'geometry::STGeomFromText(\'POINT ({} {})\', 26912)'
-
-        row['DataSource'] = self.datasource
-
-        x = row['Lon_X']
-        y = row['Lat_Y']
-
-        if not (x and y):
-            return row
-
-        if 'Shape' not in row:
-            return row
-
-        shape = Reproject.to_utm(x, y)
-
-        row['Shape'] = template.format(shape[0], shape[1])
-
-        return row
+        self._insert_rows(stations, self.sql['station_insert'], self.cursor)
 
     def _zip_column_names(self, row):
         '''Given a set, return a dictionary with field names'''
@@ -828,32 +787,3 @@ class SdwisProgram(object):
         header = [cd[0] for cd in row.cursor_description]
 
         return dict(zip(header, list(row)))
-
-    #: Todo - refactor. same as WQP
-    def _insert_rows(self, rows, insert_statement):
-        '''Given a list of fields and a sql statement, execute the statement after `batch_size` number of statements'''
-        batch_size = 5000
-
-        if not hasattr(self, 'cursor') or not self.cursor:
-            c = pyodbc.connect(self.db['connection_string'])
-            self.cursor = c.cursor()
-
-        i = 1
-        #: format and stage sql statements
-        for row in rows:
-            statement = insert_statement.format(','.join(row))
-
-            try:
-                self.cursor.execute(statement)
-                i += 1
-            except Exception, e:
-                if hasattr(self, 'cursor'):
-                    del self.cursor
-
-                raise e
-
-            #: commit commands to database
-            if i % batch_size == 0:
-                self.cursor.commit()
-
-            self.cursor.commit()

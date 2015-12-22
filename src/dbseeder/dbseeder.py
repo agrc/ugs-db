@@ -2,14 +2,15 @@
 # -*- coding: utf-8 -*-
 
 '''
-dbseeder
+dbseeder.py
 ----------------------------------
-the dbseeder module
+the main entry point module for database ETL
 '''
 
 import pyodbc
 import factory
 import requests
+import sql
 from os.path import join, dirname
 try:
     import secrets
@@ -67,9 +68,14 @@ class Seeder(object):
         programs = self._parse_source_args(source)
 
         for program in programs:
-            seederClass = factory.create(program)
+            seederClass = factory.get(program)
 
-            seeder = seederClass(db, file_location=file_location, sdwis=secrets.sdwis)
+            seeder = seederClass(db,
+                                 file_location=file_location,
+                                 sdwis=secrets.sdwis,
+                                 sql=sql.sql,
+                                 update_row=sql.update_row,
+                                 insert_rows=sql.insert_rows)
             seeder.seed()
 
     def post_process(self, who):
