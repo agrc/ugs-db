@@ -397,6 +397,11 @@ class Normalizer(object):
     def reorder_filter(cls, row, schema):
         new_row = OrderedDict()
         for field in schema:
+            #: SDWIS is a partial schema
+            #: add null values to missing fields
+            if field not in row:
+                row[field] = None
+
             new_row[field] = row[field]
 
         return new_row
