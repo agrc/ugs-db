@@ -234,7 +234,7 @@ class Normalizer(object):
         chemical = row['Param']
         unit = row['Unit']
 
-        row['StationId'] = cls.strip_wxp(row['StationId'])
+        row['StationId'] = cls.strip_wxp(str(row['StationId']))
 
         if chemical is None:
             return row
@@ -384,7 +384,7 @@ class Normalizer(object):
         '''strip wxp
         normalize fields
         '''
-        row['StationId'] = cls.strip_wxp(row['StationId'])
+        row['StationId'] = cls.strip_wxp(str(row['StationId']))
 
         try:
             row['StationType'] = cls.stationTypes[row['StationType']]
