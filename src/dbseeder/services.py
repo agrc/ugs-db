@@ -225,7 +225,7 @@ class Normalizer(object):
         return re.sub(cls.wqx_re, '-', id)
 
     @classmethod
-    def normalize_sample(cls, row):
+    def normalize_sample(cls, row, datasource=None):
         '''In the units field, make all mg/L and ug/L lowercase while preserving
          other uppercase letters, convert units, normalize chemical
          strip wxp
@@ -310,6 +310,9 @@ class Normalizer(object):
         elif chemical == 'sulfate as s' and unit == milli_per_liter:
             conversion_rate = 0.333792756
             chemical = 'Sulfate'
+        elif chemical == 'nitrate' and unit == milli_per_liter and datasource == 'SDWIS':
+            conversion_rate = 4.426802887
+            chemical = 'Nitrate'
         elif ((chemical == 'nitrate-nitrogen' and unit == 'mg/l as n') or
               (chemical == 'nitrate as n' and (unit == 'mg/l as n' or unit == milli_per_liter))):
             conversion_rate = 4.426802887
