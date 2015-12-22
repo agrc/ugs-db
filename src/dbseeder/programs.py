@@ -55,7 +55,7 @@ class WqpProgram(object):
                           + ' ResultComment, ResultStatus, ResultValue, SampComment, SampDepth, SampDepthRef,'
                           + ' SampDepthU, SampEquip, SampFrac, SampleDate, SampleTime, SampleId, SampMedia, SampMeth,'
                           + ' SampMethName, SampType, StationId, Unit, USGSPCode) values ({})'),
-        'create_index': "CREATE INDEX IF NOT EXISTS 'ActivityIdentifier_{0}' ON '{0}' ('ActivityIdentifier' ASC)",
+        'create_index': 'CREATE INDEX IF NOT EXISTS "ActivityIdentifier_{0}" ON "{0}" ("ActivityIdentifier" ASC)',
         'max_sample_date': 'SELECT max(SampleDate) FROM [UGSWaterChemistry].[dbo].[Results]',
         'new_stations': ('SELECT * FROM (VALUES{}) AS t(StationId) WHERE NOT EXISTS('
                          + 'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Stations] WHERE [StationId] = t.StationId)'),
@@ -655,8 +655,169 @@ class SdwisProgram(object):
 
     datasource = 'SDWIS'
 
+    result_sql = '''SELECT
+        UTV80.TSASAR.ANALYSIS_START_DT AS 'AnalysisDate',
+        UTV80.TSALAB.LAB_ID_NUMBER AS 'LabName',
+        UTV80.TSASAR.DETECTN_LIMIT_NUM AS 'MDL',
+        UTV80.TSASAR.DETECTN_LIM_UOM_CD AS 'MDLUnit',
+        UTV80.TINWSYS.TINWSYS_IS_NUMBER AS 'OrgId',
+        UTV80.TINWSYS.NAME AS 'OrgName',
+        UTV80.TSAANLYT.NAME AS 'Param',
+        UTV80.TSASAR.CONCENTRATION_MSR AS 'ResultValue',
+        UTV80.TSASAMPL.COLLLECTION_END_DT AS 'SampleDate',
+        UTV80.TSASAMPL.COLLCTN_END_TIME AS 'SampleTime',
+        UTV80.TSASAMPL.LAB_ASGND_ID_NUM AS 'SampleId',
+        UTV80.TINWSF.TYPE_CODE AS 'SampType',
+        UTV80.TINWSF.TINWSF_IS_NUMBER AS 'StationId',
+        UTV80.TSASAR.UOM_CODE AS 'Unit',
+        UTV80.TINLOC.LATITUDE_MEASURE AS 'Lat_Y',
+        UTV80.TINLOC.LONGITUDE_MEASURE AS 'Lon_X',
+        UTV80.TSAANLYT.CAS_REGISTRY_NUM AS 'CAS_Reg',
+        UTV80.TSASAR.TSASAR_IS_NUMBER AS 'IdNum'
+        FROM UTV80.TINWSF
+        JOIN UTV80.TINWSYS ON
+        UTV80.TINWSF.TINWSYS_IS_NUMBER = UTV80.TINWSYS.TINWSYS_IS_NUMBER
+        JOIN UTV80.TINLOC ON
+        UTV80.TINWSF.TINWSF_IS_NUMBER = UTV80.TINLOC.TINWSF_IS_NUMBER
+        JOIN UTV80.TSASMPPT ON
+        UTV80.TINWSF.TINWSF_IS_NUMBER = UTV80.TSASMPPT.TINWSF0IS_NUMBER
+        JOIN UTV80.TSASAMPL ON
+        UTV80.TSASMPPT.TSASMPPT_IS_NUMBER = UTV80.TSASAMPL.TSASMPPT_IS_NUMBER
+        JOIN UTV80.TSASAR ON
+        UTV80.TSASAMPL.TSASAMPL_IS_NUMBER = UTV80.TSASAR.TSASAMPL_IS_NUMBER
+        JOIN UTV80.TSAANLYT ON
+        UTV80.TSASAR.TSAANLYT_IS_NUMBER = UTV80.TSAANLYT.TSAANLYT_IS_NUMBER
+        JOIN UTV80.TSALAB ON
+        UTV80.TSASAMPL.TSALAB_IS_NUMBER = UTV80.TSALAB.TSALAB_IS_NUMBER
+        WHERE (UTV80.TINWSF.TYPE_CODE = 'SP' Or
+                UTV80.TINWSF.TYPE_CODE = 'WL') AND
+                UTV80.TSASAR.CONCENTRATION_MSR IS NOT NULL
+                {}
+        ORDER BY UTV80.TINWSF.ST_ASGN_IDENT_CD'''
+
+    station_sql = '''SELECT
+        UTV80.TINWSYS.TINWSYS_IS_NUMBER AS "OrgId",
+        UTV80.TINWSYS.NAME AS "OrgName",
+        UTV80.TINWSF.TINWSF_IS_NUMBER AS "StationId",
+        UTV80.TINWSF.NAME AS "StationName",
+        UTV80.TINWSF.TYPE_CODE AS "StationType",
+        UTV80.TINLOC.LONGITUDE_MEASURE AS "Lon_X",
+        UTV80.TINLOC.LATITUDE_MEASURE AS "Lat_Y",
+        UTV80.TINLOC.HORIZ_ACCURACY_MSR AS "HorAcc",
+        UTV80.TINLOC.HZ_COLLECT_METH_CD AS "HorCollMeth",
+        UTV80.TINLOC.HORIZ_REF_DATUM_CD AS "HorRef",
+        UTV80.TINLOC.VERTICAL_MEASURE AS "Elev",
+        UTV80.TINLOC.VERT_ACCURACY_MSR AS "ElevAcc",
+        UTV80.TINLOC.VER_COL_METH_CD AS "ElevMeth",
+        UTV80.TINLOC.VERT_REF_DATUM_CD AS "ElevRef",
+        MAX(UTV80.TINWLCAS.BOTTOM_DEPTH_MSR) AS "Depth",
+        UTV80.TINWLCAS.BOTTOM_DP_MSR_UOM AS "DepthUnit"
+        FROM UTV80.TINWSF
+        JOIN UTV80.TINWSYS ON
+            UTV80.TINWSF.TINWSYS_IS_NUMBER = UTV80.TINWSYS.TINWSYS_IS_NUMBER
+        JOIN UTV80.TINLOC ON
+            UTV80.TINWSF.TINWSF_IS_NUMBER = UTV80.TINLOC.TINWSF_IS_NUMBER
+        LEFT JOIN UTV80.TINWLCAS ON
+            UTV80.TINWSF.TINWSF_IS_NUMBER = UTV80.TINWLCAS.TINWSF_IS_NUMBER
+        WHERE (UTV80.TINWSF.TYPE_CODE = 'SP' Or
+                UTV80.TINWSF.TYPE_CODE = 'WL' Or
+                UTV80.TINWSF.TYPE_CODE = 'IN' Or
+                UTV80.TINWSF.TYPE_CODE = 'SS') AND
+            UTV80.TINLOC.LATITUDE_MEASURE != 0
+        GROUP BY UTV80.TINWSF.TINWSF_IS_NUMBER,
+                UTV80.TINWSF.NAME,
+                UTV80.TINWSF.TYPE_CODE,
+                UTV80.TINWSYS.TINWSYS_IS_NUMBER,
+                UTV80.TINWSYS.NAME,
+                UTV80.TINLOC.LATITUDE_MEASURE,
+                UTV80.TINLOC.LONGITUDE_MEASURE,
+                UTV80.TINLOC.SRC_MAP_SCALE_NUM,
+                UTV80.TINLOC.HORIZ_ACCURACY_MSR,
+                UTV80.TINLOC.HZ_COLLECT_METH_CD,
+                UTV80.TINLOC.HORIZ_REF_DATUM_CD,
+                UTV80.TINLOC.VERTICAL_MEASURE,
+                UTV80.TINLOC.VERT_ACCURACY_MSR,
+                UTV80.TINLOC.VER_COL_METH_CD,
+                UTV80.TINLOC.VERT_REF_DATUM_CD,
+                UTV80.TINWLCAS.BOTTOM_DEPTH_MSR,
+                UTV80.TINWLCAS.BOTTOM_DP_MSR_UOM'''
+
+    def __init__(self, db, sdwis, file_location):
+        '''create a new SDWIS program
+        db - the connection string for the database to seed
+        sdwis - the connection information to the sdwis database
+        file_location - ignored
+        '''
+        super(SdwisProgram, self).__init__()
+
+        self.db = db
+        self.cursor = pyodbc.connect(sdwis['connection_string'])
+
     def seed(self):
-        pass
+        self._seed_stations(self.cursor.execute(self.station_sql), schema.station)
 
     def update(self):
         pass
+
+    def _seed_stations(self, rows, config=None):
+        #: rows cursor()
+        #: config=The schema names for the rows
+        stations = []
+        for row in rows:
+            #: zip column names with values
+            row = self._zip_column_names(row)
+            row['Shape'] = None
+
+            #: set datasource, reproject and update shape
+            row = self._update_row(row)
+
+            #: normalize data including stripping _WXP etc
+            row = Normalizer.normalize_station(row)
+
+            #: reorder and filter out any fields not in the schema
+            row = Normalizer.reorder_filter(row, schema.station)
+
+            #: have to generate sql manually because of quoting on spatial WKT
+            row = Caster.cast_for_sql(row)
+
+            #: store row for later
+            stations.append(row.values())
+
+        #: insert stations
+        self._insert_rows(stations, self.sql['station_insert'])
+
+    def _update_row(self, row):
+        '''Given a dictionary as a row, take the lat and long field, project it to UTM, and transform to WKT'''
+
+        template = 'geometry::STGeomFromText(\'POINT ({} {})\', 26912)'
+
+        row['DataSource'] = self.datasource
+
+        x = row['Lon_X']
+        y = row['Lat_Y']
+
+        if not (x and y):
+            return row
+
+        if 'Shape' not in row:
+            return row
+
+        shape = Reproject.to_utm(x, y)
+
+        row['Shape'] = template.format(shape[0], shape[1])
+
+        return row
+
+    def _zip_column_names(self, row):
+        '''Given a set, return a dictionary with field names'''
+
+        #: we have an already etl'd station. skip it.
+        if type(row) is dict:
+            return row
+
+        if len(row) == 0:
+            return None
+
+        header = [cd[0] for cd in row.cursor_description]
+
+        return dict(zip(header, list(row)))

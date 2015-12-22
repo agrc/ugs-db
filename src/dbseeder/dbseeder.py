@@ -69,7 +69,7 @@ class Seeder(object):
         for program in programs:
             seederClass = factory.create(program)
 
-            seeder = seederClass(db, file_location=file_location)
+            seeder = seederClass(db, file_location=file_location, sdwis=secrets.sdwis)
             seeder.seed()
 
     def post_process(self, who):
