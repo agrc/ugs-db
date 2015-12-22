@@ -735,7 +735,15 @@ class SdwisProgram(object):
     def seed(self):
         print('processing stations')
 
-        self._seed_stations(self.cursor.execute(self.station_sql), schema.station)
+        try:
+            self._seed_stations(self.source_cursor.execute(self.sql['station']), schema.station)
+        except Exception, e:
+            if hasattr(self, 'source_cursor'):
+                del self.source_cursor
+            if hasattr(self, 'cursor'):
+                del self.cursor
+
+            raise e
 
     def update(self):
         pass
