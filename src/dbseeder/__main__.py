@@ -7,7 +7,7 @@ Usage:
   dbseeder seed <source> <file_location> <configuration>
   dbseeder update <source> <configuration>
   dbseeder postprocess <configuration>
-  dbseeder (-h | --help)
+  dbseeder (-h | --help | --version)
 Options:
   -h --help     Show this screen.
   <configuration> dev, stage, prod
@@ -21,7 +21,7 @@ from docopt import docopt
 
 
 def main():
-    arguments = docopt(__doc__)
+    arguments = docopt(__doc__, version='0.1.0')
     seeder = Seeder()
 
     if arguments['seed']:
