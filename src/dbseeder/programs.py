@@ -755,6 +755,8 @@ class SdwisProgram(object):
         self.cursor = pyodbc.connect(sdwis['connection_string'])
 
     def seed(self):
+        print('processing stations')
+
         self._seed_stations(self.cursor.execute(self.station_sql), schema.station)
 
     def update(self):
@@ -767,7 +769,10 @@ class SdwisProgram(object):
         for row in rows:
             #: zip column names with values
             row = self._zip_column_names(row)
+            #: add shape column so row gets sql shape added
             row['Shape'] = None
+
+            #: skip casting since database sets types
 
             #: set datasource, reproject and update shape
             row = self._update_row(row)
@@ -787,6 +792,7 @@ class SdwisProgram(object):
         #: insert stations
         self._insert_rows(stations, self.sql['station_insert'])
 
+    #: Todo: refactor - same as WQP
     def _update_row(self, row):
         '''Given a dictionary as a row, take the lat and long field, project it to UTM, and transform to WKT'''
 
@@ -822,3 +828,30 @@ class SdwisProgram(object):
         header = [cd[0] for cd in row.cursor_description]
 
         return dict(zip(header, list(row)))
+
+    #: Todo - refactor. same as WQP
+    def _insert_rows(self, rows, insert_statement):
+        '''Given a list of fields and a sql statement, execute the statement after `batch_size` number of statements'''
+        batch_size = 5000
+
+        if not hasattr(self, 'cursor') or not self.cursor:
+            c = pyodbc.connect(self.db['connection_string'])
+            self.cursor = c.cursor()
+
+        i = 1
+        #: format and stage sql statements
+        for row in rows:
+            statement = insert_statement.format(','.join(row))
+
+            try:
+                self.cursor.execute(statement)
+                i += 1
+            except Exception, e:
+                del self.cursor
+                raise e
+
+            #: commit commands to database
+            if i % batch_size == 0:
+                self.cursor.commit()
+
+            self.cursor.commit()
