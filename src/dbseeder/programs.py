@@ -7,7 +7,6 @@ the different source programs
 '''
 
 import csv
-import pyodbc
 import re
 import schema
 import sqlite3
@@ -147,28 +146,30 @@ class WqpProgram(object):
 
     def __init__(self,
                  db,
-                 file_location=None,
-                 sql={},
+                 update,
+                 source=None,
+                 sql_statements={},
                  update_row=None,
-                 insert_rows=None):
+                 insert_rows=None,
+                 cursor_factory=None):
         '''create a new WQP program
         db - the connection string for the database to seed
-        file_location - the path on disk to find csv files to ETL
+        source - the path on disk to find csv files to ETL
         update_row - the function to reproject a point and set the DataSource
         insert_row - the function to batch insert rows
-
-        if `file_location` is None, it is assumed to be an update
-        operation
+        cursor_factory - the function to create pyodbc connection_string
+        update - use source files or web service
         '''
         self.db = db
         self._update_row = update_row
         self._insert_rows = insert_rows
-        self.sql.update(sql)
+        self.cursor_factory = cursor_factory
+        self.sql.update(sql_statements)
 
-        #: if file_location is None then we are updating
-        if file_location is not None:
-            #: check that file_location exists wqp/results and wqp/stations
-            parent_folder = join(file_location, self.datasource)
+        #: if update is True then we are updating
+        if not update:
+            #: check that source exists wqp/results and wqp/stations
+            parent_folder = join(source, self.datasource)
 
             if not isdir(parent_folder):
                 raise Exception('Pass in a location to the parent folder that contains WQP. {}'.format(parent_folder))
@@ -316,8 +317,7 @@ class WqpProgram(object):
             stations.append(row.values())
 
         if not hasattr(self, 'cursor') or not self.cursor:
-            c = pyodbc.connect(self.db['connection_string'])
-            self.cursor = c.cursor()
+            self.cursor = self.cursor_factory(self.db['connection_string'])
 
         #: insert stations
         self._insert_rows(stations, self.sql['station_insert'], self.cursor)
@@ -345,8 +345,7 @@ class WqpProgram(object):
         rows = map(lambda sample: sample.values(), samples)
 
         if not hasattr(self, 'cursor') or not self.cursor:
-            c = pyodbc.connect(self.db['connection_string'])
-            self.cursor = c.cursor()
+            self.cursor = self.cursor_factory(self.db['connection_string'])
 
         #: TODO determine if this should this be batched in sets bigger than just a sample set?
         self._insert_rows(rows, self.sql['result_insert'], self.cursor)
@@ -458,8 +457,7 @@ class WqpProgram(object):
     def _get_most_recent_result_date(self):
         #: open connection if one hasn't been opened
         if not hasattr(self, 'cursor') or not self.cursor:
-            c = pyodbc.connect(self.db['connection_string'])
-            self.cursor = c.cursor()
+            self.cursor = self.cursor_factory(self.db['connection_string'])
 
         try:
             last_updated = self.cursor.execute(self.sql['max_sample_date']).fetchone()
@@ -538,8 +536,7 @@ class WqpProgram(object):
         station_ids = map(lambda station_id: '(\'{}\')'.format(station_id), station_ids)
 
         if not hasattr(self, 'cursor') or not self.cursor:
-            c = pyodbc.connect(self.db['connection_string'])
-            self.cursor = c.cursor()
+            self.cursor = self.cursor_factory(self.db['connection_string'])
 
         statement = self.sql['new_stations'].format(','.join(station_ids))
         self.cursor.execute(statement)
@@ -608,8 +605,7 @@ class WqpProgram(object):
 
     def _get_unique_sample_ids(self, sample_ids):
         if not hasattr(self, 'cursor') or not self.cursor:
-            c = pyodbc.connect(self.db['connection_string'])
-            self.cursor = c.cursor()
+            self.cursor = self.cursor_factory(self.db['connection_string'])
 
         statement = self.sql['new_results'].format(','.join(sample_ids))
         self.cursor.execute(statement)
@@ -713,24 +709,23 @@ class SdwisProgram(object):
 
     def __init__(self,
                  db,
-                 sdwis,
-                 file_location,
-                 sql={},
+                 update,
+                 source,
+                 sql_statements={},
                  update_row=None,
-                 insert_rows=None):
+                 insert_rows=None,
+                 cursor_factory=None):
         '''create a new SDWIS program
         db - the connection string for the database to seed
-        sdwis - the connection information to the sdwis database
-        file_location - ignored
+        source - the connection information to the sdwis database
         update_row - the function to reproject a point and set the DataSource
         insert_row - the function to batch insert rows
         '''
-
-        self.sql.update(sql)
+        self.db = db
         self._update_row = update_row
         self._insert_rows = insert_rows
-        self.db = db
-        self.source_cursor = pyodbc.connect(sdwis['connection_string'])
+        self.sql.update(sql_statements)
+        self.source_cursor = cursor_factory(source['connection_string'])
 
     def seed(self):
         print('processing stations')
@@ -776,8 +771,7 @@ class SdwisProgram(object):
             stations.append(row.values())
 
         if not hasattr(self, 'cursor') or not self.cursor:
-            c = pyodbc.connect(self.db['connection_string'])
-            self.cursor = c.cursor()
+            self.cursor = self.cursor_factory(self.db['connection_string'])
 
         #: insert stations
         self._insert_rows(stations, self.sql['station_insert'], self.cursor)

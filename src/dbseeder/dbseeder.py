@@ -70,12 +70,13 @@ class Seeder(object):
         for program in programs:
             seederClass = factory.get(program)
 
-            seeder = seederClass(db,
-                                 file_location=file_location,
-                                 sdwis=secrets.sdwis,
-                                 sql=sql.sql,
+            seeder = seederClass(db=db,
+                                 update=False,
+                                 source=file_location or secrets.sdwis,
+                                 sql_statements=sql.sql_statements,
                                  update_row=sql.update_row,
-                                 insert_rows=sql.insert_rows)
+                                 insert_rows=sql.insert_rows,
+                                 cursor_factory=sql.create_cursor)
             seeder.seed()
 
     def post_process(self, who):
@@ -152,9 +153,15 @@ class Seeder(object):
         programs = self._parse_source_args(source)
 
         for program in programs:
-            seederClass = factory.create(program)
+            seederClass = factory.get(program)
 
-            seeder = seederClass(db)
+            seeder = seederClass(db=db,
+                                 update=True,
+                                 source=secrets.sdwis,
+                                 sql_statements=sql.sql_statements,
+                                 update_row=sql.update_row,
+                                 insert_rows=sql.insert_rows,
+                                 cursor_factory=sql.create_cursor)
             seeder.update()
 
         self._update_params_table(who)

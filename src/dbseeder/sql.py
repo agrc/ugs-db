@@ -5,10 +5,11 @@ sql.py
 ----------------------------------
 sql queries shared between programs
 '''
+import pyodbc
 from services import Reproject
 
 
-sql = {
+sql_statements = {
     'station_insert': ('insert into Stations (OrgId, OrgName, StationId, StationName, StationType, StationComment,' +
                        ' HUC8, Lon_X, Lat_Y, HorAcc, HorAccUnit, HorCollMeth, HorRef, Elev, ElevUnit, ElevAcc,' +
                        ' ElevAccUnit, ElevMeth, ElevRef, StateCode, CountyCode, Aquifer, FmType, AquiferType,' +
@@ -21,6 +22,11 @@ sql = {
                       ' SampDepthU, SampEquip, SampFrac, SampleDate, SampleTime, SampleId, SampMedia, SampMeth,' +
                       ' SampMethName, SampType, StationId, Unit, USGSPCode) values ({})'),
 }
+
+
+def create_cursor(connection_string):
+    c = pyodbc.connect(connection_string)
+    return c.cursor()
 
 
 def insert_rows(rows, insert_statement, cursor):
