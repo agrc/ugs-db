@@ -847,7 +847,9 @@ class SdwisProgram(object):
                 self.cursor.execute(statement)
                 i += 1
             except Exception, e:
-                del self.cursor
+                if hasattr(self, 'cursor'):
+                    del self.cursor
+
                 raise e
 
             #: commit commands to database
