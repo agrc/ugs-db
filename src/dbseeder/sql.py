@@ -49,6 +49,7 @@ def insert_rows(rows, insert_statement, cursor):
             cursor.commit()
         except Exception, e:
             del cursor
+            print(statement)
 
             raise e
 

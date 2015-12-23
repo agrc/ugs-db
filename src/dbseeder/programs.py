@@ -745,7 +745,7 @@ class SdwisProgram(object):
         print('processing stations')
 
         try:
-            # self._seed_stations(self.source_cursor.execute(self.sql['station']), schema.station)
+            self._seed_stations(self.source_cursor.execute(self.sql['station']), schema.station)
             print('processing done')
 
             print('processing results')
@@ -770,7 +770,8 @@ class SdwisProgram(object):
             #: add shape column so row gets sql shape added
             row['Shape'] = None
 
-            #: skip casting since database sets types
+            #: cast
+            row = Caster.cast(row, schema.station)
 
             #: set datasource, reproject and update shape
             row = self._update_row(row, self.datasource)
@@ -799,8 +800,11 @@ class SdwisProgram(object):
         for sample_id in unique_sample_ids:
             samples = self._get_samples_for_id(sample_id)
 
+            #: cast
+            samples = [Caster.cast(self._zip_column_names(sample), schema.result) for sample in samples]
+
             #: set datasource and spatial information
-            samples = [self._update_row(self._zip_column_names(sample), self.datasource) for sample in samples]
+            samples = [self._update_row(sample, self.datasource) for sample in samples]
 
             #: normalize chemical names and units
             samples = map(Normalizer.normalize_sample, samples)
