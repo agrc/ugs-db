@@ -16,14 +16,14 @@ A db tool for seeding and updating the ugs water chemistry database.
     1. Use `C:\Windows\System32\odbcad32.exe` to find your 64 bit oracle driver if you are using 64 bit python.
     1. Use `C:\Windows\SysWOW64\odbcad32.exe` to find your 32 bit oracle driver if you are using 32 bit python.
 ![image](https://cloud.githubusercontent.com/assets/325813/11985072/685e4382-a97e-11e5-9dbc-24f811ec3ce5.png)
-1. execute `scripts\create_db.sql`
-1. see usage
+1. execute `scripts\createDB.sql` or create a sql server database called `UGSWaterChemistry`
+1. execute `python -m dbseeder create-tables <configuration>` to create db tables.
+1. see usage (`python -m dbseeder -h`)
 
 ### Usage
-from the **/src** directory
-
+from the `**/src**` directory  
 execute `python -m dbseeder -h` for usage.
 
 ### Tests
-from the **parent** project directory
+from the **parent** project directory  
 `tox`

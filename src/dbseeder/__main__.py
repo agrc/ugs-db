@@ -3,7 +3,7 @@
 
 '''UGS Chemistry database seeder
 Usage:
-  dbseeder createdb <configuration>
+  dbseeder create-tables <configuration>
   dbseeder seed <source> <file_location> <configuration>
   dbseeder update <source> <configuration>
   dbseeder postprocess <configuration>
@@ -28,7 +28,7 @@ def main():
         return seeder.seed(source=arguments['<source>'], file_location=arguments['<file_location>'], who=arguments['<configuration>'])
     elif arguments['update']:
         return seeder.update(source=arguments['<source>'], who=arguments['<configuration>'])
-    elif arguments['createdb']:
+    elif arguments['create-tables']:
         return seeder.create_tables(who=arguments['<configuration>'])
     elif arguments['postprocess']:
         return seeder.post_process(who=arguments['<configuration>'])
