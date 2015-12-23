@@ -618,7 +618,20 @@ class SdwisProgram(object):
     datasource = 'SDWIS'
 
     sql = {
-        'result': '''SELECT
+        'unique_sample_ids': '''SELECT DISTINCT UTV80.TSASAMPL.LAB_ASGND_ID_NUM AS "SampleId"
+            FROM UTV80.TINWSF
+            JOIN UTV80.TSASMPPT ON
+            UTV80.TINWSF.TINWSF_IS_NUMBER = UTV80.TSASMPPT.TINWSF0IS_NUMBER
+            JOIN UTV80.TSASAMPL ON
+            UTV80.TSASAMPL.TSASMPPT_IS_NUMBER = UTV80.TSASMPPT.TSASMPPT_IS_NUMBER
+            JOIN UTV80.TSASAR ON
+            UTV80.TSASAMPL.TSASAMPL_IS_NUMBER = UTV80.TSASAR.TSASAMPL_IS_NUMBER
+            WHERE (UTV80.TINWSF.TYPE_CODE = 'SP' Or
+                   UTV80.TINWSF.TYPE_CODE = 'WL' Or
+                   UTV80.TINWSF.TYPE_CODE = 'IN' Or
+                   UTV80.TINWSF.TYPE_CODE = 'SS') AND
+                   UTV80.TSASAR.CONCENTRATION_MSR IS NOT NULL''',
+        'sample_id': '''SELECT
             UTV80.TSASAR.ANALYSIS_START_DT AS "AnalysisDate",
             UTV80.TSALAB.LAB_ID_NUMBER AS "LabName",
             UTV80.TSASAR.DETECTN_LIMIT_NUM AS "MDL",
@@ -656,8 +669,9 @@ class SdwisProgram(object):
                     UTV80.TINWSF.TYPE_CODE = 'WL' Or
                     UTV80.TINWSF.TYPE_CODE = 'IN' Or
                     UTV80.TINWSF.TYPE_CODE = 'SS') AND
-                    UTV80.TSASAR.CONCENTRATION_MSR IS NOT NULL
-            ORDER BY UTV80.TINWSF.ST_ASGN_IDENT_CD''',
+                    UTV80.TSASAR.CONCENTRATION_MSR IS NOT NULL AND
+                UTV80.TSASAMPL.LAB_ASGND_ID_NUM = '{}'
+        ''',
         'station': '''SELECT
             UTV80.TINWSYS.TINWSYS_IS_NUMBER AS "OrgId",
             UTV80.TINWSYS.NAME AS "OrgName",
@@ -725,19 +739,23 @@ class SdwisProgram(object):
         self._insert_rows = insert_rows
         self.sql.update(sql_statements)
         self.source_cursor = cursor_factory(source['connection_string'])
+        self.cursor_factory = cursor_factory
 
     def seed(self):
         print('processing stations')
 
         try:
-            self._seed_stations(self.source_cursor.execute(self.sql['station']), schema.station)
-        except Exception, e:
+            # self._seed_stations(self.source_cursor.execute(self.sql['station']), schema.station)
+            print('processing done')
+
+            print('processing results')
+
+            self._seed_results(self.source_cursor.execute(self.sql['unique_sample_ids']))
+        finally:
             if hasattr(self, 'source_cursor'):
                 del self.source_cursor
             if hasattr(self, 'cursor'):
                 del self.cursor
-
-            raise e
 
     def update(self):
         pass
@@ -774,6 +792,41 @@ class SdwisProgram(object):
 
         #: insert stations
         self._insert_rows(stations, self.sql['station_insert'], self.cursor)
+
+    def _seed_results(self, unique_sample_ids):
+        unique_sample_ids = unique_sample_ids.fetchall()
+
+        for sample_id in unique_sample_ids:
+            samples = self._get_samples_for_id(sample_id)
+
+            #: set datasource and spatial information
+            samples = [self._update_row(self._zip_column_names(sample), self.datasource) for sample in samples]
+
+            #: normalize chemical names and units
+            samples = map(Normalizer.normalize_sample, samples)
+
+            #: create charge balance rows from sample
+            charge_balances = ChargeBalancer.get_charge_balance(samples)
+
+            samples.extend(charge_balances)
+
+            #: reorder and filter out any fields not in the schema
+            samples = map(partial(Normalizer.reorder_filter, schema=schema.result), samples)
+
+            samples = map(Caster.cast_for_sql, samples)
+
+            rows = map(lambda sample: sample.values(), samples)
+
+            if not hasattr(self, 'cursor') or not self.cursor:
+                self.cursor = self.cursor_factory(self.db['connection_string'])
+
+            #: TODO determine if this should this be batched in sets bigger than just a sample set?
+            self._insert_rows(rows, self.sql['result_insert'], self.cursor)
+
+    def _get_samples_for_id(self, sample_id):
+        #: a set containing the sample id (sampleid,)
+
+        return self.source_cursor.execute(self.sql['sample_id'].format(sample_id[0]))
 
     def _zip_column_names(self, row):
         '''Given a set, return a dictionary with field names'''
