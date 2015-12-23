@@ -14,7 +14,7 @@ A db tool for seeding and updating the ugs water chemistry database.
         1. **Port**: `1521`
 1. Update `secrets.py` based on the [sample.](/src/dbseeder/secrets_sample.py)
     1. Use `C:\Windows\System32\odbcad32.exe` to find your 64 bit oracle driver if you are using 64 bit python.
-    1. Use `C:\Windows\SysWOW64\odbcad32.exe` to fidn your 32 bit oralce driver if you are using 32 bit python.
+    1. Use `C:\Windows\SysWOW64\odbcad32.exe` to find your 32 bit oracle driver if you are using 32 bit python.
 1. execute `scripts\create_db.sql`
 1. see usage
 
