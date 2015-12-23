@@ -479,7 +479,7 @@ class ChargeBalancer(object):
         con = Concentration()
 
         for r in rows:
-            con.set(r['Param'], r['ResultValue'], r['DetectCond'])
+            con.set(r['Param'], r['ResultValue'], r.get('DetectCond'))
 
         if con.has_major_params:
             return cls.calculate_charge_balance(con, rows[0]['SampleId'])
