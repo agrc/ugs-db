@@ -829,8 +829,13 @@ class SdwisProgram(object):
 
     def _get_samples_for_id(self, sample_id):
         #: a set containing the sample id (sampleid,)
+        try:
+            cursor = self.source_cursor.execute(self.sql['sample_id'].format(sample_id[0]))
+        except Exception as e:
+            print(sample_id)
+            raise e
 
-        return self.source_cursor.execute(self.sql['sample_id'].format(sample_id[0]))
+        return cursor
 
     def _zip_column_names(self, row):
         '''Given a set, return a dictionary with field names'''
