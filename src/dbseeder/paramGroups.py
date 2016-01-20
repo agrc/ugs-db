@@ -6,7 +6,7 @@ paramGroups.py
 parameter group to fill in ParamGroup
 '''
 
-ParamGroups = {
+param_groups = {
     'diethyl ether, water, unfiltered, recoverable, micrograms per liter':
     'organics, other',
     'n-nitrosodimethylamine': 'organics, other',
