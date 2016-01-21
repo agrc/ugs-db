@@ -44,6 +44,12 @@ class Caster(object):
         for the row (result or station) a new {string, string} dictionary
         (row) is returned with the values properly formatted.
         '''
+        def noop(arg):
+            return arg
+
+        def date_conversion(arg):
+            return datetime.time(*map(int, arg.split(':')))
+
         for field in schema.iteritems():
             cast = None
             #: if the value is not in the csv skip it
@@ -69,7 +75,7 @@ class Caster(object):
                 cast = float
             elif field[1]['type'] == 'Date':
                 if isinstance(value, datetime.datetime):
-                    cast = lambda x: x
+                    cast = noop
                 elif value == '':
                     row[field[0]] = None
                     continue
@@ -77,12 +83,12 @@ class Caster(object):
                     cast = parse
             elif field[1]['type'] == 'Time':
                 if isinstance(value, datetime.time):
-                    cast = lambda x: x
+                    cast = noop
                 elif value == '':
                     row[field[0]] = None
                     continue
                 else:
-                    cast = lambda x: datetime.time(*map(int, x.split(':')))
+                    cast = date_conversion
 
             try:
                 value = cast(value)
