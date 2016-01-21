@@ -22,7 +22,68 @@ from services import Caster, Normalizer, ChargeBalancer, HttpClient
 from benchmarking import get_milliseconds
 
 
-class WqpProgram(object):
+class Program(object):
+
+    most_recent_result_query = 'SELECT max(SampleDate) FROM [UGSWaterChemistry].[dbo].[Results] WHERE [DataSource] = \'{}\''
+    new_results_query = ('SELECT * FROM (VALUES{}) AS t(StationId) WHERE NOT EXISTS('
+                         'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Stations] WHERE [StationId] = t.StationId)')
+    new_stations_query = ('SELECT * FROM (VALUES{}) AS t(SampleId) WHERE NOT EXISTS('
+                          'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Results] WHERE [SampleId] = t.SampleId)')
+
+    def _get_most_recent_result_date(self, datasource):
+
+        #: open connection if one hasn't been opened
+        if not hasattr(self, 'cursor') or not self.cursor:
+            self.cursor = self.cursor_factory(self.db['connection_string'])
+
+        query = self.most_recent_result_query.format(datasource)
+        try:
+            last_updated = self.cursor.execute(query).fetchone()
+        except Exception, e:
+            del self.cursor
+            raise e
+
+        #: fetchone returns a set with one item
+        if last_updated and len(last_updated) == 1:
+            return last_updated[0]
+
+    def _get_unique_station_ids(self, station_ids):
+        '''queries the Stations table to find stations that have not been inserted yet
+        stations_ids: list('StationId')
+
+        returns a set of station ids
+        '''
+
+        station_ids = ['(\'{}\')'.format(station_id) for station_id in station_ids]
+
+        if not hasattr(self, 'cursor') or not self.cursor:
+            self.cursor = self.cursor_factory(self.db['connection_string'])
+
+        statement = self.new_stations_query.format(','.join(station_ids))
+        self.cursor.execute(statement)
+
+        return self.cursor.fetchall()
+
+    def _get_unique_sample_ids(self, sample_ids):
+        if not hasattr(self, 'cursor') or not self.cursor:
+            self.cursor = self.cursor_factory(self.db['connection_string'])
+
+        statement = self.new_results_query.format(','.join(sample_ids))
+        self.cursor.execute(statement)
+
+        return self.cursor.fetchall()
+
+    def _remove_existing_results(self, results):
+        sample_ids = ['(\'{}\')'.format(re.sub('\'', '\'\'', sample_id)) for sample_id in results.keys()]
+
+        unique_sample_ids = self._get_unique_sample_ids(sample_ids)
+        #: flatten list
+        unique_sample_ids = [item for iter_ in unique_sample_ids for item in iter_]
+
+        return {key: results[key] for key in results if key in unique_sample_ids}
+
+
+class WqpProgram(Program):
     '''class for handling wqp csv files'''
 
     datasource = 'WQP'
@@ -32,10 +93,7 @@ class WqpProgram(object):
     wqp_url = ('http://www.waterqualitydata.us/{}/search?sampleMedia=Water&startDateLo={}&startDateHi={}&'
                'bBox=-115%2C35.5%2C-108%2C42.5&mimeType=csv')
 
-    fields = {
-        'sample_id': 'ActivityIdentifier',
-        'monitoring_location_id': 'MonitoringLocationIdentifier'
-    }
+    fields = {'sample_id': 'ActivityIdentifier', 'monitoring_location_id': 'MonitoringLocationIdentifier'}
 
     sql = {
         'distinct_sample_id': 'select distinct({}) from {}',
@@ -52,12 +110,7 @@ class WqpProgram(object):
                           ' ResultComment, ResultStatus, ResultValue, SampComment, SampDepth, SampDepthRef,'
                           ' SampDepthU, SampEquip, SampFrac, SampleDate, SampleTime, SampleId, SampMedia, SampMeth,'
                           ' SampMethName, SampType, StationId, Unit, USGSPCode) values ({})'),
-        'create_index': 'CREATE INDEX IF NOT EXISTS "ActivityIdentifier_{0}" ON "{0}" ("ActivityIdentifier" ASC)',
-        'max_sample_date': 'SELECT max(SampleDate) FROM [UGSWaterChemistry].[dbo].[Results]',
-        'new_stations': ('SELECT * FROM (VALUES{}) AS t(StationId) WHERE NOT EXISTS('
-                         'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Stations] WHERE [StationId] = t.StationId)'),
-        'new_results': ('SELECT * FROM (VALUES{}) AS t(SampleId) WHERE NOT EXISTS('
-                        'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Results] WHERE [SampleId] = t.SampleId)')
+        'create_index': 'CREATE INDEX IF NOT EXISTS "ActivityIdentifier_{0}" ON "{0}" ("ActivityIdentifier" ASC)'
     }
 
     wqx_re = re.compile('(_WQX)-')
@@ -195,10 +248,10 @@ class WqpProgram(object):
 
     def update(self):
         try:
-            last_updated = self._get_most_recent_result_date()
+            last_updated = self._get_most_recent_result_date(self.datasource)
 
             if not last_updated:
-                raise Exception('No last updated date')
+                raise Exception('No last updated date. You should seed some data first.')
 
             #: get new results from wqp service
             result_url = self._format_url(self.wqp_url, 'Result', last_updated)
@@ -218,7 +271,8 @@ class WqpProgram(object):
                 new_stations = HttpClient.get_csv(station_url)
 
                 if not new_stations:
-                    raise Exception('WQP service should have returned results but result is empty. {}'.format(station_url))
+                    raise Exception('WQP service should have returned results but result is empty. {}'.format(
+                        station_url))
 
                 header = new_stations.next()
 
@@ -277,8 +331,8 @@ class WqpProgram(object):
                     sample_sets += 1
                     elapsed = get_milliseconds() - sets_start
                     if sample_sets % 5000 == 0:
-                        print('{} total sample sets (avg {} milliseconds per set)'.format(sample_sets,
-                                                                                          round(elapsed/sample_sets, 5)))
+                        print('{} total sample sets (avg {} milliseconds per set)'.format(sample_sets, round(
+                            elapsed / sample_sets, 5)))
 
             finally:
                 #: in case something goes wrong always clean up the db
@@ -368,8 +422,7 @@ class WqpProgram(object):
         file_name = self._get_file_name_without_extension(file_path)
 
         unique_sample_ids = query_csv(self.sql['distinct_sample_id'].format(self.fields['sample_id'], file_name),
-                                      [file_path],
-                                      self.TEMPDB)
+                                      [file_path], self.TEMPDB)
         if len(unique_sample_ids) > 0:
             #: remove header cell
             unique_sample_ids.pop(0)
@@ -388,15 +441,15 @@ class WqpProgram(object):
             stations = file_path
 
         if file_name:
-            rows = query_csv(self.sql['wqxids'].format(self.fields['monitoring_location_id'], file_name),
-                             [file_path],
+            rows = query_csv(self.sql['wqxids'].format(self.fields['monitoring_location_id'], file_name), [file_path],
                              self.TEMPDB)
             if len(rows) > 0:
                 rows.pop(0)
 
             return set([re.sub(self.wqx_re, '-', row[0]) for row in rows])
 
-        return set([re.sub(self.wqx_re, '-', station['StationId']) for station in filter(lambda x: self.wqx_re.search(x['StationId']), stations)])
+        return set([re.sub(self.wqx_re, '-', station['StationId'])
+                    for station in filter(lambda x: self.wqx_re.search(x['StationId']), stations)])
 
     def _get_samples_for_id(self, sample_id_set, file_path, config=None):
         '''Given a `(id,)` styled set of sample ids, this will return the sample
@@ -408,8 +461,7 @@ class WqpProgram(object):
 
         file_name = self._get_file_name_without_extension(file_path)
         samples_for_id = query_csv(self.sql['sample_id'].format(file_name, self.fields['sample_id'], sample_id_set[0]),
-                                   [file_path],
-                                   self.TEMPDB)
+                                   [file_path], self.TEMPDB)
 
         return self._etl_column_names(samples_for_id, config or self.result_config)
 
@@ -452,21 +504,6 @@ class WqpProgram(object):
         '''Add an index to ActivityIdentifier field for the table matching the file'''
         with sqlite3.connect(self.TEMPDB) as conn:
             conn.cursor().execute(self.sql['create_index'].format(basename(filepath)[:-4]))
-
-    def _get_most_recent_result_date(self):
-        #: open connection if one hasn't been opened
-        if not hasattr(self, 'cursor') or not self.cursor:
-            self.cursor = self.cursor_factory(self.db['connection_string'])
-
-        try:
-            last_updated = self.cursor.execute(self.sql['max_sample_date']).fetchone()
-        except Exception, e:
-            del self.cursor
-            raise e
-
-        #: fetchone returns a set with one item
-        if last_updated and len(last_updated) == 1:
-            return last_updated[0]
 
     def _format_url(self, template, source, last_updated, today=None):
         date_format = '%m-%d-%Y'
@@ -525,23 +562,6 @@ class WqpProgram(object):
 
         return [id[0] for id in unique_station_ids]
 
-    def _get_unique_station_ids(self, station_ids):
-        '''queries the Stations table to find stations that have not been inserted yet
-        stations_ids: list('StationId')
-
-        returns a set of station ids
-        '''
-
-        station_ids = map(lambda station_id: '(\'{}\')'.format(station_id), station_ids)
-
-        if not hasattr(self, 'cursor') or not self.cursor:
-            self.cursor = self.cursor_factory(self.db['connection_string'])
-
-        statement = self.sql['new_stations'].format(','.join(station_ids))
-        self.cursor.execute(statement)
-
-        return self.cursor.fetchall()
-
     def _extract_stations_by_id(self, cursor, station_ids, header):
         '''loops over a cursor of stations and returns the stations that have an id
         in station_ids
@@ -593,32 +613,15 @@ class WqpProgram(object):
 
         return station_ids
 
-    def _remove_existing_results(self, results):
-        sample_ids = map(lambda sample_id: '(\'{}\')'.format(sample_id), results.keys())
 
-        unique_sample_ids = self._get_unique_sample_ids(sample_ids)
-        #: flatten list
-        unique_sample_ids = [item for iter_ in unique_sample_ids for item in iter_]
-
-        return {key: results[key] for key in results if key in unique_sample_ids}
-
-    def _get_unique_sample_ids(self, sample_ids):
-        if not hasattr(self, 'cursor') or not self.cursor:
-            self.cursor = self.cursor_factory(self.db['connection_string'])
-
-        statement = self.sql['new_results'].format(','.join(sample_ids))
-        self.cursor.execute(statement)
-
-        return self.cursor.fetchall()
-
-
-class SdwisProgram(object):
+class SdwisProgram(Program):
     '''class for handling sdwis database rows'''
 
     datasource = 'SDWIS'
 
     sql = {
-        'unique_sample_ids': '''SELECT DISTINCT UTV80.TSASAMPL.LAB_ASGND_ID_NUM AS "SampleId"
+        'unique_sample_ids': '''SELECT DISTINCT UTV80.TSASAMPL.LAB_ASGND_ID_NUM AS "SampleId",
+            UTV80.TINWSF.TINWSF_IS_NUMBER AS "StationId"
             FROM UTV80.TINWSF
             JOIN UTV80.TSASMPPT ON
             UTV80.TINWSF.TINWSF_IS_NUMBER = UTV80.TSASMPPT.TINWSF0IS_NUMBER
@@ -631,6 +634,7 @@ class SdwisProgram(object):
                    UTV80.TINWSF.TYPE_CODE = 'IN' Or
                    UTV80.TINWSF.TYPE_CODE = 'SS') AND
                    UTV80.TSASAR.CONCENTRATION_MSR IS NOT NULL''',
+        'date_clause': ' AND UTV80.TSASAMPL.COLLLECTION_END_DT > TO_DATE(\'{}\',\'YYYY-MM-DD\')',
         'sample_id': '''SELECT
             UTV80.TSASAR.ANALYSIS_START_DT AS "AnalysisDate",
             UTV80.TSALAB.LAB_ID_NUMBER AS "LabName",
@@ -700,34 +704,28 @@ class SdwisProgram(object):
                     UTV80.TINWSF.TYPE_CODE = 'WL' Or
                     UTV80.TINWSF.TYPE_CODE = 'IN' Or
                     UTV80.TINWSF.TYPE_CODE = 'SS') AND
-                UTV80.TINLOC.LATITUDE_MEASURE != 0
+                    UTV80.TINLOC.LATITUDE_MEASURE != 0 {}
             GROUP BY UTV80.TINWSF.TINWSF_IS_NUMBER,
-                    UTV80.TINWSF.NAME,
-                    UTV80.TINWSF.TYPE_CODE,
-                    UTV80.TINWSYS.TINWSYS_IS_NUMBER,
-                    UTV80.TINWSYS.NAME,
-                    UTV80.TINLOC.LATITUDE_MEASURE,
-                    UTV80.TINLOC.LONGITUDE_MEASURE,
-                    UTV80.TINLOC.SRC_MAP_SCALE_NUM,
-                    UTV80.TINLOC.HORIZ_ACCURACY_MSR,
-                    UTV80.TINLOC.HZ_COLLECT_METH_CD,
-                    UTV80.TINLOC.HORIZ_REF_DATUM_CD,
-                    UTV80.TINLOC.VERTICAL_MEASURE,
-                    UTV80.TINLOC.VERT_ACCURACY_MSR,
-                    UTV80.TINLOC.VER_COL_METH_CD,
-                    UTV80.TINLOC.VERT_REF_DATUM_CD,
-                    UTV80.TINWLCAS.BOTTOM_DEPTH_MSR,
-                    UTV80.TINWLCAS.BOTTOM_DP_MSR_UOM'''
+                UTV80.TINWSF.NAME,
+                UTV80.TINWSF.TYPE_CODE,
+                UTV80.TINWSYS.TINWSYS_IS_NUMBER,
+                UTV80.TINWSYS.NAME,
+                UTV80.TINLOC.LATITUDE_MEASURE,
+                UTV80.TINLOC.LONGITUDE_MEASURE,
+                UTV80.TINLOC.SRC_MAP_SCALE_NUM,
+                UTV80.TINLOC.HORIZ_ACCURACY_MSR,
+                UTV80.TINLOC.HZ_COLLECT_METH_CD,
+                UTV80.TINLOC.HORIZ_REF_DATUM_CD,
+                UTV80.TINLOC.VERTICAL_MEASURE,
+                UTV80.TINLOC.VERT_ACCURACY_MSR,
+                UTV80.TINLOC.VER_COL_METH_CD,
+                UTV80.TINLOC.VERT_REF_DATUM_CD,
+                UTV80.TINWLCAS.BOTTOM_DEPTH_MSR,
+                UTV80.TINWLCAS.BOTTOM_DP_MSR_UOM''',
+        'station_id': 'AND UTV80.TINWSF.TINWSF_IS_NUMBER IN ({})'
     }
 
-    def __init__(self,
-                 db,
-                 update,
-                 source,
-                 sql_statements={},
-                 update_row=None,
-                 insert_rows=None,
-                 cursor_factory=None):
+    def __init__(self, db, update, source, sql_statements={}, update_row=None, insert_rows=None, cursor_factory=None):
         '''create a new SDWIS program
         db - the connection string for the database to seed
         source - the connection information to the sdwis database
@@ -742,15 +740,17 @@ class SdwisProgram(object):
         self.cursor_factory = cursor_factory
 
     def seed(self):
-        print('processing stations')
-
         try:
-            self._seed_stations(self.source_cursor.execute(self.sql['station']), schema.station)
-            print('processing done')
+            print('processing stations...')
 
-            print('processing results')
+            self._seed_stations(self.source_cursor.execute(self.sql['station'].format('')), schema.station)
+
+            print('processing done.')
+            print('processing results...')
 
             self._seed_results(self.source_cursor.execute(self.sql['unique_sample_ids']))
+
+            print('processing done.')
         finally:
             if hasattr(self, 'source_cursor'):
                 del self.source_cursor
@@ -758,19 +758,47 @@ class SdwisProgram(object):
                 del self.cursor
 
     def update(self):
-        #: query for new Results
+        print('processing stations...')
+        try:
+            #: query for new Results
+            last_updated = self._get_most_recent_result_date(self.datasource)
 
-        #: remove existing Results
+            if not last_updated:
+                raise Exception('No last updated date. You should seed some data first.')
 
-        #: get station ids from new results
+            last_updated = last_updated.split(' ')[0]
+            query = self.sql['unique_sample_ids'] + self.sql['date_clause'].format(last_updated)
 
-        #: remove existing stations
+            #: group them by sample id
+            new_results = self._group_rows_by_id(self.source_cursor.execute(query))
 
-        #: seed stations
+            #: weed out results that have a sample id already in the database
+            new_results = self._remove_existing_results(new_results)
 
-        #: seed results
+            #: find the station ids from the new results that aren't in the database
+            new_station_ids = self._find_new_station_ids(new_results)
 
-        pass
+            if new_station_ids and len(new_station_ids) > 0:
+                end = 500
+                while new_station_ids:
+                    stations = new_station_ids[0:end]
+                    query = self.sql['station'].format(self.sql['station_id']).format(','.join(stations))
+                    self._seed_stations(self.source_cursor.execute(query), schema.station)
+
+                    #: remove stations already inserted
+                    del new_station_ids[0:end]
+
+                print('processing done.')
+                print('processing results...')
+
+                self._seed_results(new_results.keys())
+
+                print('processing done.')
+        finally:
+            if hasattr(self, 'source_cursor'):
+                del self.source_cursor
+            if hasattr(self, 'cursor'):
+                del self.cursor
 
     def _seed_stations(self, rows, config=None):
         #: rows cursor()
@@ -803,11 +831,19 @@ class SdwisProgram(object):
         if not hasattr(self, 'cursor') or not self.cursor:
             self.cursor = self.cursor_factory(self.db['connection_string'])
 
+        print('inserting {}'.format(len(stations)))
+
         #: insert stations
         self._insert_rows(stations, self.sql['station_insert'], self.cursor)
 
     def _seed_results(self, unique_sample_ids):
-        unique_sample_ids = unique_sample_ids.fetchall()
+        '''
+        given a cursor or a list of ids, query for each one and insert it.
+        '''
+        try:
+            unique_sample_ids = unique_sample_ids.fetchall()
+        except Exception:
+            pass
 
         for sample_id in unique_sample_ids:
             samples = self._get_samples_for_id(sample_id)
@@ -862,3 +898,46 @@ class SdwisProgram(object):
         header = [cd[0] for cd in row.cursor_description]
 
         return dict(zip(header, list(row)))
+
+    def _find_new_station_ids(self, rows):
+        '''gets the station ids to process from the rows
+        rows: {sampleId: list(stationId)}
+
+        returns a set of station ids
+        '''
+
+        if not rows or len(rows) < 1:
+            return []
+
+        unique_station_ids = set([])
+
+        for results in rows.values():
+            for result in results:
+                station_id = result
+
+                unique_station_ids.add(station_id)
+
+        unique_station_ids = self._get_unique_station_ids(list(unique_station_ids))
+
+        return [id[0] for id in unique_station_ids]
+
+    def _group_rows_by_id(self, cursor):
+        '''groups results by SampleId similar to WQP
+        cursor: generator
+
+        returns a dicionary with sample_id's as the key, with a list of station ids
+        '''
+        unique_sample_ids = {}
+
+        if not cursor:
+            return
+
+        for row in cursor:
+            sample_id = row[0]
+            station_id = row[1]
+            if sample_id in unique_sample_ids:
+                unique_sample_ids[sample_id] += [station_id]
+            else:
+                unique_sample_ids[sample_id] = [station_id]
+
+        return unique_sample_ids
