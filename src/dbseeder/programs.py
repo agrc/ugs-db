@@ -42,22 +42,22 @@ class WqpProgram(object):
         'sample_id': 'select * from {} where {} = \'{}\'',
         'wqxids': 'select {0} from {1} where {0} LIKE \'%_WQX%\'',
         'station_insert': ('insert into Stations (OrgId, OrgName, StationId, StationName, StationType, StationComment,'
-                           + ' HUC8, Lon_X, Lat_Y, HorAcc, HorAccUnit, HorCollMeth, HorRef, Elev, ElevUnit, ElevAcc,'
-                           + ' ElevAccUnit, ElevMeth, ElevRef, StateCode, CountyCode, Aquifer, FmType, AquiferType,'
-                           + ' ConstDate, Depth, DepthUnit, HoleDepth, HoleDUnit, demELEVm, DataSource, WIN, Shape)'
-                           + ' values ({})'),
+                           ' HUC8, Lon_X, Lat_Y, HorAcc, HorAccUnit, HorCollMeth, HorRef, Elev, ElevUnit, ElevAcc,'
+                           ' ElevAccUnit, ElevMeth, ElevRef, StateCode, CountyCode, Aquifer, FmType, AquiferType,'
+                           ' ConstDate, Depth, DepthUnit, HoleDepth, HoleDUnit, demELEVm, DataSource, WIN, Shape)'
+                           ' values ({})'),
         'result_insert': ('insert into Results (AnalysisDate, AnalytMeth, AnalytMethId, AutoQual, CAS_Reg, Chrg,'
-                          + ' DataSource, DetectCond, IdNum, LabComments, LabName, Lat_Y, LimitType, Lon_X, MDL,'
-                          + ' MDLUnit, MethodDescript, OrgId, OrgName, Param, ParamGroup, ProjectId, QualCode,'
-                          + ' ResultComment, ResultStatus, ResultValue, SampComment, SampDepth, SampDepthRef,'
-                          + ' SampDepthU, SampEquip, SampFrac, SampleDate, SampleTime, SampleId, SampMedia, SampMeth,'
-                          + ' SampMethName, SampType, StationId, Unit, USGSPCode) values ({})'),
+                          ' DataSource, DetectCond, IdNum, LabComments, LabName, Lat_Y, LimitType, Lon_X, MDL,'
+                          ' MDLUnit, MethodDescript, OrgId, OrgName, Param, ParamGroup, ProjectId, QualCode,'
+                          ' ResultComment, ResultStatus, ResultValue, SampComment, SampDepth, SampDepthRef,'
+                          ' SampDepthU, SampEquip, SampFrac, SampleDate, SampleTime, SampleId, SampMedia, SampMeth,'
+                          ' SampMethName, SampType, StationId, Unit, USGSPCode) values ({})'),
         'create_index': 'CREATE INDEX IF NOT EXISTS "ActivityIdentifier_{0}" ON "{0}" ("ActivityIdentifier" ASC)',
         'max_sample_date': 'SELECT max(SampleDate) FROM [UGSWaterChemistry].[dbo].[Results]',
         'new_stations': ('SELECT * FROM (VALUES{}) AS t(StationId) WHERE NOT EXISTS('
-                         + 'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Stations] WHERE [StationId] = t.StationId)'),
+                         'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Stations] WHERE [StationId] = t.StationId)'),
         'new_results': ('SELECT * FROM (VALUES{}) AS t(SampleId) WHERE NOT EXISTS('
-                        + 'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Results] WHERE [SampleId] = t.SampleId)')
+                        'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Results] WHERE [SampleId] = t.SampleId)')
     }
 
     wqx_re = re.compile('(_WQX)-')
@@ -758,6 +758,18 @@ class SdwisProgram(object):
                 del self.cursor
 
     def update(self):
+        #: query for new Results
+
+        #: remove existing Results
+
+        #: get station ids from new results
+
+        #: remove existing stations
+
+        #: seed stations
+
+        #: seed results
+
         pass
 
     def _seed_stations(self, rows, config=None):
