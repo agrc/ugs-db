@@ -268,7 +268,7 @@ class TestWqpProgram(unittest.TestCase):
 
     def test_new_stations_sql_format(self):
         station_ids = ['(1)', '(2)', '(3)']
-        statement = self.patient.sql['new_stations'].format(','.join(station_ids))
+        statement = self.patient.new_stations_query.format(','.join(station_ids))
 
         self.assertEqual(('SELECT * FROM (VALUES(1),(2),(3)) AS t(StationId) WHERE NOT EXISTS(' +
                           'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Stations] WHERE [StationId] = t.StationId)'),

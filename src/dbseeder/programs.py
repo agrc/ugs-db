@@ -25,10 +25,10 @@ from benchmarking import get_milliseconds
 class Program(object):
 
     most_recent_result_query = 'SELECT max(SampleDate) FROM [UGSWaterChemistry].[dbo].[Results] WHERE [DataSource] = \'{}\''
-    new_results_query = ('SELECT * FROM (VALUES{}) AS t(StationId) WHERE NOT EXISTS('
-                         'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Stations] WHERE [StationId] = t.StationId)')
-    new_stations_query = ('SELECT * FROM (VALUES{}) AS t(SampleId) WHERE NOT EXISTS('
-                          'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Results] WHERE [SampleId] = t.SampleId)')
+    new_stations_query = ('SELECT * FROM (VALUES{}) AS t(StationId) WHERE NOT EXISTS('
+                          'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Stations] WHERE [StationId] = t.StationId)')
+    new_results_query = ('SELECT * FROM (VALUES{}) AS t(SampleId) WHERE NOT EXISTS('
+                         'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Results] WHERE [SampleId] = t.SampleId)')
 
     def _get_most_recent_result_date(self, datasource):
 
