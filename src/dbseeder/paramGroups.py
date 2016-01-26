@@ -364,8 +364,10 @@ param_groups = {
     'alachlor esa': 'organics, pesticide',
     'bromochloromethane': 'organics, other',
     'dissolved arsenic': 'inorganics, minor, non-metals',
-    "benzene, 1-chloro-2-[2,2,2-trichloro-1-(4-chlorophenyl)ethyl]-, 1,1'-(2,2,2-trichloroethylidene)bis[4-chlorobenzene], 1-chloro-2-[2,2-dichloro-1-(4-chlorophenyl)ethyl]benzene], 1,1'-(2,2-dichloroethylidene)bis[4-chlorobenzene], 1-chloro-2-[2,2-dichloro-1-(4-chlorophenyl)ethenyl]benzene, and 1,1'-(dichloroethenylidene)bis[4-chlorobenzene] and metabolites":
-    'toxicity',
+    ("benzene, 1-chloro-2-[2,2,2-trichloro-1-(4-chlorophenyl)ethyl]-, 1,1'-(2,2,2-trichloroethylidene)bis[4-chlorobenzene], "
+     "1-chloro-2-[2,2-dichloro-1-(4-chlorophenyl)ethyl]benzene], 1,1'-(2,2-dichloroethylidene)bis[4-chlorobenzene], "
+     "1-chloro-2-[2,2-dichloro-1-(4-chlorophenyl)ethenyl]benzene, and 1,1'-(dichloroethenylidene)bis[4-chlorobenzene] "
+     "and metabolites"): 'toxicity',
     'calcium carbonate as caco3': 'inorganics, major, non-metals',
     'hexachlorobenzene': 'organics, pesticide',
     'tthm': 'organics, other',
