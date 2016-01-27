@@ -99,8 +99,7 @@ def read_sqlfile(filename):
 
 
 def csv_to_sqldb(db, filename, table_name):
-    dialect = csv.Sniffer().sniff(open(filename, "rt").readline())
-    reader = csv.reader(open(filename, "rt"), dialect)
+    reader = csv.reader(open(filename, "rt"), dialect=csv.excel)
     column_names = reader.next()
     colstr = ",".join("[{0}]".format(col) for col in column_names)
     try:

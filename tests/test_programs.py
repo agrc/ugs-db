@@ -323,3 +323,24 @@ class TestWqpProgram(unittest.TestCase):
         new_results = self.patient._remove_existing_results(results)
 
         self.assertItemsEqual(new_results.keys(), ['sampleid1', 'sampleid2'])
+
+    def test_get_samples_for_id_returns_correct_list_when_quoted(self):
+        self.patient.sample_id_field = 'id'
+        sample_id_set = ('nwisnv.01.00901373',)
+        file_path = join('tests', 'data', 'WQP', 'quotes_in_csv.csv')
+
+        from nose.tools import set_trace
+        set_trace()
+        rows = self.patient._get_samples_for_id(sample_id_set, file_path, config=self.patient.result_config)
+
+        self.assertEqual(len(rows), 1)
+
+        result = rows[0]
+
+        self.assertEqual(result['OrgName'], 'USGS Nevada Water Science Center')
+        self.assertEqual(result['StationId'], 'USGS-362735114154501')
+        self.assertEqual(result['SampComment'], '"A-2400004 Filter lot Q625 L-2400004 Received August 27, 2009..  verified FA btl not received,paa,9/2/09"')
+        self.assertEqual(result['SampMeth'], 'USGS')
+        self.assertEqual(result['SampMethName'], 'USGS')
+        self.assertEqual(result['SampEquip'], 'Unknown')
+        self.assertEqual(result['Param'], 'Specific conductance')
