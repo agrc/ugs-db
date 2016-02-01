@@ -142,7 +142,7 @@ class TestWqpProgram(unittest.TestCase):
             "'aquifer'",
             "'fmtype'",
             "'aquifertype'",
-            "Cast('2011-01-01' as datetime)",
+            "Cast('2011-01-01' as date)",
             "5.0",  #: depth
             "'dunit'",
             "6.0",  #: HoleDepth
@@ -155,7 +155,7 @@ class TestWqpProgram(unittest.TestCase):
 
         result_rows = result_call[0][0][0]
         self.assertEqual(result_rows, [
-            "Cast('2011-01-01' as datetime)",  #: analysis date
+            "Cast('2011-01-01' as date)",  #: analysis date
             "'analythmeth'",
             "'analythmethid'",
             'Null',  #: AutoQual
@@ -187,7 +187,7 @@ class TestWqpProgram(unittest.TestCase):
             "'sampdepthu'",
             "'sampequip'",
             "'sampfrac'",
-            "Cast('2011-01-02' as datetime)",  #: activity date
+            "Cast('2011-01-02' as date)",  #: activity date
             "'12:00:00'",  #: activity Time
             "'sampleid'",
             "'sampmedia'",
@@ -329,8 +329,6 @@ class TestWqpProgram(unittest.TestCase):
         sample_id_set = ('nwisnv.01.00901373',)
         file_path = join('tests', 'data', 'WQP', 'quotes_in_csv.csv')
 
-        from nose.tools import set_trace
-        set_trace()
         rows = self.patient._get_samples_for_id(sample_id_set, file_path, config=self.patient.result_config)
 
         self.assertEqual(len(rows), 1)

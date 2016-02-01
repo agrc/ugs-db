@@ -92,7 +92,9 @@ class Caster(object):
 
             try:
                 value = cast(value)
-                if isinstance(value, datetime.datetime) and value > datetime.datetime.now():
+                if (isinstance(value, datetime.datetime) and
+                        (value > datetime.datetime.now() or
+                            value.year < 1800)):
                     value = None
             except:
                 row[field[0]] = None
@@ -137,12 +139,12 @@ class Caster(object):
                 new_value = "'{}'".format(value.replace('\'', '\'\''))
             elif isinstance(value, datetime.datetime):
                 try:
-                    new_value = 'Cast(\'{}\' as datetime)'.format(value.strftime('%Y-%m-%d'))
+                    new_value = 'Cast(\'{}\' as date)'.format(value.strftime('%Y-%m-%d'))
                 except ValueError:
                     #: year is before 1900
                     iso = value.isoformat()
                     date_string = iso.strip().split('T')[0]
-                    new_value = 'Cast(\'{}\' as datetime)'.format(date_string)
+                    new_value = 'Cast(\'{}\' as date)'.format(date_string)
             elif isinstance(value, datetime.time):
                 new_value = "'{}'".format(str(value))
             elif value is None:
