@@ -647,7 +647,7 @@ class SdwisProgram(Program):
             UTV80.TSASAMPL.COLLLECTION_END_DT AS "SampleDate",
             UTV80.TSASAMPL.COLLCTN_END_TIME AS "SampleTime",
             UTV80.TSASAMPL.LAB_ASGND_ID_NUM AS "SampleId",
-            UTV80.TINWSF.TYPE_CODE AS "SampType",
+            UTV80.TINWSF.TYPE_CODE AS "SampMedia",
             UTV80.TINWSF.TINWSF_IS_NUMBER AS "StationId",
             UTV80.TSASAR.UOM_CODE AS "Unit",
             UTV80.TINLOC.LATITUDE_MEASURE AS "Lat_Y",
