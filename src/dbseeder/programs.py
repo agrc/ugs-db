@@ -68,7 +68,11 @@ class Program(object):
         if not hasattr(self, 'cursor') or not self.cursor:
             self.cursor = self.cursor_factory(self.db['connection_string'])
 
+        if len(sample_ids) == 0:
+            return None
+
         statement = self.new_results_query.format(','.join(sample_ids))
+
         self.cursor.execute(statement)
 
         return self.cursor.fetchall()
@@ -620,20 +624,45 @@ class SdwisProgram(Program):
     datasource = 'SDWIS'
 
     sql = {
-        'unique_sample_ids': '''SELECT DISTINCT UTV80.TSASAMPL.LAB_ASGND_ID_NUM AS "SampleId",
-            UTV80.TINWSF.TINWSF_IS_NUMBER AS "StationId"
+        'unique_result_sample_ids': '''SELECT
+            UTV80.TSASAMPL.LAB_ASGND_ID_NUM AS "SampleId",
+            UTV80.TINWSF.TINWSF_IS_NUMBER AS "StationId",
+            UTV80.TSASAR.ANALYSIS_START_DT AS "AnalysisDate",
+            UTV80.TSALAB.LAB_ID_NUMBER AS "LabName",
+            UTV80.TSASAR.DETECTN_LIMIT_NUM AS "MDL",
+            UTV80.TSASAR.DETECTN_LIM_UOM_CD AS "MDLUnit",
+            UTV80.TINWSYS.TINWSYS_IS_NUMBER AS "OrgId",
+            UTV80.TINWSYS.NAME AS "OrgName",
+            UTV80.TSAANLYT.NAME AS "Param",
+            UTV80.TSASAR.CONCENTRATION_MSR AS "ResultValue",
+            UTV80.TSASAMPL.COLLLECTION_END_DT AS "SampleDate",
+            UTV80.TSASAMPL.COLLCTN_END_TIME AS "SampleTime",
+            UTV80.TINWSF.TYPE_CODE AS "SampType",
+            UTV80.TSASAR.UOM_CODE AS "Unit",
+            UTV80.TINLOC.LATITUDE_MEASURE AS "Lat_Y",
+            UTV80.TINLOC.LONGITUDE_MEASURE AS "Lon_X",
+            UTV80.TSAANLYT.CAS_REGISTRY_NUM AS "CAS_Reg",
+            UTV80.TSASAR.TSASAR_IS_NUMBER AS "IdNum"
             FROM UTV80.TINWSF
+            JOIN UTV80.TINWSYS ON
+            UTV80.TINWSF.TINWSYS_IS_NUMBER = UTV80.TINWSYS.TINWSYS_IS_NUMBER
+            JOIN UTV80.TINLOC ON
+            UTV80.TINWSF.TINWSF_IS_NUMBER = UTV80.TINLOC.TINWSF_IS_NUMBER
             JOIN UTV80.TSASMPPT ON
             UTV80.TINWSF.TINWSF_IS_NUMBER = UTV80.TSASMPPT.TINWSF0IS_NUMBER
             JOIN UTV80.TSASAMPL ON
-            UTV80.TSASAMPL.TSASMPPT_IS_NUMBER = UTV80.TSASMPPT.TSASMPPT_IS_NUMBER
+            UTV80.TSASMPPT.TSASMPPT_IS_NUMBER = UTV80.TSASAMPL.TSASMPPT_IS_NUMBER
             JOIN UTV80.TSASAR ON
             UTV80.TSASAMPL.TSASAMPL_IS_NUMBER = UTV80.TSASAR.TSASAMPL_IS_NUMBER
+            JOIN UTV80.TSAANLYT ON
+            UTV80.TSASAR.TSAANLYT_IS_NUMBER = UTV80.TSAANLYT.TSAANLYT_IS_NUMBER
+            JOIN UTV80.TSALAB ON
+            UTV80.TSASAMPL.TSALAB_IS_NUMBER = UTV80.TSALAB.TSALAB_IS_NUMBER
             WHERE (UTV80.TINWSF.TYPE_CODE = 'SP' Or
-                   UTV80.TINWSF.TYPE_CODE = 'WL' Or
-                   UTV80.TINWSF.TYPE_CODE = 'IN' Or
-                   UTV80.TINWSF.TYPE_CODE = 'SS') AND
-                   UTV80.TSASAR.CONCENTRATION_MSR IS NOT NULL''',
+                    UTV80.TINWSF.TYPE_CODE = 'WL' Or
+                    UTV80.TINWSF.TYPE_CODE = 'IN' Or
+                    UTV80.TINWSF.TYPE_CODE = 'SS') AND
+                    UTV80.TSASAR.CONCENTRATION_MSR IS NOT NULL''',
         'date_clause': ' AND UTV80.TSASAMPL.COLLLECTION_END_DT > TO_DATE(\'{}\',\'YYYY-MM-DD\')',
         'sample_id': '''SELECT
             UTV80.TSASAR.ANALYSIS_START_DT AS "AnalysisDate",
@@ -748,7 +777,7 @@ class SdwisProgram(Program):
             print('processing done.')
             print('processing results...')
 
-            self._seed_results(self.source_cursor.execute(self.sql['unique_sample_ids']))
+            self._seed_results(self.source_cursor.execute(self.sql['unique_result_sample_ids']))
 
             print('processing done.')
         finally:
@@ -766,11 +795,16 @@ class SdwisProgram(Program):
             if not last_updated:
                 raise Exception('No last updated date. You should seed some data first.')
 
+            print('fetching records after {}'.format(last_updated))
             last_updated = last_updated.split(' ')[0]
-            query = self.sql['unique_sample_ids'] + self.sql['date_clause'].format(last_updated)
+            query = self.sql['unique_result_sample_ids'] + self.sql['date_clause'].format(last_updated)
 
             #: group them by sample id
             new_results = self._group_rows_by_id(self.source_cursor.execute(query))
+
+            if len(new_results) <= 0:
+                print('no new data.')
+                return
 
             #: weed out results that have a sample id already in the database
             new_results = self._remove_existing_results(new_results)
@@ -789,11 +823,11 @@ class SdwisProgram(Program):
                     del new_station_ids[0:end]
 
                 print('processing done.')
-                print('processing results...')
+            print('processing results...')
 
-                self._seed_results(new_results.keys())
+            self._seed_results(new_results.keys())
 
-                print('processing done.')
+            print('processing done.')
         finally:
             if hasattr(self, 'source_cursor'):
                 del self.source_cursor
