@@ -840,6 +840,8 @@ class SdwisProgram(Program):
         finally:
             if hasattr(self, 'source_cursor'):
                 del self.source_cursor
+            if hasattr(self, 'second_source_cursor'):
+                del self.second_source_cursor
             if hasattr(self, 'cursor'):
                 del self.cursor
 
