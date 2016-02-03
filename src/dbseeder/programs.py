@@ -624,8 +624,10 @@ class SdwisProgram(Program):
     datasource = 'SDWIS'
 
     sql = {
-        'unique_result_sample_ids': '''SELECT
+        'specific-result': '''SELECT
+            UTV80.TSASAMPL.COLLLECTION_END_DT AS "SampleDate",
             UTV80.TSASAMPL.LAB_ASGND_ID_NUM AS "SampleId",
+            UTV80.TSAANLYT.NAME AS "Param",
             UTV80.TINWSF.TINWSF_IS_NUMBER AS "StationId",
             UTV80.TSASAR.ANALYSIS_START_DT AS "AnalysisDate",
             UTV80.TSALAB.LAB_ID_NUMBER AS "LabName",
@@ -633,11 +635,9 @@ class SdwisProgram(Program):
             UTV80.TSASAR.DETECTN_LIM_UOM_CD AS "MDLUnit",
             UTV80.TINWSYS.TINWSYS_IS_NUMBER AS "OrgId",
             UTV80.TINWSYS.NAME AS "OrgName",
-            UTV80.TSAANLYT.NAME AS "Param",
             UTV80.TSASAR.CONCENTRATION_MSR AS "ResultValue",
-            UTV80.TSASAMPL.COLLLECTION_END_DT AS "SampleDate",
             UTV80.TSASAMPL.COLLCTN_END_TIME AS "SampleTime",
-            UTV80.TINWSF.TYPE_CODE AS "SampType",
+            UTV80.TINWSF.TYPE_CODE AS "SampMedia",
             UTV80.TSASAR.UOM_CODE AS "Unit",
             UTV80.TINLOC.LATITUDE_MEASURE AS "Lat_Y",
             UTV80.TINLOC.LONGITUDE_MEASURE AS "Lon_X",
@@ -658,53 +658,59 @@ class SdwisProgram(Program):
             UTV80.TSASAR.TSAANLYT_IS_NUMBER = UTV80.TSAANLYT.TSAANLYT_IS_NUMBER
             JOIN UTV80.TSALAB ON
             UTV80.TSASAMPL.TSALAB_IS_NUMBER = UTV80.TSALAB.TSALAB_IS_NUMBER
-            WHERE (UTV80.TINWSF.TYPE_CODE = 'SP' Or
-                    UTV80.TINWSF.TYPE_CODE = 'WL' Or
-                    UTV80.TINWSF.TYPE_CODE = 'IN' Or
-                    UTV80.TINWSF.TYPE_CODE = 'SS') AND
+            WHERE UTV80.TINWSF.TYPE_CODE in ('SP', 'WL', 'IN', 'SS') AND
+                    UTV80.TSASAR.CONCENTRATION_MSR IS NOT NULL AND
+                    UTV80.TSASAMPL.COLLLECTION_END_DT = TO_DATE('{}','YYYY-MM-DD') AND
+                    UTV80.TSASAMPL.LAB_ASGND_ID_NUM = ? AND
+                    UTV80.TSAANLYT.NAME = ?;''',
+        'result': '''SELECT
+            UTV80.TSASAMPL.COLLLECTION_END_DT AS "SampleDate",
+            UTV80.TSASAMPL.LAB_ASGND_ID_NUM AS "SampleId",
+            UTV80.TSAANLYT.NAME AS "Param",
+            UTV80.TINWSF.TINWSF_IS_NUMBER AS "StationId",
+            UTV80.TSASAR.ANALYSIS_START_DT AS "AnalysisDate",
+            UTV80.TSALAB.LAB_ID_NUMBER AS "LabName",
+            UTV80.TSASAR.DETECTN_LIMIT_NUM AS "MDL",
+            UTV80.TSASAR.DETECTN_LIM_UOM_CD AS "MDLUnit",
+            UTV80.TINWSYS.TINWSYS_IS_NUMBER AS "OrgId",
+            UTV80.TINWSYS.NAME AS "OrgName",
+            UTV80.TSASAR.CONCENTRATION_MSR AS "ResultValue",
+            UTV80.TSASAMPL.COLLCTN_END_TIME AS "SampleTime",
+            UTV80.TINWSF.TYPE_CODE AS "SampMedia",
+            UTV80.TSASAR.UOM_CODE AS "Unit",
+            UTV80.TINLOC.LATITUDE_MEASURE AS "Lat_Y",
+            UTV80.TINLOC.LONGITUDE_MEASURE AS "Lon_X",
+            UTV80.TSAANLYT.CAS_REGISTRY_NUM AS "CAS_Reg",
+            UTV80.TSASAR.TSASAR_IS_NUMBER AS "IdNum"
+            FROM UTV80.TINWSF
+            JOIN UTV80.TINWSYS ON
+            UTV80.TINWSF.TINWSYS_IS_NUMBER = UTV80.TINWSYS.TINWSYS_IS_NUMBER
+            JOIN UTV80.TINLOC ON
+            UTV80.TINWSF.TINWSF_IS_NUMBER = UTV80.TINLOC.TINWSF_IS_NUMBER
+            JOIN UTV80.TSASMPPT ON
+            UTV80.TINWSF.TINWSF_IS_NUMBER = UTV80.TSASMPPT.TINWSF0IS_NUMBER
+            JOIN UTV80.TSASAMPL ON
+            UTV80.TSASMPPT.TSASMPPT_IS_NUMBER = UTV80.TSASAMPL.TSASMPPT_IS_NUMBER
+            JOIN UTV80.TSASAR ON
+            UTV80.TSASAMPL.TSASAMPL_IS_NUMBER = UTV80.TSASAR.TSASAMPL_IS_NUMBER
+            JOIN UTV80.TSAANLYT ON
+            UTV80.TSASAR.TSAANLYT_IS_NUMBER = UTV80.TSAANLYT.TSAANLYT_IS_NUMBER
+            JOIN UTV80.TSALAB ON
+            UTV80.TSASAMPL.TSALAB_IS_NUMBER = UTV80.TSALAB.TSALAB_IS_NUMBER
+            WHERE UTV80.TINWSF.TYPE_CODE in ('SP', 'WL', 'IN', 'SS') AND
                     UTV80.TSASAR.CONCENTRATION_MSR IS NOT NULL''',
         'date_clause': ' AND UTV80.TSASAMPL.COLLLECTION_END_DT > TO_DATE(\'{}\',\'YYYY-MM-DD\')',
-        'sample_id': '''SELECT
-            UTV80.TSASAR.ANALYSIS_START_DT AS "AnalysisDate",
-            UTV80.TSALAB.LAB_ID_NUMBER AS "LabName",
-            UTV80.TSASAR.DETECTN_LIMIT_NUM AS "MDL",
-            UTV80.TSASAR.DETECTN_LIM_UOM_CD AS "MDLUnit",
-            UTV80.TINWSYS.TINWSYS_IS_NUMBER AS "OrgId",
-            UTV80.TINWSYS.NAME AS "OrgName",
-            UTV80.TSAANLYT.NAME AS "Param",
-            UTV80.TSASAR.CONCENTRATION_MSR AS "ResultValue",
-            UTV80.TSASAMPL.COLLLECTION_END_DT AS "SampleDate",
-            UTV80.TSASAMPL.COLLCTN_END_TIME AS "SampleTime",
-            UTV80.TSASAMPL.LAB_ASGND_ID_NUM AS "SampleId",
-            UTV80.TINWSF.TYPE_CODE AS "SampType",
-            UTV80.TINWSF.TINWSF_IS_NUMBER AS "StationId",
-            UTV80.TSASAR.UOM_CODE AS "Unit",
-            UTV80.TINLOC.LATITUDE_MEASURE AS "Lat_Y",
-            UTV80.TINLOC.LONGITUDE_MEASURE AS "Lon_X",
-            UTV80.TSAANLYT.CAS_REGISTRY_NUM AS "CAS_Reg",
-            UTV80.TSASAR.TSASAR_IS_NUMBER AS "IdNum"
+        'unique_sample_ids': '''SELECT DISTINCT UTV80.TSASAMPL.LAB_ASGND_ID_NUM AS "SampleId"
             FROM UTV80.TINWSF
-            JOIN UTV80.TINWSYS ON
-            UTV80.TINWSF.TINWSYS_IS_NUMBER = UTV80.TINWSYS.TINWSYS_IS_NUMBER
-            JOIN UTV80.TINLOC ON
-            UTV80.TINWSF.TINWSF_IS_NUMBER = UTV80.TINLOC.TINWSF_IS_NUMBER
             JOIN UTV80.TSASMPPT ON
-            UTV80.TINWSF.TINWSF_IS_NUMBER = UTV80.TSASMPPT.TINWSF0IS_NUMBER
+                UTV80.TINWSF.TINWSF_IS_NUMBER = UTV80.TSASMPPT.TINWSF0IS_NUMBER
             JOIN UTV80.TSASAMPL ON
-            UTV80.TSASMPPT.TSASMPPT_IS_NUMBER = UTV80.TSASAMPL.TSASMPPT_IS_NUMBER
+                UTV80.TSASMPPT.TSASMPPT_IS_NUMBER = UTV80.TSASAMPL.TSASMPPT_IS_NUMBER
             JOIN UTV80.TSASAR ON
-            UTV80.TSASAMPL.TSASAMPL_IS_NUMBER = UTV80.TSASAR.TSASAMPL_IS_NUMBER
-            JOIN UTV80.TSAANLYT ON
-            UTV80.TSASAR.TSAANLYT_IS_NUMBER = UTV80.TSAANLYT.TSAANLYT_IS_NUMBER
-            JOIN UTV80.TSALAB ON
-            UTV80.TSASAMPL.TSALAB_IS_NUMBER = UTV80.TSALAB.TSALAB_IS_NUMBER
-            WHERE (UTV80.TINWSF.TYPE_CODE = 'SP' Or
-                    UTV80.TINWSF.TYPE_CODE = 'WL' Or
-                    UTV80.TINWSF.TYPE_CODE = 'IN' Or
-                    UTV80.TINWSF.TYPE_CODE = 'SS') AND
-                    UTV80.TSASAR.CONCENTRATION_MSR IS NOT NULL AND
-                UTV80.TSASAMPL.LAB_ASGND_ID_NUM = '{}'
-        ''',
+                UTV80.TSASAMPL.TSASAMPL_IS_NUMBER = UTV80.TSASAR.TSASAMPL_IS_NUMBER
+            WHERE UTV80.TINWSF.TYPE_CODE in ('SP', 'WL', 'IN', 'SS') AND
+                    UTV80.TSASAR.CONCENTRATION_MSR IS NOT NULL''',
+        'sample_id': ' AND UTV80.TSASAMPL.LAB_ASGND_ID_NUM = ?',
         'station': '''SELECT
             UTV80.TINWSYS.TINWSYS_IS_NUMBER AS "OrgId",
             UTV80.TINWSYS.NAME AS "OrgName",
@@ -762,6 +768,7 @@ class SdwisProgram(Program):
         insert_row - the function to batch insert rows
         '''
         self.db = db
+        self.source_db = source
         self._update_row = update_row
         self._insert_rows = insert_rows
         self.sql.update(sql_statements)
@@ -772,17 +779,19 @@ class SdwisProgram(Program):
         try:
             print('processing stations...')
 
-            self._seed_stations(self.source_cursor.execute(self.sql['station'].format('')), schema.station)
+            # self._seed_stations(self.source_cursor.execute(self.sql['station'].format('')), schema.station)
 
             print('processing done.')
             print('processing results...')
 
-            self._seed_results(self.source_cursor.execute(self.sql['unique_result_sample_ids']))
+            self._seed_results(self.source_cursor.execute(self.sql['unique_sample_ids']))
 
             print('processing done.')
         finally:
             if hasattr(self, 'source_cursor'):
                 del self.source_cursor
+            if hasattr(self, 'second_source_cursor'):
+                del self.second_source_cursor
             if hasattr(self, 'cursor'):
                 del self.cursor
 
@@ -797,17 +806,17 @@ class SdwisProgram(Program):
 
             print('fetching records after {}'.format(last_updated))
             last_updated = last_updated.split(' ')[0]
-            query = self.sql['unique_result_sample_ids'] + self.sql['date_clause'].format(last_updated)
+            query = self.sql['result'] + self.sql['date_clause'].format(last_updated)
 
-            #: group them by sample id
+            #: group new results by SampleDate + SampleId + Param
             new_results = self._group_rows_by_id(self.source_cursor.execute(query))
 
             if len(new_results) <= 0:
-                print('no new data.')
+                print('No new results to update. Quitting.')
                 return
 
-            #: weed out results that have a sample id already in the database
-            new_results = self._remove_existing_results(new_results)
+            #: weed out results that have are already in the database
+            # new_results = self._remove_existing_results(new_results)
 
             #: find the station ids from the new results that aren't in the database
             new_station_ids = self._find_new_station_ids(new_results)
@@ -870,16 +879,12 @@ class SdwisProgram(Program):
         #: insert stations
         self._insert_rows(stations, self.sql['station_insert'], self.cursor)
 
-    def _seed_results(self, unique_sample_ids):
+    def _seed_results(self, results_or_result_key):
         '''
-        given a cursor or a list of ids, query for each one and insert it.
+        given a cursor or a list of keys, query for each one and insert it.
         '''
-        try:
-            unique_sample_ids = unique_sample_ids.fetchall()
-        except Exception:
-            pass
-
-        for sample_id in unique_sample_ids:
+        for sample_id in results_or_result_key:
+            #: sample id for seed or sample_date, sample_id, param key for update
             samples = self._get_samples_for_id(sample_id)
 
             #: cast
@@ -909,15 +914,26 @@ class SdwisProgram(Program):
             #: TODO determine if this should this be batched in sets bigger than just a sample set?
             self._insert_rows(rows, self.sql['result_insert'], self.cursor)
 
-    def _get_samples_for_id(self, sample_id):
-        #: a set containing the sample id (sampleid,)
+    def _get_samples_for_id(self, sample_id_or_key):
+        #: updating
         try:
-            cursor = self.source_cursor.execute(self.sql['sample_id'].format(sample_id[0]))
-        except Exception as e:
-            print(sample_id)
-            raise e
+            key = sample_id_or_key.split('{-}')
 
-        return cursor
+            sample_date = key[0]
+            sample_id = key[1]
+            param = key[2]
+
+            return self.source_cursor.execute(self.sql['specific-result'].format(sample_date), sample_id, param)
+        except AttributeError:
+            #: 'pyodbc.Row' object has no attribute 'split'
+            pass
+
+        #: seeding
+        #: introduce another cursor so that seeding can continue to iterate over it's buffer
+        if not hasattr(self, 'second_source_cursor') or not self.second_source_cursor:
+            self.second_source_cursor = self.cursor_factory(self.source_db['connection_string'])
+
+        return self.second_source_cursor.execute(self.sql['result'] + self.sql['sample_id'], sample_id_or_key[0])
 
     def _zip_column_names(self, row):
         '''Given a set, return a dictionary with field names'''
@@ -935,7 +951,7 @@ class SdwisProgram(Program):
 
     def _find_new_station_ids(self, rows):
         '''gets the station ids to process from the rows
-        rows: {sampleId: list(stationId)}
+        rows: {key: list(stationId)}
 
         returns a set of station ids
         '''
@@ -956,10 +972,10 @@ class SdwisProgram(Program):
         return [id[0] for id in unique_station_ids]
 
     def _group_rows_by_id(self, cursor):
-        '''groups results by SampleId similar to WQP
-        cursor: generator
+        '''groups results by SampleDate + SampleId + Param
+        cursor: generator over a sql query for results
 
-        returns a dicionary with sample_id's as the key, with a list of station ids
+        returns a dicionary with SampleDate + SampleId + Param as the key, with a list of station_ids
         '''
         unique_sample_ids = {}
 
@@ -967,11 +983,14 @@ class SdwisProgram(Program):
             return
 
         for row in cursor:
-            sample_id = row[0]
-            station_id = row[1]
-            if sample_id in unique_sample_ids:
-                unique_sample_ids[sample_id] += [station_id]
+            sample_date = row[0]
+            sample_id = row[1]
+            param = row[2]
+            station_id = row[3]
+            key = '{}{{-}}{}{{-}}{}'.format(sample_date.strftime('%Y-%m-%d'), sample_id, param)
+            if key in unique_sample_ids:
+                unique_sample_ids[key] += [station_id]
             else:
-                unique_sample_ids[sample_id] = [station_id]
+                unique_sample_ids[key] = [station_id]
 
         return unique_sample_ids
