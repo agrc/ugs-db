@@ -779,7 +779,7 @@ class SdwisProgram(Program):
         try:
             print('processing stations...')
 
-            # self._seed_stations(self.source_cursor.execute(self.sql['station'].format('')), schema.station)
+            self._seed_stations(self.source_cursor.execute(self.sql['station'].format('')), schema.station)
 
             print('processing done.')
             print('processing results...')
@@ -815,7 +815,7 @@ class SdwisProgram(Program):
                 print('No new results to update. Quitting.')
                 return
 
-            #: weed out results that have are already in the database
+            #: TODO: weed out results that have are already in the database
             # new_results = self._remove_existing_results(new_results)
 
             #: find the station ids from the new results that aren't in the database
