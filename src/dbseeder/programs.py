@@ -27,8 +27,6 @@ class Program(object):
     most_recent_result_query = 'SELECT max(SampleDate) FROM [UGSWaterChemistry].[dbo].[Results] WHERE [DataSource] = \'{}\''
     new_stations_query = ('SELECT * FROM (VALUES{}) AS t(StationId) WHERE NOT EXISTS('
                           'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Stations] WHERE [StationId] = t.StationId)')
-    new_results_query = ('SELECT * FROM (VALUES{}) AS t(SampleId) WHERE NOT EXISTS('
-                         'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Results] WHERE [SampleId] = t.SampleId)')
 
     def _get_most_recent_result_date(self, datasource):
 
@@ -64,28 +62,6 @@ class Program(object):
 
         return self.cursor.fetchall()
 
-    def _get_unique_sample_ids(self, sample_ids):
-        if not hasattr(self, 'cursor') or not self.cursor:
-            self.cursor = self.cursor_factory(self.db['connection_string'])
-
-        if len(sample_ids) == 0:
-            return None
-
-        statement = self.new_results_query.format(','.join(sample_ids))
-
-        self.cursor.execute(statement)
-
-        return self.cursor.fetchall()
-
-    def _remove_existing_results(self, results):
-        sample_ids = ['(\'{}\')'.format(re.sub('\'', '\'\'', sample_id)) for sample_id in results.keys()]
-
-        unique_sample_ids = self._get_unique_sample_ids(sample_ids)
-        #: flatten list
-        unique_sample_ids = [item for iter_ in unique_sample_ids for item in iter_]
-
-        return {key: results[key] for key in results if key in unique_sample_ids}
-
 
 class WqpProgram(Program):
     '''class for handling wqp csv files'''
@@ -114,6 +90,8 @@ class WqpProgram(Program):
                           ' ResultComment, ResultStatus, ResultValue, SampComment, SampDepth, SampDepthRef,'
                           ' SampDepthU, SampEquip, SampFrac, SampleDate, SampleTime, SampleId, SampMedia, SampMeth,'
                           ' SampMethName, SampType, StationId, Unit, USGSPCode) values ({})'),
+        'new_results': ('SELECT * FROM (VALUES{}) AS t(SampleId) WHERE NOT EXISTS('
+                        'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Results] WHERE [SampleId] = t.SampleId)'),
         'create_index': 'CREATE INDEX IF NOT EXISTS "ActivityIdentifier_{0}" ON "{0}" ("ActivityIdentifier" ASC)'
     }
 
@@ -617,6 +595,28 @@ class WqpProgram(Program):
 
         return station_ids
 
+    def _get_unique_sample_ids(self, sample_ids):
+        if not hasattr(self, 'cursor') or not self.cursor:
+            self.cursor = self.cursor_factory(self.db['connection_string'])
+
+        if len(sample_ids) == 0:
+            return None
+
+        statement = self.sql['new_results'].format(','.join(sample_ids))
+
+        self.cursor.execute(statement)
+
+        return self.cursor.fetchall()
+
+    def _remove_existing_results(self, results):
+        sample_ids = ['(\'{}\')'.format(re.sub('\'', '\'\'', sample_id)) for sample_id in results.keys()]
+
+        unique_sample_ids = self._get_unique_sample_ids(sample_ids)
+        #: flatten list
+        unique_sample_ids = [item for iter_ in unique_sample_ids for item in iter_]
+
+        return {key: results[key] for key in results if key in unique_sample_ids}
+
 
 class SdwisProgram(Program):
     '''class for handling sdwis database rows'''
@@ -624,6 +624,9 @@ class SdwisProgram(Program):
     datasource = 'SDWIS'
 
     sql = {
+        'new_results': ('SELECT * FROM (VALUES{}) AS t(SampleDate,SampleId,Param) WHERE NOT EXISTS('
+                        'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Results] WHERE [SampleId] = t.SampleId AND '
+                        '[SampleDate] = t.SampleDate AND [Param] = t.Param)'),
         'specific-result': '''SELECT
             UTV80.TSASAMPL.COLLLECTION_END_DT AS "SampleDate",
             UTV80.TSASAMPL.LAB_ASGND_ID_NUM AS "SampleId",
@@ -815,8 +818,7 @@ class SdwisProgram(Program):
                 print('No new results to update. Quitting.')
                 return
 
-            #: TODO: weed out results that have are already in the database
-            # new_results = self._remove_existing_results(new_results)
+            new_results = self._remove_existing_results(new_results)
 
             #: find the station ids from the new results that aren't in the database
             new_station_ids = self._find_new_station_ids(new_results)
@@ -996,3 +998,34 @@ class SdwisProgram(Program):
                 unique_sample_ids[key] = [station_id]
 
         return unique_sample_ids
+
+    def _remove_existing_results(self, results):
+        sample_ids = []
+        for key in results.keys():
+            key = key.split('{-}')
+
+            sample_date = key[0]
+            sample_id = key[1]
+            param = key[2]
+            sample_ids.append('(\'{}\',\'{}\',\'{}\')'.format(sample_date, re.sub('\'', '\'\'', sample_id), re.sub('\'', '\'\'', param)))
+
+        unique_sample_ids = self._get_unique_sample_ids(sample_ids)
+
+        #: munge back to stationid, date, param key
+        unique_sample_ids = ['{}{{-}}{}{{-}}{}'.format(item[0], item[1], item[2]) for item in unique_sample_ids]
+
+        import pdb
+        pdb.set_trace()
+
+        return {key: results[key] for key in results if key in unique_sample_ids}
+
+    def _get_unique_sample_ids(self, sample_ids):
+        if not hasattr(self, 'cursor') or not self.cursor:
+            self.cursor = self.cursor_factory(self.db['connection_string'])
+
+        if len(sample_ids) == 0:
+            return None
+
+        statement = self.sql['new_results'].format(','.join(sample_ids))
+
+        return self.cursor.execute(statement)
