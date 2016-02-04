@@ -159,7 +159,7 @@ class Caster(object):
 class Normalizer(object):
     '''class for handling the normalization of fields'''
 
-    stationTypes = {
+    station_types = {
         'Atmosphere': 'Atmosphere',
         'CERCLA Superfund Site': 'Other',
         'CG-2': 'Other',
@@ -223,6 +223,13 @@ class Normalizer(object):
         'Wetland Riverine-Emergent': 'Wetland'
     }
 
+    samp_media = {
+        'WL': 'Groundwater',
+        'SP': 'Groundwater',
+        'SS': 'Surface Water',
+        'IN': 'Surface Water'
+    }
+
     wqx_re = re.compile('(_WQX)-')
 
     @classmethod
@@ -235,6 +242,14 @@ class Normalizer(object):
          other uppercase letters, convert units, normalize chemical
          strip wxp
         '''
+
+        try:
+            row['SampMedia'] = row['SampMedia'].strip()
+            row['SampMedia'] = cls.samp_media[row['SampMedia']]
+        except AttributeError:
+            pass
+        except KeyError:
+            pass
 
         chemical = row['Param']
         unit = row['Unit']
@@ -427,7 +442,7 @@ class Normalizer(object):
         row['StationId'] = cls.strip_wxp(str(row['StationId']))
 
         try:
-            row['StationType'] = cls.stationTypes[row['StationType']]
+            row['StationType'] = cls.station_types[row['StationType']]
         except KeyError:
             pass
 

@@ -194,6 +194,39 @@ class TestNormalizer_NormalizeSample(unittest.TestCase):
         })
         self.assertEqual(row['Unit'], 'unit')
 
+    def test_sample_is_expanded(self):
+        row = self.patient.normalize_sample({
+            'StationId': 'ABC_WQX-abc',
+            'Param': None,
+            'Unit': 'unit',
+            'ResultValue': 0,
+            'SampMedia': 'WL'
+        })
+        self.assertEqual(row['SampMedia'], 'Groundwater')
+        self.assertEqual(row['StationId'], 'ABC-abc')
+
+    def test_sample_is_skipped_if_none(self):
+        row = self.patient.normalize_sample({
+            'StationId': 'ABC_WQX-abc',
+            'Param': None,
+            'Unit': 'unit',
+            'ResultValue': 0,
+            'SampMedia': None
+        })
+        self.assertEqual(row['SampMedia'], None)
+        self.assertEqual(row['StationId'], 'ABC-abc')
+
+    def test_sample_is_passed_on_if_not_in_lookup(self):
+        row = self.patient.normalize_sample({
+            'StationId': 'ABC_WQX-abc',
+            'Param': None,
+            'Unit': 'unit',
+            'ResultValue': 0,
+            'SampMedia': 'test'
+        })
+        self.assertEqual(row['SampMedia'], 'test')
+        self.assertEqual(row['StationId'], 'ABC-abc')
+
     def test_strips_wxp(self):
         row = self.patient.normalize_sample({
             'StationId': 'ABC_WQX-abc',
