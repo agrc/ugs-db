@@ -15,3 +15,5 @@ def get(source):
         return programs.WqpProgram
     elif source == 'SDWIS':
         return programs.SdwisProgram
+    elif source == 'DOGM':
+        return programs.DogmProgram

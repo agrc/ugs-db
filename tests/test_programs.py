@@ -8,8 +8,8 @@ test the programs module
 '''
 
 import unittest
-from dbseeder.programs import WqpProgram
-from dbseeder import sql
+from dbseeder.programs import WqpProgram, DogmProgram
+from dbseeder import sql, arcpy_mock
 from collections import OrderedDict
 from csv import reader as csvreader
 from mock import Mock
@@ -22,6 +22,7 @@ class TestWqpProgram(unittest.TestCase):
         self.test_get_files_folder = join('tests', 'data', 'WQP', 'get_files')
         self.patient = WqpProgram(db='bad db connection',
                                   update=False,
+                                  sql_statements=sql.sql_statements,
                                   source=self.test_get_files_folder)
 
     def test_get_files_finds_files(self):
@@ -342,3 +343,46 @@ class TestWqpProgram(unittest.TestCase):
         self.assertEqual(result['SampMethName'], 'USGS')
         self.assertEqual(result['SampEquip'], 'Unknown')
         self.assertEqual(result['Param'], 'Specific conductance')
+
+
+class TestDogmProgram(unittest.TestCase):
+    def setUp(self):
+        self.test_get_files_folder = join('tests', 'data')
+        self.patient = DogmProgram(db='bad db connection',
+                                   update=False,
+                                   source=self.test_get_files_folder,
+                                   arcpy=arcpy_mock)
+
+    def test_get_field_intersection(self):
+        ugs_schema = OrderedDict([
+            ('AnalysisDate', {
+                'alias': 'Analysis Start Date',
+                'type': 'Date'
+            }),
+            ('AnalytMeth', {
+                'alias': 'Analytical Method Name',
+                'type': 'String',
+                'length': 150
+            }),
+            ('AnalytMethId', {
+                'alias': 'Analytical Method Id',
+                'type': 'String',
+                'length': 50
+            }),
+            ('AutoQual', {
+                'alias': 'Auto Quality Check',
+                'type': 'String'
+            })
+        ])
+
+        table_fields = [Field('AnalysisDate'), Field('AnalytMeth'), Field('SAMPLE_TYPE'), Field('AutoQual')]
+
+        actual = self.patient._get_field_instersection(ugs_schema, table_fields)
+
+        self.assertItemsEqual(actual, ['AnalysisDate', 'AnalytMeth', 'AutoQual'])
+
+
+class Field(object):
+    '''Mock of an arcpy.Field class'''
+    def __init__(self, name):
+        self.name = name

@@ -36,9 +36,8 @@ def insert_rows(rows, insert_statement, cursor):
     i = 1
     #: format and stage sql statements
     for row in rows:
-        statement = insert_statement.format(','.join(row))
-
         try:
+            statement = insert_statement.format(','.join(row))
             cursor.execute(statement)
             i += 1
 
@@ -50,6 +49,7 @@ def insert_rows(rows, insert_statement, cursor):
         except Exception, e:
             del cursor
             print(statement)
+            print(row)
 
             raise e
 

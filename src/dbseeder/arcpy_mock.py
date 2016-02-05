@@ -7,4 +7,19 @@ arcpy_mock
 mock arcpy for testing on travis
 '''
 
-env = 'blah'
+
+class Env(object):
+
+    @property
+    def workspace(self):
+        pass
+
+    @workspace.setter
+    def workspace(self, value):
+        pass
+
+env = Env()
+
+
+def Exists(arg):
+    return True

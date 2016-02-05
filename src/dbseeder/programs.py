@@ -79,17 +79,6 @@ class WqpProgram(Program):
         'distinct_sample_id': 'select distinct({}) from {}',
         'sample_id': 'select * from {} where {} = \'{}\'',
         'wqxids': 'select {0} from {1} where {0} LIKE \'%_WQX%\'',
-        'station_insert': ('insert into Stations (OrgId, OrgName, StationId, StationName, StationType, StationComment,'
-                           ' HUC8, Lon_X, Lat_Y, HorAcc, HorAccUnit, HorCollMeth, HorRef, Elev, ElevUnit, ElevAcc,'
-                           ' ElevAccUnit, ElevMeth, ElevRef, StateCode, CountyCode, Aquifer, FmType, AquiferType,'
-                           ' ConstDate, Depth, DepthUnit, HoleDepth, HoleDUnit, demELEVm, DataSource, WIN, Shape)'
-                           ' values ({})'),
-        'result_insert': ('insert into Results (AnalysisDate, AnalytMeth, AnalytMethId, AutoQual, CAS_Reg, Chrg,'
-                          ' DataSource, DetectCond, IdNum, LabComments, LabName, Lat_Y, LimitType, Lon_X, MDL,'
-                          ' MDLUnit, MethodDescript, OrgId, OrgName, Param, ParamGroup, ProjectId, QualCode,'
-                          ' ResultComment, ResultStatus, ResultValue, SampComment, SampDepth, SampDepthRef,'
-                          ' SampDepthU, SampEquip, SampFrac, SampleDate, SampleTime, SampleId, SampMedia, SampMeth,'
-                          ' SampMethName, SampType, StationId, Unit, USGSPCode) values ({})'),
         'new_results': ('SELECT * FROM (VALUES{}) AS t(SampleId) WHERE NOT EXISTS('
                         'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Results] WHERE [SampleId] = t.SampleId)'),
         'create_index': 'CREATE INDEX IF NOT EXISTS "ActivityIdentifier_{0}" ON "{0}" ("ActivityIdentifier" ASC)'
@@ -851,6 +840,7 @@ class SdwisProgram(Program):
         #: rows cursor()
         #: config=The schema names for the rows
         stations = []
+
         for row in rows:
             #: zip column names with values
             row = self._zip_column_names(row)
@@ -877,8 +867,6 @@ class SdwisProgram(Program):
 
         if not hasattr(self, 'cursor') or not self.cursor:
             self.cursor = self.cursor_factory(self.db['connection_string'])
-
-        print('inserting {}'.format(len(stations)))
 
         #: insert stations
         self._insert_rows(stations, self.sql['station_insert'], self.cursor)
@@ -1014,9 +1002,6 @@ class SdwisProgram(Program):
         #: munge back to stationid, date, param key
         unique_sample_ids = ['{}{{-}}{}{{-}}{}'.format(item[0], item[1], item[2]) for item in unique_sample_ids]
 
-        import pdb
-        pdb.set_trace()
-
         return {key: results[key] for key in results if key in unique_sample_ids}
 
     def _get_unique_sample_ids(self, sample_ids):
@@ -1029,3 +1014,208 @@ class SdwisProgram(Program):
         statement = self.sql['new_results'].format(','.join(sample_ids))
 
         return self.cursor.execute(statement)
+
+
+class DogmProgram(object):
+    datasource = 'UDOGM'
+    #: location to dogm gdb
+    gdb = join('DOGM', 'DOGM_AGRC.gdb')
+
+    #: results table name
+    result_table = 'DOGM_RESULT'
+
+    #: stations feature class name
+    station_table = 'DOGM_STATION'
+
+    #: sql queries
+    sql = {}
+
+    def __init__(self,
+                 db,
+                 update,
+                 source=None,
+                 sql_statements={},
+                 update_row=None,
+                 insert_rows=None,
+                 cursor_factory=None,
+                 arcpy=None):
+        '''create a new DOGM program
+        db - the connection string for the database to seed
+        update - use source files or web service
+        source - the path on disk to find csv files to ETL
+        update_row - the function to reproject a point and set the DataSource
+        insert_row - the function to batch insert rows
+        cursor_factory - the function to create pyodbc connection_string
+        arcpy - the arcpy module
+        '''
+        self.db = db
+        self._update_row = update_row
+        self._insert_rows = insert_rows
+        self.arcpy = arcpy
+        self.cursor_factory = cursor_factory
+        self.sql.update(sql_statements)
+
+        #: check that source exists wqp/results and wqp/stations
+        parent_folder = join(source, self.gdb)
+
+        if not isdir(parent_folder):
+            raise Exception('Pass in a location to the parent folder that contains DOGM. {}'.format(parent_folder))
+
+        arcpy.env.workspace = parent_folder
+        if not arcpy.Exists(self.result_table) or not arcpy.Exists(self.station_table):
+            raise Exception('The DOGM geodatabase is missing the feature class {} or table.'.format(self.station_table, self.result_table))
+
+        try:
+            arcpy.RemoveIndex_management(self.result_table, index_name='result_query')
+        except Exception:
+            print('There was an issue removing an index.')
+
+        try:
+            arcpy.AddIndex_management(in_table=self.result_table,
+                                      fields='SampleId',
+                                      index_name='result_query')
+        except Exception:
+            print('There was an issue adding an index. Inserting may be slower or removing the existing index failed.')
+
+    def seed(self):
+        self._seed()
+
+    def update(self):
+        self._seed()
+
+    def _seed(self):
+        #: location - the path to the table data
+        #: fields - the fields form the data to pull
+        print('processing stations....')
+
+        #: get subset of dogm fields
+        station_fields = self._get_field_instersection(schema.station, self.arcpy.ListFields(self.station_table))
+
+        import pdb
+        pdb.set_trace()
+
+        try:
+            self.source_cursor = self.arcpy.da.SearchCursor(self.station_table, field_names=station_fields, where_clause='1=1')
+            self._seed_stations(self.source_cursor, station_fields)
+
+            print('processing done.')
+            print('processing results...')
+
+            self.source_cursor = self.arcpy.da.SearchCursor(self.result_table,
+                                                            field_names=['SampleId'],
+                                                            sql_clause=('DISTINCT', None))
+
+            self._seed_results(self.source_cursor)
+
+            print('processing done.')
+        finally:
+            if hasattr(self, 'source_cursor'):
+                del self.source_cursor
+            if hasattr(self, 'second_source_cursor'):
+                del self.second_source_cursor
+            if hasattr(self, 'cursor'):
+                del self.cursor
+
+    def _seed_stations(self, rows, config=None):
+        #: rows cursor()
+        #: config=The schema names for the rows
+        stations = []
+
+        for row in rows:
+            #: zip column names with values
+            row = self._zip_column_names(row, config)
+
+            #: cast
+            row = Caster.cast(row, schema.station)
+
+            #: set datasource, reproject and update shape
+            row = self._update_row(row, self.datasource)
+
+            if row['Shape'] is None:
+                print('Skipping row because it has an invalid shape.')
+                print(row)
+
+                continue
+
+            #: normalize data including stripping _WXP etc
+            row = Normalizer.normalize_station(row)
+
+            #: reorder and filter out any fields not in the schema
+            row = Normalizer.reorder_filter(row, schema.station)
+
+            #: have to generate sql manually because of quoting on spatial WKT
+            row = Caster.cast_for_sql(row)
+
+            #: store row for later
+            stations.append(row.values())
+
+        if not hasattr(self, 'cursor') or not self.cursor:
+            self.cursor = self.cursor_factory(self.db['connection_string'])
+
+        #: insert stations
+        self._insert_rows(stations, self.sql['station_insert'], self.cursor)
+
+    def _seed_results(self, sample_ids):
+        result_fields = self._get_field_instersection(schema.result, self.arcpy.ListFields(self.result_table))
+
+        for sample_id in sample_ids:
+            sample_id = sample_id[0]
+            print(sample_id)
+            try:
+                samples = self._get_samples_for_id(sample_id, result_fields)
+            finally:
+                if hasattr(self, 'second_source_cursor'):
+                    del self.second_source_cursor
+
+            #: cast
+            samples = [Caster.cast(self._zip_column_names(sample, result_fields), schema.result) for sample in samples]
+
+            #: set datasource and spatial information
+            samples = [self._update_row(sample, self.datasource) for sample in samples]
+
+            #: normalize chemical names and units
+            samples = map(Normalizer.normalize_sample, samples)
+
+            #: create charge balance rows from sample
+            charge_balances = ChargeBalancer.get_charge_balance(samples)
+
+            samples.extend(charge_balances)
+
+            #: reorder and filter out any fields not in the schema
+            samples = map(partial(Normalizer.reorder_filter, schema=schema.result), samples)
+
+            samples = map(Caster.cast_for_sql, samples)
+
+            rows = map(lambda sample: sample.values(), samples)
+
+            if not hasattr(self, 'cursor') or not self.cursor:
+                self.cursor = self.cursor_factory(self.db['connection_string'])
+
+            #: TODO determine if this should this be batched in sets bigger than just a sample set?
+            self._insert_rows(rows, self.sql['result_insert'], self.cursor)
+
+    def _get_samples_for_id(self, sample_id, result_fields):
+        #: introduce another cursor so that seeding can continue to iterate over it's buffer
+        self.second_source_cursor = self.arcpy.da.SearchCursor(self.result_table,
+                                                               field_names=result_fields,
+                                                               where_clause='SampleId=\'{}\''.format(sample_id))
+
+        return self.second_source_cursor
+
+    def _get_field_instersection(self, ugs_schema, table_fields):
+        station_fields = set([str(x.name) for x in table_fields])
+        schema_fields = set(ugs_schema.keys())
+
+        return list(station_fields & schema_fields)
+
+    def _zip_column_names(self, row, fields):
+        '''Given a set, return a dictionary with field names'''
+
+        #: we have an already etl'd station. skip it.
+        if type(row) is dict:
+            return row
+
+        if len(row) == 0:
+            return None
+
+        return dict(zip(fields, list(row)))

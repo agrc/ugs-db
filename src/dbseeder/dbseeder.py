@@ -14,11 +14,11 @@ import sql
 from os.path import join, dirname
 try:
     import secrets
-except Exception:
+except ImportError:
     import secrets_sample as secrets
 try:
     import arcpy
-except Exception:
+except ImportError:
     import arcpy_mock as arcpy
 
 
@@ -76,7 +76,8 @@ class Seeder(object):
                                  sql_statements=sql.sql_statements,
                                  update_row=sql.update_row,
                                  insert_rows=sql.insert_rows,
-                                 cursor_factory=sql.create_cursor)
+                                 cursor_factory=sql.create_cursor,
+                                 arcpy=arcpy)
             seeder.seed()
 
     def post_process(self, who):
