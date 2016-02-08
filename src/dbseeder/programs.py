@@ -1091,8 +1091,9 @@ class DogmProgram(object):
         #: get subset of dogm fields
         station_fields = self._get_field_instersection(schema.station, self.arcpy.ListFields(self.station_table))
 
-        import pdb
-        pdb.set_trace()
+        #: use geodatabase shape
+        station_fields.remove('Shape')
+        station_fields.append('Shape@XY')
 
         try:
             self.source_cursor = self.arcpy.da.SearchCursor(self.station_table, field_names=station_fields, where_clause='1=1')

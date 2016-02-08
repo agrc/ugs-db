@@ -55,14 +55,23 @@ def insert_rows(rows, insert_statement, cursor):
 
 
 def update_row(row, datasource):
-    '''Given a dictionary as a row, take the lat and long field, project it to UTM, and transform to WKT'''
+    '''Given a dictionary as a row, take the lat and long field,
+    an arcpy x,y tuple, possibly project it to UTM, and transform to WKT'''
 
     template = 'geometry::STGeomFromText(\'POINT ({} {})\', 26912)'
 
     row['DataSource'] = datasource
 
-    x = row['Lon_X']
-    y = row['Lat_Y']
+    if 'Shape@XY' in row:
+        row['Shape'] = None
+
+        x = row['Shape@XY'][0]
+        y = row['Shape@XY'][1]
+
+        del row['Shape@XY']
+    else:
+        x = row['Lon_X']
+        y = row['Lat_Y']
 
     if not (x and y):
         return row
