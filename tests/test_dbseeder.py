@@ -43,3 +43,13 @@ class TestParseSourceArgs(unittest.TestCase):
         self.assertEqual(self.patient._parse_source_args('WQP '), ['WQP'])
         self.assertEqual(self.patient._parse_source_args(' WQP'), ['WQP'])
         self.assertEqual(self.patient._parse_source_args(' WQP '), ['WQP'])
+
+    def test_gets_array_of_sources_when_lowercase(self):
+        self.assertEqual(self.patient._parse_source_args('wqp'), ['WQP'])
+        self.assertEqual(self.patient._parse_source_args('wqp '), ['WQP'])
+        self.assertEqual(self.patient._parse_source_args(' wqp'), ['WQP'])
+        self.assertEqual(self.patient._parse_source_args(' wqp '), ['WQP'])
+        self.assertEqual(self.patient._parse_source_args('wqp, sdwis'), ['WQP', 'SDWIS'])
+        self.assertEqual(self.patient._parse_source_args(' wqp, sdwis'), ['WQP', 'SDWIS'])
+        self.assertEqual(self.patient._parse_source_args(' wqp , sdwis '), ['WQP', 'SDWIS'])
+        self.assertEqual(self.patient._parse_source_args('wqp, sdwis, NOT A SOURCE'), ['WQP', 'SDWIS'])

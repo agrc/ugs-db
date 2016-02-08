@@ -172,7 +172,7 @@ class Seeder(object):
         if not source:
             return all_sources
         else:
-            sources = [s.strip() for s in source.split(',')]
+            sources = [s.strip().upper() for s in source.split(',')]
             sources = filter(lambda s: s in all_sources, sources)
             if len(sources) > 0:
                 return sources
