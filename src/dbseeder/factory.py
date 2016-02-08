@@ -17,3 +17,7 @@ def get(source):
         return programs.SdwisProgram
     elif source == 'DOGM':
         return programs.DogmProgram
+    elif source == 'UDWR':
+        return programs.UdwrProgram
+    elif source == 'UGS':
+        return programs.UgsProgram

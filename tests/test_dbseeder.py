@@ -21,7 +21,7 @@ class TestParseSourceArgs(unittest.TestCase):
 
     def setUp(self):
         self.patient = Seeder()
-        self.all_sources = ['WQP', 'SDWIS', 'DOGM', 'DWR', 'UGS']
+        self.all_sources = ['WQP', 'SDWIS', 'DOGM', 'UDWR', 'UGS']
 
     def test_gets_all_sources_when_given_none(self):
         self.assertEqual(self.patient._parse_source_args(None), self.all_sources)

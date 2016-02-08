@@ -72,7 +72,8 @@ class Seeder(object):
 
             seeder = seederClass(db=db,
                                  update=False,
-                                 source=file_location or secrets.sdwis,
+                                 source=file_location,
+                                 secrets=secrets.sdwis,
                                  sql_statements=sql.sql_statements,
                                  update_row=sql.update_row,
                                  insert_rows=sql.insert_rows,
@@ -168,7 +169,7 @@ class Seeder(object):
         self._update_params_table(who)
 
     def _parse_source_args(self, source):
-        all_sources = ['WQP', 'SDWIS', 'DOGM', 'DWR', 'UGS']
+        all_sources = ['WQP', 'SDWIS', 'DOGM', 'UDWR', 'UGS']
         if not source:
             return all_sources
         else:

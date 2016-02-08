@@ -171,17 +171,22 @@ class WqpProgram(Program):
                  db,
                  update,
                  source=None,
+                 secrets=None,
                  sql_statements={},
                  update_row=None,
                  insert_rows=None,
-                 cursor_factory=None):
+                 cursor_factory=None,
+                 arcpy=None):
         '''create a new WQP program
         db - the connection string for the database to seed
         source - the path on disk to find csv files to ETL
+        update - boolean value whether we are seeding or updating
+        secrets - ignored. Valid for sdwis only.
+        sql_statements - common sql statements for inserting into stations and results
         update_row - the function to reproject a point and set the DataSource
-        insert_row - the function to batch insert rows
+        insert_rows - the function to batch insert rows
         cursor_factory - the function to create pyodbc connection_string
-        update - use source files or web service
+        arcpy - ignored. for gdb programs only
         '''
         self.db = db
         self._update_row = update_row
@@ -261,12 +266,12 @@ class WqpProgram(Program):
                 del self.cursor
 
     def _seed_by_file(self):
-        print('processing stations')
+        print('processing {} stations...'.format(self.datasource))
 
         for csv_file in self._get_files(self.stations_folder):
             #: create csv reader
             with open(csv_file, 'r') as f:
-                print('processing {}'.format(basename(csv_file)))
+                print('- {}'.format(basename(csv_file)))
 
                 #: generate duplicate id list
                 wqx = self._get_wqx_duplicate_ids(csv_file)
@@ -277,12 +282,13 @@ class WqpProgram(Program):
 
                 self._seed_stations(reader, header=header, wqx=wqx)
 
-                print('processing {}: done'.format(basename(csv_file)))
+                print('- {}: done'.format(basename(csv_file)))
 
-        print('processing results')
+        print('processing {} stations done.'.format(self.datasource))
+        print('processing {} results...'.format(self.datasource))
 
         for csv_file in self._get_files(self.results_folder):
-            print('processing {}'.format(basename(csv_file)))
+            print('- {}'.format(basename(csv_file)))
 
             #: create sqlite db and get unique sample ids
             unique_sample_ids = self._get_distinct_sample_ids_from(csv_file)
@@ -308,7 +314,9 @@ class WqpProgram(Program):
             finally:
                 #: in case something goes wrong always clean up the db
                 os.remove(self.TEMPDB)
-            print('processing {}: done'.format(basename(csv_file)))
+            print('- {}: done'.format(basename(csv_file)))
+
+        print('processing {} results done.'.format(self.datasource))
 
     def _seed_stations(self, rows, header=None, wqx=None):
         stations = []
@@ -752,33 +760,47 @@ class SdwisProgram(Program):
         'station_id': 'AND UTV80.TINWSF.TINWSF_IS_NUMBER IN ({})'
     }
 
-    def __init__(self, db, update, source, sql_statements={}, update_row=None, insert_rows=None, cursor_factory=None):
+    def __init__(self,
+                 db,
+                 update,
+                 source,
+                 secrets=None,
+                 sql_statements={},
+                 update_row=None,
+                 insert_rows=None,
+                 cursor_factory=None,
+                 arcpy=None):
         '''create a new SDWIS program
         db - the connection string for the database to seed
         source - the connection information to the sdwis database
+        update - boolean value whether we are seeding or updating
+        secrets - sdwis database connection information
+        sql_statements - common sql statements for inserting into stations and results
         update_row - the function to reproject a point and set the DataSource
         insert_row - the function to batch insert rows
+        cursor_factory - the function to create pyodbc connection_string
+        arcpy - ignored. for gdb programs only
         '''
         self.db = db
-        self.source_db = source
+        self.source_db = secrets
         self._update_row = update_row
         self._insert_rows = insert_rows
         self.sql.update(sql_statements)
-        self.source_cursor = cursor_factory(source['connection_string'])
+        self.source_cursor = cursor_factory(secrets['connection_string'])
         self.cursor_factory = cursor_factory
 
     def seed(self):
         try:
-            print('processing stations...')
+            print('processing {} stations...'.format(self.datasource))
 
             self._seed_stations(self.source_cursor.execute(self.sql['station'].format('')), schema.station)
 
-            print('processing done.')
-            print('processing results...')
+            print('processing {} stations done.'.format(self.datasource))
+            print('processing {} results...'.format(self.datasource))
 
             self._seed_results(self.source_cursor.execute(self.sql['unique_sample_ids']))
 
-            print('processing done.')
+            print('processing {} results done.'.format(self.datasource))
         finally:
             if hasattr(self, 'source_cursor'):
                 del self.source_cursor
@@ -788,7 +810,7 @@ class SdwisProgram(Program):
                 del self.cursor
 
     def update(self):
-        print('processing stations...')
+        print('processing {} stations...'.format(self.datasource))
         try:
             #: query for new Results
             last_updated = self._get_most_recent_result_date(self.datasource)
@@ -822,12 +844,12 @@ class SdwisProgram(Program):
                     #: remove stations already inserted
                     del new_station_ids[0:end]
 
-                print('processing done.')
-            print('processing results...')
+                print('processing {} stations done.'.format(self.datasource))
+            print('processing {} results...'.format(self.datasource))
 
             self._seed_results(new_results.keys())
 
-            print('processing done.')
+            print('processing {} results done.'.format(self.datasource))
         finally:
             if hasattr(self, 'source_cursor'):
                 del self.source_cursor
@@ -1016,17 +1038,7 @@ class SdwisProgram(Program):
         return self.cursor.execute(statement)
 
 
-class DogmProgram(object):
-    datasource = 'UDOGM'
-    #: location to dogm gdb
-    gdb = join('DOGM', 'DOGM_AGRC.gdb')
-
-    #: results table name
-    result_table = 'DOGM_RESULT'
-
-    #: stations feature class name
-    station_table = 'DOGM_STATION'
-
+class GdbProgram(object):
     #: sql queries
     sql = {}
 
@@ -1034,6 +1046,7 @@ class DogmProgram(object):
                  db,
                  update,
                  source=None,
+                 secrets=None,
                  sql_statements={},
                  update_row=None,
                  insert_rows=None,
@@ -1041,8 +1054,10 @@ class DogmProgram(object):
                  arcpy=None):
         '''create a new DOGM program
         db - the connection string for the database to seed
-        update - use source files or web service
-        source - the path on disk to find csv files to ETL
+        update - boolean value whether we are seeding or updating
+        source - the path on disk to find the parent gdb folder to ETL
+        secrets - ignored. for sdwis only
+        sql_statements - common sql statements for inserting into stations and results
         update_row - the function to reproject a point and set the DataSource
         insert_row - the function to batch insert rows
         cursor_factory - the function to create pyodbc connection_string
@@ -1086,7 +1101,7 @@ class DogmProgram(object):
     def _seed(self):
         #: location - the path to the table data
         #: fields - the fields form the data to pull
-        print('processing stations....')
+        print('processing {} stations...'.format(self.datasource))
 
         #: get subset of dogm fields
         station_fields = self._get_field_instersection(schema.station, self.arcpy.ListFields(self.station_table))
@@ -1099,8 +1114,8 @@ class DogmProgram(object):
             self.source_cursor = self.arcpy.da.SearchCursor(self.station_table, field_names=station_fields, where_clause='1=1')
             self._seed_stations(self.source_cursor, station_fields)
 
-            print('processing done.')
-            print('processing results...')
+            print('processing {} stations done.'.format(self.datasource))
+            print('processing {} results...'.format(self.datasource))
 
             self.source_cursor = self.arcpy.da.SearchCursor(self.result_table,
                                                             field_names=['SampleId'],
@@ -1108,7 +1123,7 @@ class DogmProgram(object):
 
             self._seed_results(self.source_cursor)
 
-            print('processing done.')
+            print('processing {} results done.'.format(self.datasource))
         finally:
             if hasattr(self, 'source_cursor'):
                 del self.source_cursor
@@ -1161,7 +1176,7 @@ class DogmProgram(object):
 
         for sample_id in sample_ids:
             sample_id = sample_id[0]
-            print(sample_id)
+
             try:
                 samples = self._get_samples_for_id(sample_id, result_fields)
             finally:
@@ -1220,3 +1235,39 @@ class DogmProgram(object):
             return None
 
         return dict(zip(fields, list(row)))
+
+
+class DogmProgram(GdbProgram):
+    datasource = 'UDOGM'
+    #: location to dogm gdb
+    gdb = join('DOGM', 'DOGM_AGRC.gdb')
+
+    #: results table name
+    result_table = 'DOGM_RESULT'
+
+    #: stations feature class name
+    station_table = 'DOGM_STATION'
+
+
+class UdwrProgram(GdbProgram):
+    datasource = 'UDWR'
+    #: location to dogm gdb
+    gdb = join('UDWR', 'UDWR_AGRC.gdb')
+
+    #: results table name
+    result_table = 'UDWR_RESULTS'
+
+    #: stations feature class name
+    station_table = 'UDWR_STATION'
+
+
+class UgsProgram(GdbProgram):
+    datasource = 'UGS'
+    #: location to dogm gdb
+    gdb = join('UGS', 'UGS_AGRC.gdb')
+
+    #: results table name
+    result_table = 'RESULTS'
+
+    #: stations feature class name
+    station_table = 'STATIONS'
