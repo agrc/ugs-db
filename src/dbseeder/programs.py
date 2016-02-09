@@ -223,12 +223,15 @@ class WqpProgram(Program):
                 del self.cursor
 
     def update(self):
+        print('updating {} stations and results...'.format(self.datasource))
+
         try:
             last_updated = self._get_most_recent_result_date(self.datasource)
 
             if not last_updated:
                 raise Exception('No last updated date. You should seed some data first.')
 
+            print('fetching records after {}'.format(last_updated))
             #: get new results from wqp service
             result_url = self._format_url(self.wqp_url, 'Result', last_updated)
             #: group them as if they were read from querycsv
@@ -791,16 +794,16 @@ class SdwisProgram(Program):
 
     def seed(self):
         try:
-            print('processing {} stations...'.format(self.datasource))
+            print('seeding {} stations...'.format(self.datasource))
 
             self._seed_stations(self.source_cursor.execute(self.sql['station'].format('')), schema.station)
 
-            print('processing {} stations done.'.format(self.datasource))
-            print('processing {} results...'.format(self.datasource))
+            print('seeding {} stations done.'.format(self.datasource))
+            print('seeding {} results...'.format(self.datasource))
 
             self._seed_results(self.source_cursor.execute(self.sql['unique_sample_ids']))
 
-            print('processing {} results done.'.format(self.datasource))
+            print('seeding {} results done.'.format(self.datasource))
         finally:
             if hasattr(self, 'source_cursor'):
                 del self.source_cursor
@@ -810,7 +813,8 @@ class SdwisProgram(Program):
                 del self.cursor
 
     def update(self):
-        print('processing {} stations...'.format(self.datasource))
+        print('updating {} stations...'.format(self.datasource))
+
         try:
             #: query for new Results
             last_updated = self._get_most_recent_result_date(self.datasource)
@@ -844,12 +848,12 @@ class SdwisProgram(Program):
                     #: remove stations already inserted
                     del new_station_ids[0:end]
 
-                print('processing {} stations done.'.format(self.datasource))
-            print('processing {} results...'.format(self.datasource))
+                print('updating {} stations done.'.format(self.datasource))
+            print('updating {} results...'.format(self.datasource))
 
             self._seed_results(new_results.keys())
 
-            print('processing {} results done.'.format(self.datasource))
+            print('updating {} results done.'.format(self.datasource))
         finally:
             if hasattr(self, 'source_cursor'):
                 del self.source_cursor
@@ -1093,15 +1097,15 @@ class GdbProgram(object):
             print('There was an issue adding an index. Inserting may be slower or removing the existing index failed.')
 
     def seed(self):
-        self._seed()
+        self._seed('seeding')
 
     def update(self):
-        self._seed()
+        self._seed('updating')
 
-    def _seed(self):
+    def _seed(self, what):
         #: location - the path to the table data
         #: fields - the fields form the data to pull
-        print('processing {} stations...'.format(self.datasource))
+        print('{} {} stations...'.format(what, self.datasource))
 
         #: get subset of dogm fields
         station_fields = self._get_field_instersection(schema.station, self.arcpy.ListFields(self.station_table))
@@ -1114,8 +1118,8 @@ class GdbProgram(object):
             self.source_cursor = self.arcpy.da.SearchCursor(self.station_table, field_names=station_fields, where_clause='1=1')
             self._seed_stations(self.source_cursor, station_fields)
 
-            print('processing {} stations done.'.format(self.datasource))
-            print('processing {} results...'.format(self.datasource))
+            print('{} {} stations done.'.format(what, self.datasource))
+            print('{} {} results...'.format(what, self.datasource))
 
             self.source_cursor = self.arcpy.da.SearchCursor(self.result_table,
                                                             field_names=['SampleId'],
@@ -1123,7 +1127,7 @@ class GdbProgram(object):
 
             self._seed_results(self.source_cursor)
 
-            print('processing {} results done.'.format(self.datasource))
+            print('{} {} results done.'.format(what, self.datasource))
         finally:
             if hasattr(self, 'source_cursor'):
                 del self.source_cursor
