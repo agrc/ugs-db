@@ -149,7 +149,7 @@ class Seeder(object):
 
         self._update_params_table(who)
 
-    def update(self, source, who):
+    def update(self, source, who, location):
         db = self._get_db(who)
 
         programs = self._parse_source_args(source)
@@ -159,11 +159,13 @@ class Seeder(object):
 
             seeder = seederClass(db=db,
                                  update=True,
-                                 source=secrets.sdwis,
+                                 source=location,
+                                 secrets=secrets.sdwis,
                                  sql_statements=sql.sql_statements,
                                  update_row=sql.update_row,
                                  insert_rows=sql.insert_rows,
-                                 cursor_factory=sql.create_cursor)
+                                 cursor_factory=sql.create_cursor,
+                                 arcpy=arcpy)
             seeder.update()
 
         self._update_params_table(who)
