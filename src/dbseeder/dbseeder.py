@@ -44,6 +44,8 @@ class Seeder(object):
         with open(join(script_dir, join('..', '..', 'scripts', 'createIndices.sql')), 'r') as f:
             create_indices_sql = f.read()
 
+        c = None
+        cursor = None
         try:
             c = pyodbc.connect(db['connection_string'])
             cursor = c.cursor()
@@ -53,9 +55,9 @@ class Seeder(object):
         except Exception, e:
             raise e
         finally:
-            if cursor:
+            if cursor is not None:
                 del cursor
-            if c:
+            if c is not None:
                 del c
 
         print('done')
