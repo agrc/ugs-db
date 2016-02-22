@@ -40,7 +40,7 @@ class Tox(TestCommand):
 
 setup(
     name="ugs-dbseeder",
-    version="1.0.1",
+    version="1.1.0",
     license="MIT",
     description="ETL UGS Data",
     long_description="",

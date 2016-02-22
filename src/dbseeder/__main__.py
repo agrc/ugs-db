@@ -25,7 +25,7 @@ from docopt import docopt
 
 
 def main():
-    arguments = docopt(__doc__, version='1.0.1')
+    arguments = docopt(__doc__, version='1.1.0')
     seeder = Seeder()
 
     if arguments['seed']:
