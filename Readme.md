@@ -9,7 +9,7 @@ A db tool for seeding and updating the ugs water chemistry database.
 1. Install oracle client >= 11.2
     1. Use the Oracle Net Manager to create a Service Name called `sdwis`
         1. **Protocol**: `TCP/IP`
-        1. **Host**: `itdb208.dts.utah.gov`
+        1. **Host**: `<db host>`
         1. **Service Name**: `env`
         1. **Port**: `1521`
 1. Update `secrets.py` based on the [sample.](/src/dbseeder/secrets_sample.py)
