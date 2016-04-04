@@ -15,7 +15,7 @@ Options:
   --file-location=<file_location>   The parent location of the programs data.
 Argument values:
   <configuration>       dev, stage, prod
-  <source>              WQP, SDWIS, DOGM, DWR, UGS, or "" for all
+  <source>              WQP, SDWIS, DOGM, UDWR, UGS, or "" for all
   <file_location>       the parent location of the programs data "c:\data"
 '''
 
