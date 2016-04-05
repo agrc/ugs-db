@@ -24,7 +24,8 @@ from benchmarking import get_milliseconds
 
 class Program(object):
 
-    most_recent_result_query = 'SELECT max(SampleDate) FROM [UGSWaterChemistry].[dbo].[Results] WHERE [DataSource] = \'{}\''
+    most_recent_result_query = ('SELECT max(SampleDate) FROM [UGSWaterChemistry].[dbo].[Results]'
+                                ' WHERE [DataSource] = \'{}\'')
     new_stations_query = ('SELECT * FROM (VALUES{}) AS t(StationId) WHERE NOT EXISTS('
                           'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Stations] WHERE [StationId] = t.StationId)')
 
@@ -1021,7 +1022,9 @@ class SdwisProgram(Program):
             sample_date = key[0]
             sample_id = key[1]
             param = key[2]
-            sample_ids.append('(\'{}\',\'{}\',\'{}\')'.format(sample_date, re.sub('\'', '\'\'', sample_id), re.sub('\'', '\'\'', param)))
+            sample_ids.append('(\'{}\',\'{}\',\'{}\')'.format(sample_date,
+                                                              re.sub('\'', '\'\'', sample_id),
+                                                              re.sub('\'', '\'\'', param)))
 
         unique_sample_ids = self._get_unique_sample_ids(sample_ids)
 
@@ -1082,7 +1085,8 @@ class GdbProgram(object):
 
         arcpy.env.workspace = parent_folder
         if not arcpy.Exists(self.result_table) or not arcpy.Exists(self.station_table):
-            raise Exception('The DOGM geodatabase is missing the feature class {} or table.'.format(self.station_table, self.result_table))
+            raise Exception('The DOGM geodatabase is missing the feature class {} or table.'.format(self.station_table,
+                                                                                                    self.result_table))
 
         try:
             arcpy.RemoveIndex_management(self.result_table, index_name='result_query')
@@ -1115,7 +1119,8 @@ class GdbProgram(object):
         station_fields.append('Shape@XY')
 
         try:
-            self.source_cursor = self.arcpy.da.SearchCursor(self.station_table, field_names=station_fields, where_clause='1=1')
+            self.source_cursor = self.arcpy.da.SearchCursor(self.station_table, field_names=station_fields,
+                                                            where_clause='1=1')
             self._seed_stations(self.source_cursor, station_fields)
 
             print('{} {} stations done.'.format(what, self.datasource))

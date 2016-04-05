@@ -29,9 +29,14 @@ def main():
     seeder = Seeder()
 
     if arguments['seed']:
-        return seeder.seed(source=arguments['<source>'], file_location=arguments['<file_location>'], who=arguments['<configuration>'])
+        return seeder.seed(source=arguments['<source>'],
+                           file_location=arguments['<file_location>'],
+                           who=arguments['<configuration>'])
     elif arguments['update']:
-        return seeder.update(source=arguments['<source>'], who=arguments['<configuration>'], location=arguments['--file-location'], postprocess=arguments['--post-process'])
+        return seeder.update(source=arguments['<source>'],
+                             who=arguments['<configuration>'],
+                             location=arguments['--file-location'],
+                             postprocess=arguments['--post-process'])
     elif arguments['create-tables']:
         return seeder.create_tables(who=arguments['<configuration>'])
     elif arguments['postprocess']:
