@@ -6,7 +6,7 @@ UGS Chemistry database seeder
 Usage:
   dbseeder create-tables <configuration>
   dbseeder seed <source> <file_location> <configuration>
-  dbseeder update <source> <configuration> [--file-location=<file_location>]
+  dbseeder update <source> <configuration> [--file-location=<file_location>] [--post-process]
   dbseeder postprocess <configuration>
   dbseeder (-h | --help | --version)
 Options:
@@ -31,7 +31,7 @@ def main():
     if arguments['seed']:
         return seeder.seed(source=arguments['<source>'], file_location=arguments['<file_location>'], who=arguments['<configuration>'])
     elif arguments['update']:
-        return seeder.update(source=arguments['<source>'], who=arguments['<configuration>'], location=arguments['--file-location'])
+        return seeder.update(source=arguments['<source>'], who=arguments['<configuration>'], location=arguments['--file-location'], postprocess=arguments['--post-process'])
     elif arguments['create-tables']:
         return seeder.create_tables(who=arguments['<configuration>'])
     elif arguments['postprocess']:

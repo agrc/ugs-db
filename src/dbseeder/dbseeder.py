@@ -151,7 +151,7 @@ class Seeder(object):
 
         self._update_params_table(who)
 
-    def update(self, source, who, location):
+    def update(self, source, who, location, postprocess):
         db = self._get_db(who)
 
         programs = self._parse_source_args(source)
@@ -171,6 +171,9 @@ class Seeder(object):
             seeder.update()
 
         self._update_params_table(who)
+
+        if postprocess:
+            self.post_process(who)
 
     def _parse_source_args(self, source):
         all_sources = ['WQP', 'SDWIS', 'DOGM', 'UDWR', 'UGS']
