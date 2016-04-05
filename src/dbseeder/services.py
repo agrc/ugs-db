@@ -554,4 +554,4 @@ class HttpClient(object):
         except:
             pass
 
-        return csvreader(response.text.splitlines())
+        return csvreader((txt.encode('utf-8') for txt in response.text.splitlines()))
