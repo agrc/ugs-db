@@ -105,7 +105,7 @@ class Seeder(object):
                                                 join('in_memory', stations_identity))
 
         print('joining to layer')
-        arcpy.AddJoin_management(stationsLyr, 'Id', stationsIdent, 'FID_' + stations_fc)
+        arcpy.AddJoin_management(stationsLyr, 'Id', stationsIdent, 'FID_' + stations_fc.split('.')[2])
 
         print('calculating state')
         arcpy.CalculateField_management(stationsLyr, 'StateCode', '!STATE_FIPS!', 'PYTHON')
