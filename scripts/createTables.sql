@@ -2,16 +2,16 @@ USE [UGSWaterChemistry]
 SET ANSI_NULLS ON
 SET QUOTED_IDENTIFIER ON
 
-IF OBJECT_ID('dbo.Results', 'U') IS NOT NULL
-    DROP TABLE [dbo].[Results]
+IF OBJECT_ID('ugswaterchemistry.Results', 'U') IS NOT NULL
+    DROP TABLE [ugswaterchemistry].[Results]
 
-IF OBJECT_ID('dbo.Stations', 'U') IS NOT NULL
-    DROP TABLE [dbo].[Stations]
+IF OBJECT_ID('ugswaterchemistry.Stations', 'U') IS NOT NULL
+    DROP TABLE [ugswaterchemistry].[Stations]
 
-IF OBJECT_ID('dbo.Params', 'U') IS NOT NULL
-    DROP TABLE [dbo].[Params]
+IF OBJECT_ID('ugswaterchemistry.Params', 'U') IS NOT NULL
+    DROP TABLE [ugswaterchemistry].[Params]
 
-CREATE TABLE [dbo].[Results](
+CREATE TABLE [ugswaterchemistry].[Results](
     [Id] [int] IDENTITY(1,1) NOT NULL,
     [AnalysisDate] [datetime2](7) NULL,
     [AnalytMeth] [nvarchar](150) NULL,
@@ -61,7 +61,7 @@ CREATE TABLE [dbo].[Results](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 
-CREATE TABLE [dbo].[Stations](
+CREATE TABLE [ugswaterchemistry].[Stations](
     [Id] [int] IDENTITY(1,1) NOT NULL,
     [OrgId] [nvarchar](20) NULL,
     [OrgName] [nvarchar](100) NULL,
@@ -102,6 +102,6 @@ CREATE TABLE [dbo].[Stations](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
-CREATE TABLE [dbo].[Params](
+CREATE TABLE [ugswaterchemistry].[Params](
     [Param] [nvarchar](500) NULL
 ) ON [PRIMARY]

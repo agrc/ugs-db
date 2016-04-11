@@ -272,7 +272,7 @@ class TestWqpProgram(unittest.TestCase):
         statement = self.patient.new_stations_query.format(','.join(station_ids))
 
         self.assertEqual(('SELECT * FROM (VALUES(1),(2),(3)) AS t(StationId) WHERE NOT EXISTS(' +
-                          'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Stations] WHERE [StationId] = t.StationId)'),
+                          'SELECT 1 FROM [UGSWaterChemistry].[ugswaterchemistry].[Stations] WHERE [StationId] = t.StationId)'),
                          statement)
 
     def test_etl_column_names_with_dict(self):

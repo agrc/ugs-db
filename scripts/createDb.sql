@@ -18,7 +18,7 @@ GO
 
 IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
 begin
-EXEC [UGSWaterChemistry].[dbo].[sp_fulltext_database] @action = 'enable'
+EXEC [UGSWaterChemistry].[ugswaterchemistry].[sp_fulltext_database] @action = 'enable'
 end
 GO
 
