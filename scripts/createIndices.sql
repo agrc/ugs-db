@@ -21,7 +21,7 @@ CREATE INDEX HUC8_index
 ON Stations (HUC8)
 CREATE INDEX OrgId_index
 ON Stations (OrgId)
-CREATE SPATIAL INDEX [FDO_Shape] ON [dbo].[Stations]
+CREATE SPATIAL INDEX [FDO_Shape] ON [ugswaterchemistry].[Stations]
 (
     [Shape]
 )USING  GEOMETRY_AUTO_GRID

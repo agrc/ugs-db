@@ -24,10 +24,10 @@ from benchmarking import get_milliseconds
 
 class Program(object):
 
-    most_recent_result_query = ('SELECT max(SampleDate) FROM [UGSWaterChemistry].[dbo].[Results]'
+    most_recent_result_query = ('SELECT max(SampleDate) FROM [UGSWaterChemistry].[ugswaterchemistry].[Results]'
                                 ' WHERE [DataSource] = \'{}\'')
     new_stations_query = ('SELECT * FROM (VALUES{}) AS t(StationId) WHERE NOT EXISTS('
-                          'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Stations] WHERE [StationId] = t.StationId)')
+                          'SELECT 1 FROM [UGSWaterChemistry].[ugswaterchemistry].[Stations] WHERE [StationId] = t.StationId)')
 
     def _get_most_recent_result_date(self, datasource):
 
@@ -81,7 +81,7 @@ class WqpProgram(Program):
         'sample_id': 'select * from {} where {} = \'{}\'',
         'wqxids': 'select {0} from {1} where {0} LIKE \'%_WQX%\'',
         'new_results': ('SELECT * FROM (VALUES{}) AS t(SampleId) WHERE NOT EXISTS('
-                        'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Results] WHERE [SampleId] = t.SampleId)'),
+                        'SELECT 1 FROM [UGSWaterChemistry].[ugswaterchemistry].[Results] WHERE [SampleId] = t.SampleId)'),
         'create_index': 'CREATE INDEX IF NOT EXISTS "ActivityIdentifier_{0}" ON "{0}" ("ActivityIdentifier" ASC)'
     }
 
@@ -626,7 +626,7 @@ class SdwisProgram(Program):
 
     sql = {
         'new_results': ('SELECT * FROM (VALUES{}) AS t(SampleDate,SampleId,Param) WHERE NOT EXISTS('
-                        'SELECT 1 FROM [UGSWaterChemistry].[dbo].[Results] WHERE [SampleId] = t.SampleId AND '
+                        'SELECT 1 FROM [UGSWaterChemistry].[ugswaterchemistry].[Results] WHERE [SampleId] = t.SampleId AND '
                         '[SampleDate] = t.SampleDate AND [Param] = t.Param)'),
         'specific-result': '''SELECT
             UTV80.TSASAMPL.COLLLECTION_END_DT AS "SampleDate",

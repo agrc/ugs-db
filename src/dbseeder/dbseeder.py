@@ -88,7 +88,7 @@ class Seeder(object):
         Recalculate StateCode and CountyCode for the entire dataset (not sure that we can trust what's there)
         Populate Elev, ElevUnit, & ElevMeth only for records that have missing or bad data
         '''
-        stations_fc = 'UGSWaterChemistry.dbo.Stations'
+        stations_fc = 'UGSWaterChemistry.ugswaterchemistry.Stations'
         stations_identity = 'Stations_identity'
         epqs_service_url = r'http://nationalmap.gov/epqs/pqs.php'
 

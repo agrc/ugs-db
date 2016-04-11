@@ -1,8 +1,8 @@
 USE [UGSWaterChemistry]
 
-TRUNCATE TABLE [UGSWaterChemistry].[dbo].[Params]
+TRUNCATE TABLE [UGSWaterChemistry].[ugswaterchemistry].[Params]
 
-INSERT INTO [UGSWaterChemistry].[dbo].[Params]
+INSERT INTO [UGSWaterChemistry].[ugswaterchemistry].[Params]
 SELECT DISTINCT Param
-FROM [UGSWaterChemistry].[dbo].[Results]
+FROM [UGSWaterChemistry].[ugswaterchemistry].[Results]
 WHERE Param IS NOT NULL
