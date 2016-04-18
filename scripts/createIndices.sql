@@ -8,6 +8,8 @@ CREATE INDEX Param_index
 ON Results (Param)
 CREATE INDEX SampleDate_index
 ON Results (SampleDate)
+CREATE INDEX StationId_index
+ON Results (StationId)
 
 CREATE INDEX StateCode_index
 ON Stations (StateCode)
