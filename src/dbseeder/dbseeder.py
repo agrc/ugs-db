@@ -9,8 +9,10 @@ the main entry point module for database ETL
 
 import pyodbc
 import factory
+import logging
 import requests
 import sql
+import sys
 from os.path import join, dirname
 try:
     import secrets
@@ -24,6 +26,21 @@ except ImportError:
 
 class Seeder(object):
 
+    def __init__(self, logger_name=None):
+        if logger_name is None:
+            self.logger = logging.getLogger('ugs-db')
+
+            detailed_formatter = logging.Formatter(fmt='%(levelname)-7s %(asctime)s %(module)10s:%(lineno)5s %(message)s',
+                                                   datefmt='%m-%d %H:%M:%S')
+            console_handler = logging.StreamHandler(stream=sys.stdout)
+            console_handler.setFormatter(detailed_formatter)
+            console_handler.setLevel('INFO')
+
+            self.logger.addHandler(console_handler)
+            self.logger.setLevel('INFO')
+        else:
+            self.logger = logging.getLogger(logger_name)
+
     def _get_db(self, who):
         db = secrets.dev
         if who == 'stage':
@@ -35,7 +52,7 @@ class Seeder(object):
     def create_tables(self, who):
         db = self._get_db(who)
 
-        print('connecting to {} database'.format(who))
+        self.logger.info('connecting to {} database'.format(who))
 
         script_dir = dirname(__file__)
 
@@ -60,7 +77,7 @@ class Seeder(object):
             if c is not None:
                 del c
 
-        print('done')
+        self.logger.info('done')
 
         return True
 
@@ -72,7 +89,8 @@ class Seeder(object):
         for program in programs:
             seederClass = factory.get(program)
 
-            seeder = seederClass(db=db,
+            seeder = seederClass(self.logger,
+                                 db=db,
                                  update=False,
                                  source=file_location,
                                  secrets=secrets.sdwis,
@@ -96,27 +114,27 @@ class Seeder(object):
         db = r'connection_files\{}.sde'.format(who)
 
         #: FIPS
-        print('creating stations layer')
+        self.logger.info('creating stations layer')
         stationsLyr = arcpy.MakeFeatureLayer_management(join(db, stations_fc), 'StationsLyr')
 
-        print('identity on counties')
+        self.logger.info('identity on counties')
         stationsIdent = arcpy.Identity_analysis(stationsLyr,
                                                 r'ReferenceData.gdb\US_Counties',
                                                 join('in_memory', stations_identity))
 
-        print('joining to layer')
+        self.logger.info('joining to layer')
         arcpy.AddJoin_management(stationsLyr, 'Id', stationsIdent, 'FID_' + stations_fc.split('.')[2])
 
-        print('calculating state')
+        self.logger.info('calculating state')
         arcpy.CalculateField_management(stationsLyr, 'StateCode', '!STATE_FIPS!', 'PYTHON')
-        print('calculating county')
+        self.logger.info('calculating county')
         arcpy.CalculateField_management(stationsLyr, 'CountyCode', '!FIPS!', 'PYTHON')
 
-        print('removing join')
+        self.logger.info('removing join')
         arcpy.RemoveJoin_management(stationsLyr, stations_identity)
 
         #: Elevation
-        print('looping through points with null elevation values')
+        self.logger.info('looping through points with null elevation values')
         connection = pyodbc.connect(self._get_db(who)['connection_string'])
         cursor = connection.cursor()
         cursor.execute('''
@@ -134,7 +152,7 @@ class Seeder(object):
             try:
                 elev = r.json()['USGS_Elevation_Point_Query_Service']['Elevation_Query']['Elevation']
             except:
-                print('error retrieving elevation for Lon: {} & Lat: {}. Skipping'.format(row.Lon_X, row.Lat_Y))
+                self.logger.info('error retrieving elevation for Lon: {} & Lat: {}. Skipping'.format(row.Lon_X, row.Lat_Y))
                 continue
 
             unit = 'meters'
@@ -147,7 +165,7 @@ class Seeder(object):
             i += 1
             if i % batch_size == 0:
                 connection.commit()
-                print('{} out of {} completed ({}%)'.format(i, total, (i/float(total)*100.00)))
+                self.logger.info('{} out of {} completed ({}%)'.format(i, total, (i/float(total)*100.00)))
 
         self._update_params_table(who)
 
@@ -159,7 +177,8 @@ class Seeder(object):
         for program in programs:
             seederClass = factory.get(program)
 
-            seeder = seederClass(db=db,
+            seeder = seederClass(self.logger,
+                                 db=db,
                                  update=True,
                                  source=location,
                                  secrets=secrets.sdwis,

@@ -23,7 +23,6 @@ from benchmarking import get_milliseconds
 
 
 class Program(object):
-
     most_recent_result_query = ('SELECT max(SampleDate) FROM [UGSWaterChemistry].[ugswaterchemistry].[Results]'
                                 ' WHERE [DataSource] = \'{}\'')
     new_stations_query = ('SELECT * FROM (VALUES{}) AS t(StationId) WHERE NOT EXISTS('
@@ -169,6 +168,7 @@ class WqpProgram(Program):
     ])
 
     def __init__(self,
+                 logger,
                  db,
                  update,
                  source=None,
@@ -178,6 +178,7 @@ class WqpProgram(Program):
                  insert_rows=None,
                  cursor_factory=None,
                  arcpy=None):
+        self.logger = logger
         '''create a new WQP program
         db - the connection string for the database to seed
         source - the path on disk to find csv files to ETL
@@ -224,7 +225,7 @@ class WqpProgram(Program):
                 del self.cursor
 
     def update(self):
-        print('updating {} stations and results...'.format(self.datasource))
+        self.logger.info('updating {} stations and results...'.format(self.datasource))
 
         try:
             last_updated = self._get_most_recent_result_date(self.datasource)
@@ -232,7 +233,7 @@ class WqpProgram(Program):
             if not last_updated:
                 raise Exception('No last updated date. You should seed some data first.')
 
-            print('fetching records after {}'.format(last_updated))
+            self.logger.info('fetching records after {}'.format(last_updated))
             #: get new results from wqp service
             result_url = self._format_url(self.wqp_url, 'Result', last_updated)
             #: group them as if they were read from querycsv
@@ -245,7 +246,7 @@ class WqpProgram(Program):
             new_station_ids = self._remove_existing_wqx_station_ids(new_station_ids)
 
             if new_station_ids and len(new_station_ids) > 0:
-                print('of the new stations found, attempting to insert {}'.format(len(new_station_ids)))
+                self.logger.info('of the new stations found, attempting to insert {}'.format(len(new_station_ids)))
 
                 station_url = self._format_url(self.wqp_url, 'Station', last_updated)
                 new_stations = HttpClient.get_csv(station_url)
@@ -261,7 +262,7 @@ class WqpProgram(Program):
 
                 self._seed_stations(stations, header=header, wqx=wqx)
             else:
-                print('all stations already in database')
+                self.logger.info('all stations already in database')
             for samples_for_id in new_results.values():
                 self._seed_results(samples_for_id)
 
@@ -270,12 +271,12 @@ class WqpProgram(Program):
                 del self.cursor
 
     def _seed_by_file(self):
-        print('processing {} stations...'.format(self.datasource))
+        self.logger.info('processing {} stations...'.format(self.datasource))
 
         for csv_file in self._get_files(self.stations_folder):
             #: create csv reader
             with open(csv_file, 'r') as f:
-                print('- {}'.format(basename(csv_file)))
+                self.logger.info('- {}'.format(basename(csv_file)))
 
                 #: generate duplicate id list
                 wqx = self._get_wqx_duplicate_ids(csv_file)
@@ -286,13 +287,13 @@ class WqpProgram(Program):
 
                 self._seed_stations(reader, header=header, wqx=wqx)
 
-                print('- {}: done'.format(basename(csv_file)))
+                self.logger.info('- {}: done'.format(basename(csv_file)))
 
-        print('processing {} stations done.'.format(self.datasource))
-        print('processing {} results...'.format(self.datasource))
+        self.logger.info('processing {} stations done.'.format(self.datasource))
+        self.logger.info('processing {} results...'.format(self.datasource))
 
         for csv_file in self._get_files(self.results_folder):
-            print('- {}'.format(basename(csv_file)))
+            self.logger.info('- {}'.format(basename(csv_file)))
 
             #: create sqlite db and get unique sample ids
             unique_sample_ids = self._get_distinct_sample_ids_from(csv_file)
@@ -312,15 +313,15 @@ class WqpProgram(Program):
                     sample_sets += 1
                     elapsed = get_milliseconds() - sets_start
                     if sample_sets % 5000 == 0:
-                        print('{} total sample sets (avg {} milliseconds per set)'.format(sample_sets, round(
+                        self.logger.info('{} total sample sets (avg {} milliseconds per set)'.format(sample_sets, round(
                             elapsed / sample_sets, 5)))
 
             finally:
                 #: in case something goes wrong always clean up the db
                 os.remove(self.TEMPDB)
-            print('- {}: done'.format(basename(csv_file)))
+            self.logger.info('- {}: done'.format(basename(csv_file)))
 
-        print('processing {} results done.'.format(self.datasource))
+        self.logger.info('processing {} results done.'.format(self.datasource))
 
     def _seed_stations(self, rows, header=None, wqx=None):
         stations = []
@@ -765,6 +766,7 @@ class SdwisProgram(Program):
     }
 
     def __init__(self,
+                 logger,
                  db,
                  update,
                  source,
@@ -785,6 +787,7 @@ class SdwisProgram(Program):
         cursor_factory - the function to create pyodbc connection_string
         arcpy - ignored. for gdb programs only
         '''
+        self.logger = logger
         self.db = db
         self.source_db = secrets
         self._update_row = update_row
@@ -795,16 +798,16 @@ class SdwisProgram(Program):
 
     def seed(self):
         try:
-            print('seeding {} stations...'.format(self.datasource))
+            self.logger.info('seeding {} stations...'.format(self.datasource))
 
             self._seed_stations(self.source_cursor.execute(self.sql['station'].format('')), schema.station)
 
-            print('seeding {} stations done.'.format(self.datasource))
-            print('seeding {} results...'.format(self.datasource))
+            self.logger.info('seeding {} stations done.'.format(self.datasource))
+            self.logger.info('seeding {} results...'.format(self.datasource))
 
             self._seed_results(self.source_cursor.execute(self.sql['unique_sample_ids']))
 
-            print('seeding {} results done.'.format(self.datasource))
+            self.logger.info('seeding {} results done.'.format(self.datasource))
         finally:
             if hasattr(self, 'source_cursor'):
                 del self.source_cursor
@@ -814,7 +817,7 @@ class SdwisProgram(Program):
                 del self.cursor
 
     def update(self):
-        print('updating {} stations...'.format(self.datasource))
+        self.logger.info('updating {} stations...'.format(self.datasource))
 
         try:
             #: query for new Results
@@ -823,7 +826,7 @@ class SdwisProgram(Program):
             if not last_updated:
                 raise Exception('No last updated date. You should seed some data first.')
 
-            print('fetching records after {}'.format(last_updated))
+            self.logger.info('fetching records after {}'.format(last_updated))
             last_updated = last_updated.split(' ')[0]
             query = self.sql['result'] + self.sql['date_clause'].format(last_updated)
 
@@ -831,7 +834,7 @@ class SdwisProgram(Program):
             new_results = self._group_rows_by_id(self.source_cursor.execute(query))
 
             if len(new_results) <= 0:
-                print('No new results to update. Quitting.')
+                self.logger.info('No new results to update. Quitting.')
                 return
 
             new_results = self._remove_existing_results(new_results)
@@ -849,12 +852,12 @@ class SdwisProgram(Program):
                     #: remove stations already inserted
                     del new_station_ids[0:end]
 
-                print('updating {} stations done.'.format(self.datasource))
-            print('updating {} results...'.format(self.datasource))
+                self.logger.info('updating {} stations done.'.format(self.datasource))
+            self.logger.info('updating {} results...'.format(self.datasource))
 
             self._seed_results(new_results.keys())
 
-            print('updating {} results done.'.format(self.datasource))
+            self.logger.info('updating {} results done.'.format(self.datasource))
         finally:
             if hasattr(self, 'source_cursor'):
                 del self.source_cursor
@@ -1050,6 +1053,7 @@ class GdbProgram(object):
     sql = {}
 
     def __init__(self,
+                 logger,
                  db,
                  update,
                  source=None,
@@ -1070,6 +1074,7 @@ class GdbProgram(object):
         cursor_factory - the function to create pyodbc connection_string
         arcpy - the arcpy module
         '''
+        self.logger = logger
         self.db = db
         self._update_row = update_row
         self._insert_rows = insert_rows
@@ -1091,14 +1096,14 @@ class GdbProgram(object):
         try:
             arcpy.RemoveIndex_management(self.result_table, index_name='result_query')
         except Exception:
-            print('There was an issue removing an index.')
+            self.logger.error('There was an issue removing an index.')
 
         try:
             arcpy.AddIndex_management(in_table=self.result_table,
                                       fields='SampleId',
                                       index_name='result_query')
         except Exception:
-            print('There was an issue adding an index. Inserting may be slower or removing the existing index failed.')
+            self.logger.error('There was an issue adding an index. Inserting may be slower or removing the existing index failed.')
 
     def seed(self):
         self._seed('seeding')
@@ -1109,7 +1114,7 @@ class GdbProgram(object):
     def _seed(self, what):
         #: location - the path to the table data
         #: fields - the fields form the data to pull
-        print('{} {} stations...'.format(what, self.datasource))
+        self.logger.info('{} {} stations...'.format(what, self.datasource))
 
         #: get subset of dogm fields
         station_fields = self._get_field_instersection(schema.station, self.arcpy.ListFields(self.station_table))
@@ -1123,8 +1128,8 @@ class GdbProgram(object):
                                                             where_clause='1=1')
             self._seed_stations(self.source_cursor, station_fields)
 
-            print('{} {} stations done.'.format(what, self.datasource))
-            print('{} {} results...'.format(what, self.datasource))
+            self.logger.info('{} {} stations done.'.format(what, self.datasource))
+            self.logger.info('{} {} results...'.format(what, self.datasource))
 
             self.source_cursor = self.arcpy.da.SearchCursor(self.result_table,
                                                             field_names=['SampleId'],
@@ -1132,7 +1137,7 @@ class GdbProgram(object):
 
             self._seed_results(self.source_cursor)
 
-            print('{} {} results done.'.format(what, self.datasource))
+            self.logger.info('{} {} results done.'.format(what, self.datasource))
         finally:
             if hasattr(self, 'source_cursor'):
                 del self.source_cursor
@@ -1157,8 +1162,8 @@ class GdbProgram(object):
             row = self._update_row(row, self.datasource)
 
             if row['Shape'] is None:
-                print('Skipping row because it has an invalid shape.')
-                print(row)
+                self.logger.warn('Skipping row because it has an invalid shape.')
+                self.logger.debug(row)
 
                 continue
 
