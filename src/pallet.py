@@ -11,5 +11,11 @@ from forklift.models import Pallet
 
 
 class UGSPallet(Pallet):
+    def build(self, configuration):
+        self.configuration = configuration
+
     def ship(self):
-        Seeder('forklift').update('WQP, SDWIS', 'stage', None, True)
+        configs = {'Production': 'prod',
+                   'Staging': 'stage',
+                   'Dev': 'dev'}
+        Seeder('forklift').update('WQP, SDWIS', configs[self.configuration], None, True)
