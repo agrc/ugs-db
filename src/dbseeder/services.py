@@ -543,14 +543,14 @@ class HttpClient(object):
     """A wrapper around requests for testing"""
 
     @staticmethod
-    def get_csv(url):
+    def get_csv(url, logger):
         response = get(url)
         response.raise_for_status()
 
         try:
-            print('query completed in {}'.format(response.elapsed))
-            print('new sites found {}'.format(response.headers['total-site-count']))
-            print('new results found {}'.format(response.headers['total-result-count']))
+            logger.info('query completed in {}'.format(response.elapsed))
+            logger.info('new sites found {}'.format(response.headers['total-site-count']))
+            logger.info('new results found {}'.format(response.headers['total-result-count']))
         except:
             pass
 

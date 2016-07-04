@@ -237,7 +237,7 @@ class WqpProgram(Program):
             #: get new results from wqp service
             result_url = self._format_url(self.wqp_url, 'Result', last_updated)
             #: group them as if they were read from querycsv
-            new_results = self._group_rows_by_id(HttpClient.get_csv(result_url))
+            new_results = self._group_rows_by_id(HttpClient.get_csv(result_url, self.logger))
             #: remove results that have a sample id already in the database
             new_results = self._remove_existing_results(new_results)
             #: find the station ids from the new results that aren't in the database
@@ -249,7 +249,7 @@ class WqpProgram(Program):
                 self.logger.info('of the new stations found, attempting to insert {}'.format(len(new_station_ids)))
 
                 station_url = self._format_url(self.wqp_url, 'Station', last_updated)
-                new_stations = HttpClient.get_csv(station_url)
+                new_stations = HttpClient.get_csv(station_url, self.logger)
 
                 if not new_stations:
                     raise Exception('WQP service should have returned results but result is empty. {}'.format(
