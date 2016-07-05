@@ -843,6 +843,7 @@ class SdwisProgram(Program):
             new_station_ids = self._find_new_station_ids(new_results)
 
             if new_station_ids and len(new_station_ids) > 0:
+                self.logger.info('adding {} new stations...'.format(len(new_station_ids)))
                 end = 500
                 while new_station_ids:
                     stations = new_station_ids[0:end]
@@ -853,7 +854,8 @@ class SdwisProgram(Program):
                     del new_station_ids[0:end]
 
                 self.logger.info('updating {} stations done.'.format(self.datasource))
-            self.logger.info('updating {} results...'.format(self.datasource))
+
+            self.logger.info('adding {} new results...'.format(len(new_results.keys())))
 
             self._seed_results(new_results.keys())
 
