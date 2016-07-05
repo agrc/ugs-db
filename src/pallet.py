@@ -23,7 +23,7 @@ class UGSPallet(Pallet):
         return ready
 
     def ship(self):
-        configs = {'Production': 'prod',
-                   'Staging': 'stage',
-                   'Dev': 'dev'}
-        Seeder('forklift').update('WQP, SDWIS', configs[self.configuration], None, True)
+        configs_lookup = {'Production': 'prod',
+                          'Staging': 'stage',
+                          'Dev': 'dev'}
+        Seeder('forklift').update('WQP, SDWIS', configs_lookup[self.configuration], None, True)
