@@ -8,8 +8,8 @@ test the programs module
 '''
 
 import unittest
-from dbseeder.programs import WqpProgram, DogmProgram
-from dbseeder import sql, arcpy_mock
+from ugsdbseeder.programs import WqpProgram, DogmProgram
+from ugsdbseeder import sql, arcpy_mock
 from collections import OrderedDict
 from csv import reader as csvreader
 from mock import Mock

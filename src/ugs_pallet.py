@@ -6,7 +6,7 @@ pallet.py
 A module that contains the pallet for running this project via forklift
 '''
 
-from dbseeder.dbseeder import Seeder
+from ugsdbseeder.ugsdbseeder import Seeder
 from forklift.models import Pallet
 from time import strftime
 

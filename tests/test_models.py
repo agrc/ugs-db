@@ -7,7 +7,7 @@ test_programs
 Tests for `models` module.
 """
 
-import dbseeder.models as models
+import ugsdbseeder.models as models
 import unittest
 
 

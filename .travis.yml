@@ -22,7 +22,7 @@ install:
   - python setup.py install
 
 script:
-  - nosetests --with-coverage --cov dbseeder --cov-config .coveragerc --logging-level=INFO
+  - nosetests --with-coverage --cov ugsdbseeder --cov-config .coveragerc --logging-level=INFO
   - flake8
 after_success:
     # Report coverage results to codecov.io
