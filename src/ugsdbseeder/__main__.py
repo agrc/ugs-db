@@ -4,11 +4,11 @@
 '''
 UGS Chemistry database seeder
 Usage:
-  dbseeder create-tables <configuration>
-  dbseeder seed <source> <file_location> <configuration>
-  dbseeder update <source> <configuration> [--file-location=<file_location>] [--post-process]
-  dbseeder postprocess <configuration>
-  dbseeder (-h | --help | --version)
+  ugsdbseeder create-tables <configuration>
+  ugsdbseeder seed <source> <file_location> <configuration>
+  ugsdbseeder update <source> <configuration> [--file-location=<file_location>] [--post-process]
+  ugsdbseeder postprocess <configuration>
+  ugsdbseeder (-h | --help | --version)
 Options:
   -h --help                         Show this screen.
   -v --version                      Show version.
@@ -20,7 +20,7 @@ Argument values:
 '''
 
 import sys
-from dbseeder import Seeder
+from ugsdbseeder import Seeder
 from docopt import docopt
 
 

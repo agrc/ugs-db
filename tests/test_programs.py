@@ -8,19 +8,24 @@ test the programs module
 '''
 
 import unittest
-from dbseeder.programs import WqpProgram, DogmProgram
-from dbseeder import sql, arcpy_mock
+from ugsdbseeder.programs import WqpProgram, DogmProgram
+from ugsdbseeder import sql, arcpy_mock
 from collections import OrderedDict
 from csv import reader as csvreader
 from mock import Mock
 from nose.tools import raises
 from os.path import join, basename
+import logging
+
+
+logger = logging.getLogger('test')
 
 
 class TestWqpProgram(unittest.TestCase):
     def setUp(self):
         self.test_get_files_folder = join('tests', 'data', 'WQP', 'get_files')
-        self.patient = WqpProgram(db='bad db connection',
+        self.patient = WqpProgram(logger,
+                                  db='bad db connection',
                                   update=False,
                                   sql_statements=sql.sql_statements,
                                   source=self.test_get_files_folder)
@@ -99,7 +104,8 @@ class TestWqpProgram(unittest.TestCase):
         db = {
             'connection_string': ''
         }
-        self.patient = WqpProgram(db=db,
+        self.patient = WqpProgram(logger,
+                                  db=db,
                                   source=join('tests', 'data', 'WQP', 'insert'),
                                   update=False,
                                   insert_rows=insert_mock,
@@ -348,7 +354,8 @@ class TestWqpProgram(unittest.TestCase):
 class TestDogmProgram(unittest.TestCase):
     def setUp(self):
         self.test_get_files_folder = join('tests', 'data')
-        self.patient = DogmProgram(db='bad db connection',
+        self.patient = DogmProgram(logger,
+                                   db='bad db connection',
                                    update=False,
                                    source=self.test_get_files_folder,
                                    arcpy=arcpy_mock)

@@ -8,7 +8,7 @@ test the schema module
 '''
 
 import unittest
-from dbseeder import schema
+from ugsdbseeder import schema
 
 
 class TestSchema(unittest.TestCase):

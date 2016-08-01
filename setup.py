@@ -79,7 +79,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "dbseeder = dbseeder.__main__:main"
+            "dbseeder = ugsdbseeder.__main__:main"
         ]
     },
     cmdclass={

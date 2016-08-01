@@ -9,8 +9,8 @@ test the services module
 
 import unittest
 from collections import OrderedDict
-from dbseeder.services import Caster, Reproject, ChargeBalancer, Normalizer
-from dbseeder.models import Concentration
+from ugsdbseeder.services import Caster, Reproject, ChargeBalancer, Normalizer
+from ugsdbseeder.models import Concentration
 import datetime
 
 

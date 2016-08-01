@@ -1,14 +1,13 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'''
-dbseeder
+''' ugsdbseeder
 ----------------------------------
-test the dbseeder module
+test the ugsdbseeder module
 '''
 
 import unittest
-from dbseeder.dbseeder import Seeder
+from ugsdbseeder.ugsdbseeder import Seeder
 
 
 class TestDbSeeder(unittest.TestCase):

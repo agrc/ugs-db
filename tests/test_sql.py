@@ -8,7 +8,7 @@ test the sql module
 '''
 
 import unittest
-from dbseeder.sql import update_row
+from ugsdbseeder.sql import update_row
 
 
 class TestSqlFunctions(unittest.TestCase):
