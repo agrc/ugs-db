@@ -15,9 +15,9 @@ import sql
 import sys
 from os.path import join, dirname
 try:
-    import secrets
+    import ugssecrets
 except ImportError:
-    import secrets_sample as secrets
+    import ugssecrets_sample as ugssecrets
 try:
     import arcpy
 except ImportError:
@@ -42,11 +42,11 @@ class Seeder(object):
             self.logger = logging.getLogger(logger_name)
 
     def _get_db(self, who):
-        db = secrets.dev
+        db = ugssecrets.dev
         if who == 'stage':
-            db = secrets.stage
+            db = ugssecrets.stage
         elif who == 'prod':
-            db = secrets.prod
+            db = ugssecrets.prod
         return db
 
     def create_tables(self, who):
@@ -93,7 +93,7 @@ class Seeder(object):
                                  db=db,
                                  update=False,
                                  source=file_location,
-                                 secrets=secrets.sdwis,
+                                 secrets=ugssecrets.sdwis,
                                  sql_statements=sql.sql_statements,
                                  update_row=sql.update_row,
                                  insert_rows=sql.insert_rows,
@@ -181,7 +181,7 @@ class Seeder(object):
                                  db=db,
                                  update=True,
                                  source=location,
-                                 secrets=secrets.sdwis,
+                                 secrets=ugssecrets.sdwis,
                                  sql_statements=sql.sql_statements,
                                  update_row=sql.update_row,
                                  insert_rows=sql.insert_rows,

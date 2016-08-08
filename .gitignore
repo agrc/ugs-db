@@ -58,7 +58,7 @@ src/**/*.csv
 *.xlsx
 *.sublime-workspace
 *.sde
-secrets.py
+ugssecrets.py
 
 *temp.sqlite3
 *.lock
