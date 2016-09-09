@@ -417,10 +417,9 @@ class WqpProgram(Program):
         '''Given the file_path, return the list of stripped station ids that have the _WQX suffix'''
 
         file_name = None
-        try:
+        if isinstance(file_path, basestring):
             file_name = self._get_file_name_without_extension(file_path)
-        except AttributeError:
-            #: most likely list is not a string error
+        else:
             #: we are sending in the updated stations
             stations = file_path
 

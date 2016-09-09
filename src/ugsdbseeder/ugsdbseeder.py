@@ -103,8 +103,7 @@ class Seeder(object):
 
     def post_process(self, who):
         '''
-        Recalculate StateCode and CountyCode for the entire dataset (not sure that we can trust what's there)
-        Populate Elev, ElevUnit, & ElevMeth only for records that have missing or bad data
+        Calculate StateCode, CountyCode, Populate Elev, ElevUnit, & ElevMeth only for records that have missing or bad data
         '''
         stations_fc = 'UGSWaterChemistry.ugswaterchemistry.Stations'
         stations_identity = 'Stations_identity'
@@ -115,7 +114,7 @@ class Seeder(object):
 
         #: FIPS
         self.logger.info('creating stations layer')
-        stationsLyr = arcpy.MakeFeatureLayer_management(join(db, stations_fc), 'StationsLyr')
+        stationsLyr = arcpy.MakeFeatureLayer_management(join(db, stations_fc), 'StationsLyr', 'StateCode IS NULL OR CountyCode IS NULL')
 
         self.logger.info('identity on counties')
         stationsIdent = arcpy.Identity_analysis(stationsLyr,
