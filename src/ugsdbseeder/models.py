@@ -159,7 +159,7 @@ class Concentration(object):
 
         new = concentration.chemical_amount
 
-        for key in new.keys():
+        for key in list(new.keys()):
             self.set(key, new[key], detect_cond)
 
     def set(self, chemical, amount, detect_cond=None):
@@ -177,10 +177,10 @@ class Concentration(object):
         chemical = chemical.lower()
 
         # do we care about this chemical?
-        if chemical in self.chemical_map.keys():
+        if chemical in list(self.chemical_map.keys()):
             chemical = self.chemical_map[chemical]
 
-        if chemical not in self.chemical_amount.keys():
+        if chemical not in list(self.chemical_amount.keys()):
             return
 
         # there is more than one sample for this chemical

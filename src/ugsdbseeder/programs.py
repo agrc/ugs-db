@@ -8,7 +8,7 @@ the different source programs
 
 import csv
 import re
-import schema
+from . import schema
 import sqlite3
 import os
 from collections import OrderedDict
@@ -16,10 +16,10 @@ from datetime import datetime
 from dateutil.parser import parse as dateparser
 from glob import glob
 from os.path import join, isdir, basename, splitext
-from querycsv import query_csv
+from .querycsv import query_csv
 from functools import partial
-from services import Caster, Normalizer, ChargeBalancer, HttpClient
-from benchmarking import get_milliseconds
+from .services import Caster, Normalizer, ChargeBalancer, HttpClient
+from .benchmarking import get_milliseconds
 
 
 class Program(object):
@@ -37,7 +37,7 @@ class Program(object):
         query = self.most_recent_result_query.format(datasource)
         try:
             last_updated = self.cursor.execute(query).fetchone()
-        except Exception, e:
+        except Exception as e:
             del self.cursor
             raise e
 
@@ -255,7 +255,7 @@ class WqpProgram(Program):
                     raise Exception('WQP service should have returned results but result is empty. {}'.format(
                         station_url))
 
-                header = new_stations.next()
+                header = next(new_stations)
 
                 stations = self._extract_stations_by_id(new_stations, new_station_ids, header)
                 wqx = self._get_wqx_duplicate_ids(stations)
@@ -263,7 +263,7 @@ class WqpProgram(Program):
                 self._seed_stations(stations, header=header, wqx=wqx)
             else:
                 self.logger.info('all stations already in database')
-            for samples_for_id in new_results.values():
+            for samples_for_id in list(new_results.values()):
                 self._seed_results(samples_for_id)
 
         finally:
@@ -283,7 +283,7 @@ class WqpProgram(Program):
 
                 reader = csv.reader(f)
                 #: get a reference to the header row
-                header = reader.next()
+                header = next(reader)
 
                 self._seed_stations(reader, header=header, wqx=wqx)
 
@@ -351,7 +351,7 @@ class WqpProgram(Program):
             row = Caster.cast_for_sql(row)
 
             #: store row for later
-            stations.append(row.values())
+            stations.append(list(row.values()))
 
         if not hasattr(self, 'cursor') or not self.cursor:
             self.cursor = self.cursor_factory(self.db['connection_string'])
@@ -361,13 +361,13 @@ class WqpProgram(Program):
 
     def _seed_results(self, samples_for_id):
         #: cast to defined schema types
-        samples = map(partial(Caster.cast, schema=schema.result), samples_for_id)
+        samples = list(map(partial(Caster.cast, schema=schema.result), samples_for_id))
 
         #: set datasource and spatial information
         samples = [self._update_row(sample, self.datasource) for sample in samples]
 
         #: normalize chemical names and units
-        samples = map(Normalizer.normalize_sample, samples)
+        samples = list(map(Normalizer.normalize_sample, samples))
 
         #: create charge balance rows from sample
         charge_balances = ChargeBalancer.get_charge_balance(samples)
@@ -375,11 +375,11 @@ class WqpProgram(Program):
         samples.extend(charge_balances)
 
         #: reorder and filter out any fields not in the schema
-        samples = map(partial(Normalizer.reorder_filter, schema=schema.result), samples)
+        samples = list(map(partial(Normalizer.reorder_filter, schema=schema.result), samples))
 
-        samples = map(Caster.cast_for_sql, samples)
+        samples = list(map(Caster.cast_for_sql, samples))
 
-        rows = map(lambda sample: sample.values(), samples)
+        rows = [list(sample.values()) for sample in samples]
 
         if not hasattr(self, 'cursor') or not self.cursor:
             self.cursor = self.cursor_factory(self.db['connection_string'])
@@ -433,7 +433,7 @@ class WqpProgram(Program):
             return set([re.sub(self.wqx_re, '-', row[0]) for row in rows])
 
         return set([re.sub(self.wqx_re, '-', station['StationId'])
-                    for station in filter(lambda x: self.wqx_re.search(x['StationId']), stations)])
+                    for station in [x for x in stations if self.wqx_re.search(x['StationId'])]])
 
     def _get_samples_for_id(self, sample_id_set, file_path, config=None):
         '''Given a `(id,)` styled set of sample ids, this will return the sample
@@ -470,14 +470,14 @@ class WqpProgram(Program):
 
             return key
 
-        header = map(lambda x: return_value_if_not_in_config(x), header)
+        header = [return_value_if_not_in_config(x) for x in header]
 
         #: if we are passing a single item, not an array of sets, don't map over it.
         #: this is when we have a station and not a set of results
         if not isinstance(rows[0], tuple):
-            return dict(zip(header, rows))
+            return dict(list(zip(header, rows)))
 
-        return map(lambda x: dict(zip(header, x)), rows)
+        return [dict(list(zip(header, x))) for x in rows]
 
     def _get_file_name_without_extension(self, file_path):
         '''Given a filename with an extension, the file name is returned without the extension.'''
@@ -511,7 +511,7 @@ class WqpProgram(Program):
         if not cursor:
             return
 
-        header = cursor.next()
+        header = next(cursor)
 
         for row in cursor:
             row = self._etl_column_names(row, config or self.result_config, header=header)
@@ -536,7 +536,7 @@ class WqpProgram(Program):
 
         unique_station_ids = set([])
 
-        for results in rows.values():
+        for results in list(rows.values()):
             for result in results:
                 station_id = result['StationId']
 
@@ -578,7 +578,7 @@ class WqpProgram(Program):
         returns a list of station_ids
         '''
         #: pull out wqx ids from Stations
-        wqxs = set([id for id in filter(lambda x: self.wqx_re.search(x), station_ids)])
+        wqxs = set([id for id in [x for x in station_ids if self.wqx_re.search(x)]])
 
         #: if there are no wqx's then return
         if len(wqxs) < 1:
@@ -611,7 +611,7 @@ class WqpProgram(Program):
         return self.cursor.fetchall()
 
     def _remove_existing_results(self, results):
-        sample_ids = ['(\'{}\')'.format(re.sub('\'', '\'\'', sample_id)) for sample_id in results.keys()]
+        sample_ids = ['(\'{}\')'.format(re.sub('\'', '\'\'', sample_id)) for sample_id in list(results.keys())]
 
         unique_sample_ids = self._get_unique_sample_ids(sample_ids)
         #: flatten list
@@ -855,9 +855,9 @@ class SdwisProgram(Program):
 
                 self.logger.info('updating {} stations done.'.format(self.datasource))
 
-            self.logger.info('adding {} new results...'.format(len(new_results.keys())))
+            self.logger.info('adding {} new results...'.format(len(list(new_results.keys()))))
 
-            self._seed_results(new_results.keys())
+            self._seed_results(list(new_results.keys()))
 
             self.logger.info('updating {} results done.'.format(self.datasource))
         finally:
@@ -895,7 +895,7 @@ class SdwisProgram(Program):
             row = Caster.cast_for_sql(row)
 
             #: store row for later
-            stations.append(row.values())
+            stations.append(list(row.values()))
 
         if not hasattr(self, 'cursor') or not self.cursor:
             self.cursor = self.cursor_factory(self.db['connection_string'])
@@ -918,7 +918,7 @@ class SdwisProgram(Program):
             samples = [self._update_row(sample, self.datasource) for sample in samples]
 
             #: normalize chemical names and units
-            samples = map(Normalizer.normalize_sample, samples)
+            samples = list(map(Normalizer.normalize_sample, samples))
 
             #: create charge balance rows from sample
             charge_balances = ChargeBalancer.get_charge_balance(samples)
@@ -926,11 +926,11 @@ class SdwisProgram(Program):
             samples.extend(charge_balances)
 
             #: reorder and filter out any fields not in the schema
-            samples = map(partial(Normalizer.reorder_filter, schema=schema.result), samples)
+            samples = list(map(partial(Normalizer.reorder_filter, schema=schema.result), samples))
 
-            samples = map(Caster.cast_for_sql, samples)
+            samples = list(map(Caster.cast_for_sql, samples))
 
-            rows = map(lambda sample: sample.values(), samples)
+            rows = [list(sample.values()) for sample in samples]
 
             if not hasattr(self, 'cursor') or not self.cursor:
                 self.cursor = self.cursor_factory(self.db['connection_string'])
@@ -971,7 +971,7 @@ class SdwisProgram(Program):
 
         header = [cd[0] for cd in row.cursor_description]
 
-        return dict(zip(header, list(row)))
+        return dict(list(zip(header, list(row))))
 
     def _find_new_station_ids(self, rows):
         '''gets the station ids to process from the rows
@@ -985,7 +985,7 @@ class SdwisProgram(Program):
 
         unique_station_ids = set([])
 
-        for results in rows.values():
+        for results in list(rows.values()):
             for result in results:
                 station_id = result
 
@@ -1021,7 +1021,7 @@ class SdwisProgram(Program):
 
     def _remove_existing_results(self, results):
         sample_ids = []
-        for key in results.keys():
+        for key in list(results.keys()):
             key = key.split('{-}')
 
             sample_date = key[0]
@@ -1179,7 +1179,7 @@ class GdbProgram(object):
             row = Caster.cast_for_sql(row)
 
             #: store row for later
-            stations.append(row.values())
+            stations.append(list(row.values()))
 
         if not hasattr(self, 'cursor') or not self.cursor:
             self.cursor = self.cursor_factory(self.db['connection_string'])
@@ -1206,7 +1206,7 @@ class GdbProgram(object):
             samples = [self._update_row(sample, self.datasource) for sample in samples]
 
             #: normalize chemical names and units
-            samples = map(Normalizer.normalize_sample, samples)
+            samples = list(map(Normalizer.normalize_sample, samples))
 
             #: create charge balance rows from sample
             charge_balances = ChargeBalancer.get_charge_balance(samples)
@@ -1214,11 +1214,11 @@ class GdbProgram(object):
             samples.extend(charge_balances)
 
             #: reorder and filter out any fields not in the schema
-            samples = map(partial(Normalizer.reorder_filter, schema=schema.result), samples)
+            samples = list(map(partial(Normalizer.reorder_filter, schema=schema.result), samples))
 
-            samples = map(Caster.cast_for_sql, samples)
+            samples = list(map(Caster.cast_for_sql, samples))
 
-            rows = map(lambda sample: sample.values(), samples)
+            rows = [list(sample.values()) for sample in samples]
 
             if not hasattr(self, 'cursor') or not self.cursor:
                 self.cursor = self.cursor_factory(self.db['connection_string'])
@@ -1250,7 +1250,7 @@ class GdbProgram(object):
         if len(row) == 0:
             return None
 
-        return dict(zip(fields, list(row)))
+        return dict(list(zip(fields, list(row))))
 
 
 class DogmProgram(GdbProgram):

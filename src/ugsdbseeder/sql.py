@@ -6,7 +6,7 @@ sql.py
 sql queries shared between programs
 '''
 import pyodbc
-from services import Reproject
+from .services import Reproject
 
 
 sql_statements = {
@@ -46,7 +46,7 @@ def insert_rows(rows, insert_statement, cursor):
                 cursor.commit()
 
             cursor.commit()
-        except Exception, e:
+        except Exception as e:
             del cursor
             print(statement)
             print(row)

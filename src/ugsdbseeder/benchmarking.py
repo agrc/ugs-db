@@ -10,6 +10,6 @@ def get_milliseconds():
 def measure_time(title):
     start = get_milliseconds()
     yield
-    print('{}:{}{} ms'.format(title,
+    print(('{}:{}{} ms'.format(title,
                               ''.join([' ' for x in range(1, 35 - len(title))]),
-                              round(get_milliseconds() - start, 5)))
+                              round(get_milliseconds() - start, 5))))

@@ -27,9 +27,9 @@
    Aug 2015: This version was copied from https://github.com/kdeloach/querycsv-redux and modified
    to fit the need of this project.
 """
-from __future__ import print_function
-from __future__ import unicode_literals
-from __future__ import division
+
+
+
 
 import sys
 import logging
@@ -50,8 +50,8 @@ log.addHandler(logging.StreamHandler(sys.stderr))
 def pretty_print(rows, fp):
     headers = rows.pop(0)
 
-    rcols = range(len(headers))
-    rrows = range(len(rows))
+    rcols = list(range(len(headers)))
+    rrows = list(range(len(rows)))
     colwidth = [max(0, len(headers[j]),
                     *(len(rows[i][j]) for i in rrows)) for j in rcols]
 
@@ -100,7 +100,7 @@ def read_sqlfile(filename):
 
 def csv_to_sqldb(db, filename, table_name):
     reader = csv.reader(open(filename, "rt"), dialect=csv.excel)
-    column_names = reader.next()
+    column_names = next(reader)
     colstr = ",".join("[{0}]".format(col) for col in column_names)
     try:
         db.execute("drop table %s;" % table_name)
@@ -108,13 +108,13 @@ def csv_to_sqldb(db, filename, table_name):
         pass
     db.execute("create table %s (%s);" % (table_name, colstr))
     for row in reader:
-        params = zip(column_names, row)
-        insert_statement = ",".join(map(lambda t: "{0}{1}{0}".format("'", t[0]), params))
-        values = ",".join(map(lambda t: "?", params))
+        params = list(zip(column_names, row))
+        insert_statement = ",".join(["{0}{1}{0}".format("'", t[0]) for t in params])
+        values = ",".join(["?" for t in params])
         sql = "insert into {} ({}) VALUES ({});".format(table_name, insert_statement, values)
 
         try:
-            db.execute(sql, map(lambda t: unicode(t[1], 'utf8'), params))
+            db.execute(sql, [str(t[1], 'utf8') for t in params])
         except Exception as e:
             raise e
     db.commit()

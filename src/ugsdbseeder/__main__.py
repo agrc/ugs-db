@@ -20,7 +20,7 @@ Argument values:
 '''
 
 import sys
-from ugsdbseeder import Seeder
+from .ugsdbseeder import Seeder
 from docopt import docopt
 
 

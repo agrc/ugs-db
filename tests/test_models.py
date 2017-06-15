@@ -59,7 +59,7 @@ class TestConcentrationModel(unittest.TestCase):
                   'so4']
 
         # put everything in except for 1
-        for i in xrange(0, len(majors) - 1):
+        for i in range(0, len(majors) - 1):
             self.patient.set(majors[i], 1)
             self.assertFalse(self.patient.has_major_params)
 
@@ -78,7 +78,7 @@ class TestConcentrationModel(unittest.TestCase):
                   'so4']
 
         # put everything in
-        for i in xrange(0, len(majors)):
+        for i in range(0, len(majors)):
             self.patient.set(majors[i], 1)
 
         self.assertTrue(self.patient.has_major_params)
@@ -92,7 +92,7 @@ class TestConcentrationModel(unittest.TestCase):
                   'so4']
 
         # put everything in
-        for i in xrange(0, len(majors)):
+        for i in range(0, len(majors)):
             self.patient.set(majors[i], 1)
 
         self.assertTrue(self.patient.has_major_params)

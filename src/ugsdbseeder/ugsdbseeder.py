@@ -8,20 +8,20 @@ the main entry point module for database ETL
 '''
 
 import pyodbc
-import factory
+from . import factory
 import logging
 import requests
-import sql
+from . import sql
 import sys
 from os.path import join, dirname
 try:
-    import ugssecrets
+    from . import ugssecrets
 except ImportError:
-    import ugssecrets_sample as ugssecrets
+    from . import ugssecrets_sample as ugssecrets
 try:
     import arcpy
 except ImportError:
-    import arcpy_mock as arcpy
+    from . import arcpy_mock as arcpy
 
 
 class Seeder(object):
@@ -69,7 +69,7 @@ class Seeder(object):
             cursor.execute(create_tables_sql)
             cursor.execute(create_indices_sql)
             cursor.commit()
-        except Exception, e:
+        except Exception as e:
             raise e
         finally:
             if cursor is not None:
@@ -200,7 +200,7 @@ class Seeder(object):
             return all_sources
         else:
             sources = [s.strip().upper() for s in source.split(',')]
-            sources = filter(lambda s: s in all_sources, sources)
+            sources = [s for s in sources if s in all_sources]
             if len(sources) > 0:
                 return sources
             else:
@@ -215,7 +215,7 @@ class Seeder(object):
             c = pyodbc.connect(self._get_db(who)['connection_string'])
             cursor = c.cursor()
             cursor.execute(sql)
-        except Exception, e:
+        except Exception as e:
             raise e
         finally:
             if cursor:

@@ -40,8 +40,8 @@ class TestWqpProgram(unittest.TestCase):
             'sample_stations.csv'
         ]
 
-        results_folder = map(basename, self.patient._get_files(self.patient.results_folder))
-        stations_folder = map(basename, self.patient._get_files(self.patient.stations_folder))
+        results_folder = list(map(basename, self.patient._get_files(self.patient.results_folder)))
+        stations_folder = list(map(basename, self.patient._get_files(self.patient.stations_folder)))
 
         self.assertItemsEqual(results_folder, expected_results)
         self.assertItemsEqual(stations_folder, expected_stations)
@@ -86,7 +86,7 @@ class TestWqpProgram(unittest.TestCase):
     def test_get_wqx_duplicate_ids(self):
         ids = self.patient._get_wqx_duplicate_ids(join('tests', 'data', 'WQP', 'wqxids.csv'))
 
-        self.assertItemsEqual(set([u'UTAHDWQ-4904410', u'UTAHDWQ-4904640', u'UTAHDWQ-4904610']), ids)
+        self.assertItemsEqual(set(['UTAHDWQ-4904410', 'UTAHDWQ-4904640', 'UTAHDWQ-4904610']), ids)
 
     def test_wqx_duplicates_for_update(self):
         rows = [{'StationId': 'UTAHDWQ_WQX-4904410'},
@@ -223,7 +223,7 @@ class TestWqpProgram(unittest.TestCase):
 
             unique_sample_ids = self.patient._group_rows_by_id(wqp_service_csv)
 
-            self.assertEqual(len(unique_sample_ids.keys()), 1)
+            self.assertEqual(len(list(unique_sample_ids.keys())), 1)
             self.assertEqual(len(unique_sample_ids['nwisaz.01.00000154']), 3)
             self.assertTrue('nwisaz.01.00000154' in unique_sample_ids)
 
@@ -329,7 +329,7 @@ class TestWqpProgram(unittest.TestCase):
 
         new_results = self.patient._remove_existing_results(results)
 
-        self.assertItemsEqual(new_results.keys(), ['sampleid1', 'sampleid2'])
+        self.assertItemsEqual(list(new_results.keys()), ['sampleid1', 'sampleid2'])
 
     def test_get_samples_for_id_returns_correct_list_when_quoted(self):
         self.patient.sample_id_field = 'id'

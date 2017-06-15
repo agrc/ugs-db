@@ -7,7 +7,7 @@ factory.py
 helper methods for creating a program
 '''
 
-import programs
+from . import programs
 
 
 def get(source):

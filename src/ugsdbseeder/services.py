@@ -9,14 +9,14 @@ modules for acting on items
 
 import datetime
 import re
-import schema
+from . import schema
 from collections import OrderedDict
 from csv import reader as csvreader
 from dateutil.parser import parse
-from models import Concentration
+from .models import Concentration
 from pyproj import Proj, transform
 from requests import get
-from paramGroups import param_groups
+from .paramGroups import param_groups
 
 
 class Reproject(object):
@@ -48,9 +48,9 @@ class Caster(object):
             return arg
 
         def date_conversion(arg):
-            return datetime.time(*map(int, arg.split(':')))
+            return datetime.time(*list(map(int, arg.split(':'))))
 
-        for field in schema.iteritems():
+        for field in schema.items():
             cast = None
             #: if the value is not in the csv skip it
             try:
@@ -68,7 +68,7 @@ class Caster(object):
             if field[1]['type'] == 'String':
                 cast = str
             elif field[1]['type'] == 'Long Int':
-                cast = long
+                cast = int
             elif field[1]['type'] == 'Short Int':
                 cast = int
             elif field[1]['type'] == 'Double':
@@ -131,11 +131,11 @@ class Caster(object):
         Format the values for the sql insert statement
         '''
 
-        for key in row.keys():
+        for key in list(row.keys()):
             value = row[key]
             if key == 'Shape':
                 continue
-            elif isinstance(value, basestring):
+            elif isinstance(value, str):
                 new_value = "'{}'".format(value.replace('\'', '\'\''))
             elif isinstance(value, datetime.datetime):
                 try:
@@ -505,7 +505,7 @@ class ChargeBalancer(object):
 
         def get_row(values):
             #: add all fields from result schema with None as the default value
-            new_row = dict(map(lambda field: (field, None), schema.result.keys()))
+            new_row = dict([(field, None) for field in list(schema.result.keys())])
             new_row.update(values)
             return new_row
 
