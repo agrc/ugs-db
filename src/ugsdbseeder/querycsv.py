@@ -114,7 +114,7 @@ def csv_to_sqldb(db, filename, table_name):
         sql = "insert into {} ({}) VALUES ({});".format(table_name, insert_statement, values)
 
         try:
-            db.execute(sql, [str(t[1], 'utf8') for t in params])
+            db.execute(sql, [str(t[1]) for t in params])
         except Exception as e:
             raise e
     db.commit()

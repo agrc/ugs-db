@@ -29,7 +29,7 @@ class TestConcentrationModel(unittest.TestCase):
         self.patient.set('ca', 2, None)
 
         expected = [0, 1, 2]
-        self.assertItemsEqual(
+        self.assertCountEqual(
             expected, self.patient.chemical_amount['ca'])
 
     def test_multiple_chemicals_become_array_with_None(self):
@@ -38,7 +38,7 @@ class TestConcentrationModel(unittest.TestCase):
         self.patient.set('ca', None, None)
 
         expected = [0, 1]
-        self.assertItemsEqual(
+        self.assertCountEqual(
             expected, self.patient.chemical_amount['ca'])
 
     def test_arrays_become_numbers_after_validity_check(self):

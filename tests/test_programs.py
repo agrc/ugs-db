@@ -43,8 +43,8 @@ class TestWqpProgram(unittest.TestCase):
         results_folder = list(map(basename, self.patient._get_files(self.patient.results_folder)))
         stations_folder = list(map(basename, self.patient._get_files(self.patient.stations_folder)))
 
-        self.assertItemsEqual(results_folder, expected_results)
-        self.assertItemsEqual(stations_folder, expected_stations)
+        self.assertCountEqual(results_folder, expected_results)
+        self.assertCountEqual(stations_folder, expected_stations)
 
     @raises(Exception)
     def test_get_files_with_empty_location_throws(self):
@@ -71,7 +71,7 @@ class TestWqpProgram(unittest.TestCase):
         rows = self.patient._get_samples_for_id(sample_id_set, file_path, config=config)
 
         self.assertEqual(len(rows), 2)
-        self.assertItemsEqual([
+        self.assertCountEqual([
                               {'eh': 'a1', 'bee': 'b1', 'sea': 'c1', 'ActivityIdentifier': '1'},
                               {'eh': 'a2', 'bee': 'b2', 'sea': 'c2', 'ActivityIdentifier': '1'}
                               ], rows)
@@ -81,12 +81,12 @@ class TestWqpProgram(unittest.TestCase):
         rows = self.patient._get_distinct_sample_ids_from(join('tests', 'data', 'WQP', 'distinct_sampleids.csv'))
 
         self.assertEqual(len(rows), 2)
-        self.assertItemsEqual([('1',), ('2',)], rows)
+        self.assertCountEqual([('1',), ('2',)], rows)
 
     def test_get_wqx_duplicate_ids(self):
         ids = self.patient._get_wqx_duplicate_ids(join('tests', 'data', 'WQP', 'wqxids.csv'))
 
-        self.assertItemsEqual(set(['UTAHDWQ-4904410', 'UTAHDWQ-4904640', 'UTAHDWQ-4904610']), ids)
+        self.assertCountEqual(set(['UTAHDWQ-4904410', 'UTAHDWQ-4904640', 'UTAHDWQ-4904610']), ids)
 
     def test_wqx_duplicates_for_update(self):
         rows = [{'StationId': 'UTAHDWQ_WQX-4904410'},
@@ -157,7 +157,7 @@ class TestWqpProgram(unittest.TestCase):
             'Null',  #: demELEVm
             "'WQP'",  #: DataSource
             'Null',  #: WIN
-            "geometry::STGeomFromText('POINT (251535.079282 4654130.89121)', 26912)"
+            "geometry::STGeomFromText('POINT (251535.07928578724 4654130.8912068475)', 26912)"
         ])
 
         result_rows = result_call[0][0][0]
@@ -218,7 +218,7 @@ class TestWqpProgram(unittest.TestCase):
 
     def test_group_sample_ids(self):
         sample_response = join('tests', 'data', 'WQP', 'webservice.csv.as.txt')
-        with open(sample_response, 'rb') as f:
+        with open(sample_response, 'r') as f:
             wqp_service_csv = csvreader(f)
 
             unique_sample_ids = self.patient._group_rows_by_id(wqp_service_csv)
@@ -329,7 +329,7 @@ class TestWqpProgram(unittest.TestCase):
 
         new_results = self.patient._remove_existing_results(results)
 
-        self.assertItemsEqual(list(new_results.keys()), ['sampleid1', 'sampleid2'])
+        self.assertCountEqual(list(new_results.keys()), ['sampleid1', 'sampleid2'])
 
     def test_get_samples_for_id_returns_correct_list_when_quoted(self):
         self.patient.sample_id_field = 'id'
@@ -386,7 +386,7 @@ class TestDogmProgram(unittest.TestCase):
 
         actual = self.patient._get_field_instersection(ugs_schema, table_fields)
 
-        self.assertItemsEqual(actual, ['AnalysisDate', 'AnalytMeth', 'AutoQual'])
+        self.assertCountEqual(actual, ['AnalysisDate', 'AnalytMeth', 'AutoQual'])
 
 
 class Field(object):

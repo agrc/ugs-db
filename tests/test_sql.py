@@ -20,7 +20,7 @@ class TestSqlFunctions(unittest.TestCase):
         }
         datasource = 'testing'
         actual = update_row(row, datasource)
-        expected = 'geometry::STGeomFromText(\'POINT ({} {})\', 26912)'.format(243900.352024, 4432069.05679)
+        expected = 'geometry::STGeomFromText(\'POINT ({} {})\', 26912)'.format(243900.35202798274, 4432069.056784666)
 
         self.assertEqual(actual['Shape'], expected)
         self.assertEqual(actual['DataSource'], datasource)
@@ -47,7 +47,7 @@ class TestSqlFunctions(unittest.TestCase):
         datasource = 'testing'
         actual = update_row(row, datasource)
 
-        expected = 'geometry::STGeomFromText(\'POINT ({} {})\', 26912)'.format(243900.352024, 4432069.05679)
+        expected = 'geometry::STGeomFromText(\'POINT ({} {})\', 26912)'.format(243900.35202798274, 4432069.056784666)
 
         self.assertEqual(actual['Shape'], expected)
         self.assertEqual(actual['DataSource'], datasource)
