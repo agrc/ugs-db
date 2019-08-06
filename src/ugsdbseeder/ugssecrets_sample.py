@@ -11,5 +11,5 @@ prod = {
 }
 
 sdwis = {
-    'connection_string': 'Driver={Oracle in OraClient12Home1};UID=;PWD=;DBQ=sdwis;'
+    'connection_string': 'UID=<username>;PWD=<password>;DBQ=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=<dns>)(PORT=<port>)))(CONNECT_DATA=(SERVICE_NAME=<name>)));Driver={Oracle in instantclient_19_3}'
 }
