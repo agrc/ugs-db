@@ -6,16 +6,13 @@ UGS Water Chemistry Database Seeder
 A db tool for seeding and updating the ugs water chemistry database.
 
 ### Setup
-1. Install oracle client >= 11.2
-    1. Use the Oracle Net Manager to create a Service Name called `sdwis`
-        1. **Protocol**: `TCP/IP`
-        1. **Host**: `<db host>`
-        1. **Service Name**: `env`
-        1. **Port**: `1521`
+1. Install oracle instant client >= 19.3.0.0.0
+    1. Download the "Basic Light Package" from [this page](https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html#ic_winx64_inst).
+    1. Follow [install directions](https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html#ic_winx64_inst) at the bottom of the download page.
+        - No need to mess with co-locating optional oracle config files such as `tnsnames.ora`.
+    1. Follow [ODBC installation instructions](https://www.oracle.com/database/technologies/releasenote-odbc-ic.html) for windows.
 1. Update `ugssecrets.py` based on the [sample.](/src/dbseeder/ugssecrets_sample.py)
-    1. Use `C:\Windows\System32\odbcad32.exe` to find your 64 bit oracle driver if you are using 64 bit python.
-    1. Use `C:\Windows\SysWOW64\odbcad32.exe` to find your 32 bit oracle driver if you are using 32 bit python.
-![image](https://cloud.githubusercontent.com/assets/325813/11985072/685e4382-a97e-11e5-9dbc-24f811ec3ce5.png)
+    1. To find the name of your instant client driver: `import pyodbc;pyodbc.drivers()`.
 1. execute `scripts\createDB.sql` or create a sql server database called `UGSWaterChemistry`
 1. execute `python -m ugsdbseeder create-tables <configuration>` to create db tables.
 1. see usage (`python -m ugsdbseeder -h`)
