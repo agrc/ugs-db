@@ -71,7 +71,7 @@ setup(
         'pyodbc==3.0.10',
         'pyproj==1.9.4',
         'dateutils==0.6.6',
-        'requests==2.7.0'
+        'requests==2.20.0'
     ],
     dependency_links=[
     ],
